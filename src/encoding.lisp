@@ -830,8 +830,8 @@
      (dolist (classname values)
        (encode-cimxml-classname classname stream)))
     (:instancename
-     (dolist (instance values)
-       (encode-cimxml-instancename (cim-name instance) (cim-slots instance) stream)))
+     (dolist (reference values)
+       (encode-cimxml-instancename (cim-name reference) (cim-keys reference) stream)))
     (:value
      (dolist (value values)
        (encode-cimxml-value value stream)))
@@ -895,3 +895,15 @@
   (with-output-to-string (s)
     (ecase encoding
       (:cimxml (encode-cimxml message s)))))
+
+(defgeneric encode-object (cim stream))
+
+(defmethod encode-object ((cim cim-class) stream)
+  (encode-cimxml-class cim stream))
+
+(defmethod encode-object ((cim cim-instance) stream)
+  (encode-cimxml-instance cim stream))
+
+(defmethod encode-object ((cim cim-reference) stream)
+  (encode-cimxml-instancename (cim-name cim) (cim-keys cim) stream))
+
