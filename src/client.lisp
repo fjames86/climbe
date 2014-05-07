@@ -37,6 +37,7 @@
   
   ;; ok now get the content
   (let ((content (cim-encode message :encoding encoding)))
+    (cim-debug "Content: ~S~%" content)
     (multiple-value-bind (result return-code headers uri
 				 stream must-close reason-phrase)
 	(drakma:http-request (if ssl
@@ -62,6 +63,7 @@
 		(cond
 		  ((stringp result) result)
 		  (t (map 'string #'code-char result)))))
+	   (cim-debug "Result: ~S~%" result-string)
 	   (with-input-from-string (s result-string)
 	     (cim-message-contents (cim-decode s :encoding encoding)))))
 	(t

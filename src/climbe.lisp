@@ -398,9 +398,9 @@
 											 
 ;; ------------- types ------------
 
-(defvar *cim-primitives*
+(defparameter *cim-primitives*
   '(:uint8 :uint16 :uint32 :uint64
-    :int8 :int16 :int32 :int64
+    :sint8 :sint16 :sint32 :sint64
     :string :datetime :boolean
     :real32 :real64))
 
@@ -429,3 +429,42 @@
 (defun cim-array-type (type) (second type))
 (defun cim-array-length (type) (third type))
 (defun cim-ref-class (type) (second type))
+
+
+
+;; ---------------------
+
+(defgeneric cim-object-list (cim))
+
+(defmethod cim-object-list ((cim t))
+  cim)
+
+(defmethod cim-object-list ((cim cim-class))
+  (list :cim-class
+	(cons :name (cim-name cim))
+	(cons :properties (cim-properties cim))
+	(cons :methods (cim-methods cim))
+	(cons :superclass (cim-superclass cim))
+	(cons :qualifiers (cim-qualifiers cim))))
+
+(defmethod cim-object-list ((cim cim-instance))
+  (list :cim-instance
+	(cons :name (cim-name cim))
+	(cons :slots 
+	      (mapcar (lambda (slot)
+			(destructuring-slot (name type val) slot
+			  (list name type (cim-object-list val))))
+		      (cim-slots cim)))))
+
+(defmethod cim-object-list ((cim cim-reference))
+  (list :cim-reference
+	(cons :name (cim-name cim))
+	(cons :namespace (cim-namespace cim))
+	(cons :keys 
+	      (mapcar (lambda (slot)
+			(destructuring-slot (name type val) slot
+			  (list name type (cim-object-list val))))
+		      (cim-keys cim)))))
+
+
+	

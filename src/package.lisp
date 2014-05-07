@@ -17,6 +17,8 @@
            #:cim-error-t
 		   #:cim-error
 		   #:cim-error-by-name
+		   #:cim-debug
+		   #:*cim-debug*
 
 		   ;; generate CIM engine stuff
 		   #:cim-class
@@ -69,6 +71,7 @@
 		   #:cim-qualifier-by-name
 		   #:cim-datetime
 		   #:cim-datetime-p
+		   #:cim-object-list 
 
 		   ;; encoding/decoding
 		   #:cim-encode

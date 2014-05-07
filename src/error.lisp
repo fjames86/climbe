@@ -48,3 +48,13 @@
 			 :code code
 			 :description d))))
 
+
+;; ------------- debugging ----------------
+
+(defparameter *cim-debug* nil)
+
+(defun cim-debug (format-string &rest args)
+  (when *cim-debug*
+    (apply #'format *cim-debug* format-string args)
+    (fresh-line *cim-debug*)))
+

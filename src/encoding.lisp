@@ -893,6 +893,7 @@
 
 (defun cim-encode (message &key (encoding :cimxml))
   (with-output-to-string (s)
+    (format s "<?xml version=\"1.0\" encoding=\"utf-8\" ?>")
     (ecase encoding
       (:cimxml (encode-cimxml message s)))))
 

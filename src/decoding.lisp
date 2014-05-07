@@ -473,7 +473,7 @@
 	(arraysize (cdr (assoc :arraysize attributes))))
     (make-cim-property name
 		       (if arraysize
-			   (list :array (cim-string-primitive typename) (parse-integer arraysize))
+			   (list :array (cim-string-primitive typename) (parse-integer arraysize :junk-allowed t))
 			   (list :array (cim-string-primitive typename)))
 		       :qualifiers (mapcan (lambda (tag)
 					     (when (eq (tag-name tag) :qualifier)
@@ -564,7 +564,7 @@
 	(arraysize (cdr (assoc :arraysize attributes))))
     (make-cim-parameter name
 			(if arraysize 
-			    (list :array (cim-string-primitive typename) (parse-integer arraysize))
+			    (list :array (cim-string-primitive typename) (parse-integer arraysize :junk-allowed t))
 			    (list :array (cim-string-primitive typename)))
 			:qualifiers (mapcar #'decode-dispatch containing))))
 
@@ -579,7 +579,7 @@
 	(arraysize (cdr (assoc :arraysize attributes))))
     (make-cim-parameter name
 			(if arraysize 
-			    (list :array (list :ref refclass) (parse-integer arraysize))
+			    (list :array (list :ref refclass) (parse-integer arraysize :junk-allowed t))
 			    (list :array (list :ref refclass)))
 			:qualifiers (mapcar #'decode-dispatch containing))))
 
@@ -589,7 +589,7 @@
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
 (define-decode-dispatch Message (attributes containing)
   (let ((id (aif (cdr (assoc :id attributes))
-		 (parse-integer it))))
+		 (parse-integer it :junk-allowed t))))
     (let ((req (decode-dispatch (car containing))))
       (make-cim-message req id))))
 
@@ -711,7 +711,7 @@
 ;;              DESCRIPTION CDATA   #IMPLIED>
 (define-decode-dispatch Error (attributes containing)
   (declare (ignore containing))
-  (let ((code (parse-integer (cdr (assoc :code attributes))))
+  (let ((code (parse-integer (cdr (assoc :code attributes)) :junk-allowed t))
 	(description (cdr (assoc :description attributes))))
     (error 'cim-error-t
 	   :code code
