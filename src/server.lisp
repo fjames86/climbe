@@ -30,121 +30,119 @@
   (if (not (cim-request-intrinsic-p request))
       ;; extrinsic method invocation
       (let* ((name (cim-request-method request))
-			 (path (cim-request-classpath request))
-			 (namespace (cim-namespace request))			  
-			 (cl (cim-class-by-name (cim-name path) namespace))
-			 (meth (cim-method-by-name name cl)))
-		(if meth
-			(handler-case 
-				(multiple-value-bind (return-value outparams)
-					(invoke-method cl meth
-								   (let ((args (cim-request-params request)))
-									 ;; need to extract the arguments in the correct order
-									 (mapcan (lambda (param)
-											   (destructuring-parameter (param-name param-type qualifiers) param
-											     (when (assoc* :in qualifiers)
-												   (let ((arg (assoc* param-name args)))
-													 ;; don't need to test if the arg is present, it could be an optional parameter
-													 (list (third arg))))))
-											 (cim-method-parameters meth))))
-				  (make-cim-response name
-									 return-value
-									 (cim-method-return-type meth)
-									 :outparams
-									 (mapcan (lambda (param)
-											   (destructuring-parameter (param-name param-type param-quals) param
-											     (when (assoc :out param-quals)
-												   (awhen (assoc* param-name outparams)
-													 (list (make-cim-slot param-name param-type (cdr it)))))))
-											   (cim-method-parameters meth))
-									 :namespace (cim-namespace request)))
-			  (cim-error-t (err)
-				(make-cim-response name nil nil :errorinstance err))
-			  (error ()
-				(destructuring-bind (desc code) (cim-error-by-name :cim-err-failed)
-				  (make-cim-response name nil nil
-									 :errorinstance (make-condition 'cim-error-t :description desc :code code)))))
-			;; no such method on this class
-			(destructuring-bind (desc code) (cim-error-by-name :cim-err-not-found)
-			  (make-cim-response name nil nil
-								 :errorinstance (make-condition 'cim-error-t :description desc :code code)))))
-	  
+	     (path (cim-request-classpath request))
+	     (namespace (cim-namespace request))			  
+	     (cl (cim-class-by-name (cim-name path) namespace))
+	     (meth (cim-method-by-name name cl)))
+	(if meth
+	    (handler-case 
+		(multiple-value-bind (return-value outparams)
+		    (invoke-method cl meth
+				   (let ((args (cim-request-params request)))
+				     ;; need to extract the arguments in the correct order
+				     (mapcan (lambda (param)
+					       (destructuring-parameter (param-name param-type qualifiers) param
+						 (when (assoc* :in qualifiers)
+						   (let ((arg (assoc* param-name args)))
+						     ;; don't need to test if the arg is present, it could be an optional parameter
+						     (list (third arg))))))
+					     (cim-method-parameters meth))))
+		  (make-cim-response name
+				     return-value
+				     (cim-method-return-type meth)
+				     :outparams
+				     (mapcan (lambda (param)
+					       (destructuring-parameter (param-name param-type param-quals) param
+						 (when (assoc :out param-quals)
+						   (awhen (assoc* param-name outparams)
+						     (list (make-cim-slot param-name param-type (cdr it)))))))
+					     (cim-method-parameters meth))
+				     :namespace (cim-namespace request)))
+	      (cim-error-t (err)
+		(make-cim-response name nil nil :errorinstance err))
+	      (error ()
+		(destructuring-bind (desc code) (cim-error-by-name :cim-err-failed)
+		  (make-cim-response name nil nil
+				     :errorinstance (make-condition 'cim-error-t :description desc :code code)))))
+	    ;; no such method on this class
+	    (destructuring-bind (desc code) (cim-error-by-name :cim-err-not-found)
+	      (make-cim-response name nil nil
+				 :errorinstance (make-condition 'cim-error-t :description desc :code code)))))
+      
       ;; intrinsic method dispatcher
       (handler-case 
-		  (let* ((name (make-keyword (cim-request-method request)))
-				 (namespace (cim-namespace request))
-				 (args (cim-request-params request))
-				 (return-type nil)
-				 (return-value
-				  (case name
-					(:getclass
-					 (setf return-type :class)
-					 (list (get-class-handler (third (assoc* :classname args)) namespace)))
-					(:getinstance
-					 (setf return-type :instance)
-					 (let ((instancename (assoc* :instancename args)))
-					   (if instancename 
-						   (list (get-instance-handler (third instancename) namespace))
-						   (cim-error :cim-err-invalid-parameter))))
-					(:deleteinstance
-					 (let ((instancename (assoc* :instancename args)))
-					   (if instancename 
-						   (delete-instance-handler (third instancename) namespace)
-						   (cim-error :cim-err-invalid-parameter))))
-					(:createinstance
-					 (let ((newinstance (assoc* :newinstance args)))
-					   (if newinstance
-						   (create-instance-handler (third newinstance) namespace)
-						   (cim-error :cim-err-invalid-parameter))))
-					(:modifyinstance
-					 (let ((modifiedinstance (assoc* :modifiedinstance args)))
-					   (if modifiedinstance 
-						   (modify-instance-handler (third modifiedinstance) namespace)
-						   (cim-error :cim-err-invalid-parameter))))
-					(:enumerateclasses
-					 (setf return-type :class)
-					 (enumerate-classes-handler namespace))
-					(:enumerateclassnames
-					 (setf return-type :classname)
-					 (enumerate-class-names-handler namespace))
-					(:enumerateinstances
-					 (setf return-type :namedinstance)
-					 (enumerate-instances-handler (third (assoc* :classname args)) namespace))
-					(:enumerateinstancenames
-					 (setf return-type :instancename)
-					 (enumerate-instance-names-handler (third (assoc* :classname args)) namespace))
-					#|			
-					(:associators
-					(setf return-type :value.objectwithpath)
-					(let ((objectname (assoc :objectname args)))
-					(associators-handler (third objectname)
-					namespace
-					:assocclass (third (assoc :assocclass args))
-					:resultclass (third (assoc :resultclass args)))))
-					(:associatornames
-					(setf return-type :objectpath)
-					(let ((objectname (assoc :objectname args)))					   
-					(associator-names-handler (third objectname)
-					namespace
-					:assocclass (third (assoc :assocclass args))
-					:resultclass (third (assoc :resultclass args)))))
-					(:references
-					(setf return-type :value.objectwithpath)
-					(let ((objectname (assoc :objectname args)))
-					(references-handler (third objectname)
-					namespace
-					:resultclass (third (assoc :resultclass args)))))
-					(:referencenames
-					(setf return-type :objectpath)
-					(let ((objectname (assoc :objectname args)))
-					(reference-names-handler (third objectname)
-					namespace
-					:resultclass (third (assoc :resultclass args)))))
-					|#
-					(otherwise (cim-error :cim-err-not-supported)))))
-			(make-cim-response name return-value return-type :intrinsicp t :namespace namespace))
-		(cim-error-t (err)
-		  (make-cim-response (cim-request-method request) nil nil :intrinsicp t :errorinstance err)))))
+	  (let* ((name (make-keyword (cim-request-method request)))
+		 (namespace (cim-namespace request))
+		 (args (cim-request-params request))
+		 (return-type nil)
+		 (return-value
+		  (case name
+		    (:getclass
+		     (setf return-type :class)
+		     (list (get-class-handler (third (assoc* :classname args)) namespace)))
+		    (:getinstance
+		     (setf return-type :instance)
+		     (let ((instancename (assoc* :instancename args)))
+		       (if instancename 
+			   (list (get-instance-handler (third instancename) namespace))
+			   (cim-error :cim-err-invalid-parameter))))
+		    (:deleteinstance
+		     (let ((instancename (assoc* :instancename args)))
+		       (if instancename 
+			   (delete-instance-handler (third instancename) namespace)
+			   (cim-error :cim-err-invalid-parameter))))
+		    (:createinstance
+		     (let ((newinstance (assoc* :newinstance args)))
+		       (if newinstance
+			   (create-instance-handler (third newinstance) namespace)
+			   (cim-error :cim-err-invalid-parameter))))
+		    (:modifyinstance
+		     (let ((modifiedinstance (assoc* :modifiedinstance args)))
+		       (if modifiedinstance 
+			   (modify-instance-handler (third modifiedinstance) namespace)
+			   (cim-error :cim-err-invalid-parameter))))
+		    (:enumerateclasses
+		     (setf return-type :class)
+		     (enumerate-classes-handler namespace))
+		    (:enumerateclassnames
+		     (setf return-type :classname)
+		     (enumerate-class-names-handler namespace))
+		    (:enumerateinstances
+		     (setf return-type :namedinstance)
+		     (enumerate-instances-handler (third (assoc* :classname args)) namespace))
+		    (:enumerateinstancenames
+		     (setf return-type :instancename)
+		     (enumerate-instance-names-handler (third (assoc* :classname args)) namespace))
+		    (:associators
+		     (setf return-type :value.objectwithpath)
+		     (let ((objectname (assoc :objectname args)))
+		       (associators-handler (third objectname)
+					    namespace
+					    :assocclass (third (assoc :assocclass args))
+					    :resultclass (third (assoc :resultclass args)))))
+		    (:associatornames
+		     (setf return-type :objectpath)
+		     (let ((objectname (assoc :objectname args)))					   
+		       (associator-names-handler (third objectname)
+						 namespace
+						 :assocclass (third (assoc :assocclass args))
+						 :resultclass (third (assoc :resultclass args)))))
+		    (:references
+		     (setf return-type :value.objectwithpath)
+		     (let ((objectname (assoc :objectname args)))
+		       (references-handler (third objectname)
+					   namespace
+					   :resultclass (third (assoc :resultclass args)))))
+		    (:referencenames
+		     (setf return-type :objectpath)
+		     (let ((objectname (assoc :objectname args)))
+		       (reference-names-handler (third objectname)
+						namespace
+						:resultclass (third (assoc :resultclass args)))))
+		    (otherwise (cim-error :cim-err-not-supported)))))
+	    (make-cim-response name return-value return-type :intrinsicp t :namespace namespace))
+	(cim-error-t (err)
+	  (make-cim-response (cim-request-method request) nil nil :intrinsicp t :errorinstance err)))))
 
 
 ;; handle a CIM message
@@ -446,6 +444,26 @@ Encoding must be either :CIMXML or :WSMAN. WS-Man encoding is not currently supp
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun associators-handler (object namespace &key assocclass resultclass)
+  (declare (ignore assocclass resultclass))
+  ;; if object represents a class then return the class names of the assocaition classes
+  ;; if its an instacne then call the generic ffunction on the class itself
+  (cond
+    ((stringp object)
+     (let ((cl (cim-class-by-name object namespace)))
+       (unless cl (cim-error :cim-err-not-found))
+       (mapcar (lambda (name)
+		 (cim-class-by-name name namespace))
+	       (cim-associations cl))))
+;;    ((cim-class-p object)
+;;     (mapcar (lambda (name)
+;;	       (cim-class-by-name name namespace))
+;;	     (cim-associations object)))
+    ((cim-instance-p object)
+     (let ((cl (cim-class-by-name (cim-name object) namespace)))
+       (unless cl (cim-error :cim-err-not-found))
+       (associations-of cl object)))
+    (t (cim-error :cim-err-invalid-parameter))))
 
 ;; <objectPath>*AssociatorNames ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -454,6 +472,22 @@ Encoding must be either :CIMXML or :WSMAN. WS-Man encoding is not currently supp
 ;;         [IN,OPTIONAL,NULL] string Role = NULL, 
 ;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
 ;; )
+(defun associator-names-handler (name namespace &key assocclass resultclass)
+  (declare (ignore assocclass resultclass))
+  (cond
+    ((stringp name)
+     (let ((cl (cim-class-by-name name namespace)))
+       (unless cl (cim-error :cim-err-not-found))
+       (mapcar (lambda (name)
+		 (string name))
+	       (cim-associations cl))))
+    ((cim-instance-p name)
+     (let ((cl (cim-class-by-name (cim-name name) namespace)))
+       (unless cl (cim-error :cim-err-not-found))
+       (mapcar (lambda (inst)
+		 (cim-instance-reference (cim-class-by-name (cim-name inst) namespace) inst))
+	       (associations-of cl name))))
+    (t (cim-error :cim-err-invalid-parameter))))
 
 ;; <objectWithPath>*References ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -463,12 +497,20 @@ Encoding must be either :CIMXML or :WSMAN. WS-Man encoding is not currently supp
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun references-handler (object namespace &key resultclass)
+  (declare (ignore resultclass))
+  nil)
+
 
 ;;<objectPath>*ReferenceNames ( 
 ;;         [IN] <objectName> ObjectName, 
 ;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
 ;;         [IN,OPTIONAL,NULL] string Role = NULL 
 ;; )
+(defun reference-names-handler (name namespace &key resultclass)
+  (declare (ignore resultclass))
+
+  nil)
 
 ;; <propertyValue>GetProperty ( 
 ;;         [IN] <instanceName> InstanceName, 

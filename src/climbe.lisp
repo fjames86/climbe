@@ -24,7 +24,8 @@
    (properties :initarg :properties :initform nil :accessor cim-properties)
    (methods :initarg :methods :initform nil :accessor cim-methods)
    (superclass :initarg :superclass :initform nil :accessor cim-superclass)
-   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
+   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
+   (associations :initform nil :accessor cim-associations)))
 
 (defmethod print-object ((cim cim-class) stream)
   (format stream "#<CIM-CLASS ~A>" (cim-name cim)))
@@ -69,6 +70,25 @@
 (defun cim-reference-p (cim)
   (typep cim 'cim-reference))
 
+;; -------- associator classes ---------------
+
+(defun cim-association-p (class)
+  "Is this an association class?"
+  (find :association (cim-qualifiers class) :key #'car :test #'string-equal))
+
+(defun cim-associator-of (name class)
+  "Is class NAME an associator of CLASS?"
+  (let ((ass (cim-associations class)))
+    (find name ass :test #'string-equal)))
+
+(defun derive-association-classes (class)
+  "Extract the class names of all the refernce properties of this class"
+  (mapcan (lambda (property)
+	    (destructuring-property (name type qualifiers origin value) property
+	      (when (cim-ref-p type)
+		(list (cim-ref-class type)))))
+	  (cim-properties class)))
+  
 ;; ---------- namespaces ---------------
 
 (defparameter *namespaces* (make-hash-table))
@@ -104,81 +124,87 @@
 
 (defun %define-cim-class (namespace class)
   (let ((classes (namespace-classes namespace))
-		(scl (cim-superclass class)))
-	
-	;; validate class object
-	(when scl
-	  (unless (cim-class-by-name scl namespace)
-		(error "Superclass ~S not found" scl)))
-	
-	;; remove it if it is already there
-	(when (find (cim-name class) classes :key #'cim-name)
-	  (setf (namespace-classes namespace)
-			(remove (cim-name class) classes :key #'cim-name)))
+	(scl (cim-superclass class)))
+    
+    ;; validate class object
+    (when scl
+      (unless (cim-class-by-name scl namespace)
+	(error "Superclass ~S not found" scl)))
+    
+    ;; remove it if it is already there
+    (when (find (cim-name class) classes :key #'cim-name)
+      (setf (namespace-classes namespace)
+	    (remove (cim-name class) classes :key #'cim-name)))
 
-	;; append the inherited properties and methods
-	(when scl
-	  (let ((superclass (cim-class-by-name scl namespace)))
-		(setf (cim-properties class)
-			  (append (cim-properties superclass) (cim-properties class))
-			  (cim-methods class)
-			  (append (cim-methods superclass) (cim-methods class)))))
-	
-	;; define it
-	(push class (cdr (gethash namespace *namespaces*)))))
+    ;; do things if its an association class
+    (when (cim-association-p class)
+      (setf (cim-associations class)
+	    (derive-association-classes class)))
+
+    ;; append the inherited properties and methods
+    (when scl
+      (let ((superclass (cim-class-by-name scl namespace)))
+	(setf (cim-properties class)
+	      (append (cim-properties superclass) (cim-properties class))
+	      (cim-methods class)
+	      (append (cim-methods superclass) (cim-methods class))
+	      (cim-associations class)
+	      (append (cim-associations superclass) (cim-associations class)))))
+
+    ;; define it
+    (push class (cdr (gethash namespace *namespaces*)))))
 
 (defmacro define-cim-class (name (&optional superclass) properties methods &rest options)
   (let ((gcl (gensym "CLASS")))
-  `(progn
-	 ;; defclass
-	 (defclass ,name (,(if superclass superclass 'cim-class))
-	   ()
-	   ,@(mapcan (lambda (option)
-				   (unless (eq (car option) :qualifiers)
-					 (list option)))
-				 options))
+    `(progn
+       ;; defclass
+       (defclass ,name (,(if superclass superclass 'cim-class))
+	 ()
+	 ,@(mapcan (lambda (option)
+		     (unless (eq (car option) :qualifiers)
+		       (list option)))
+		   options))
+              
+       (let ((,gcl (make-instance ',name
+				  :name ',name
+				  :superclass ',superclass
+				  :qualifiers ,(let ((qual (find :qualifiers options :key #'car)))
+						    (when qual
+						      `(kwlist-alist (list ,@(cdr qual)))))
+				  :properties (list ,@(mapcar (lambda (property)
+								(destructuring-bind (slot-name slot-type &rest qual-kwlist) property
+								  `(list
+								    ',slot-name
+								    ',slot-type
+								    (kwlist-alist (list ,@qual-kwlist))
+								    ',name ;; origin class
+								    nil ;; default value
+								    )))
+							      properties))
+				  :methods (list ,@(mapcar (lambda (method)
+							     (destructuring-bind (meth-name return-type typed-parameters &rest qual-kwlist) method
+							       (let ((fn (assoc-kwlist :function qual-kwlist)))
+								 `(list ',meth-name
+									',return-type
+									(list ,@(mapcar (lambda (parameter)
+											  (destructuring-bind (param-name param-type &rest qual-kwlist) parameter
+											    `(list ',param-name
+												   ',param-type
+												   (kwlist-alist (list ,@qual-kwlist)))))
+											typed-parameters))
+									(mapcan-kwlist (lambda (n v)
+											 (unless (eq n :function)
+											   (list (cons n v))))
+										       (list ,@qual-kwlist))
+									,fn
+									',name ;; origin class
+									))))
+							   methods)))))
+	 ;; store meta-data
+	 (%define-cim-class *namespace* ,gcl)
 	 
-	 
-	 (let ((,gcl (make-instance ',name
-								:name ',name
-								:superclass ',superclass
-								:qualifiers ,(let ((qual (find :qualifiers options :key #'car)))
-												  (when qual
-													`(kwlist-alist (list ,@(cdr qual)))))
-								:properties (list ,@(mapcar (lambda (property)
-															  (destructuring-bind (slot-name slot-type &rest qual-kwlist) property
-																`(list
-																  ',slot-name
-																  ',slot-type
-																  (kwlist-alist (list ,@qual-kwlist))
-																  ',name ;; origin class
-																  nil ;; default value
-																  )))
-															properties))
-								:methods (list ,@(mapcar (lambda (method)
-														   (destructuring-bind (meth-name return-type typed-parameters &rest qual-kwlist) method
-															 (let ((fn (assoc-kwlist :function qual-kwlist)))
-															   `(list ',meth-name
-																	  ',return-type
-																	  (list ,@(mapcar (lambda (parameter)
-																						(destructuring-bind (param-name param-type &rest qual-kwlist) parameter
-																						  `(list ',param-name
-																								 ',param-type
-																								 (kwlist-alist (list ,@qual-kwlist)))))
-																					  typed-parameters))
-																	  (mapcan-kwlist (lambda (n v)
-																					   (unless (eq n :function)
-																						 (list (cons n v))))
-																					 (list ,@qual-kwlist))
-																	  ,fn
-																	  ',name ;; origin class
-																	  ))))
-														 methods)))))
-	   ;; store meta-data
-	   (%define-cim-class *namespace* ,gcl)
-	   
-	   ;; return cim-class for repl users
-	   ,gcl))))
+	 ;; return cim-class for repl users
+	 ,gcl))))
 
 (defun cim-class-by-name (name &optional (namespace *namespace*))
   "Find a class from its name"
@@ -304,8 +330,23 @@
   (cim-error :cim-err-not-supported))
 
 ;;###############
+(defgeneric associations-of (class instance)
+  (:documentation "Enumerates (regular) instances of the classes associated with this association class."))
+
+(defmethod associations-of ((class cim-class) instance)
+  (cim-error :cim-err-not-supported))
+
+;;###############
+(defgeneric references-of (class instance)
+  (:documentation "Enumerates instances of the association classes for this association class."))
+
+(defmethod references-of ((class cim-class) instance)
+  (cim-error :cim-err-not-supported))
+
+;;###############
 (defgeneric invoke-method (class method arguments)
   (:documentation "Invoke a method of CIM class."))
+
 
 ;; ALL CIM method handlers should return (values <return-value> <list of outparams>)
 ;; the outparams should be an assoc list of (name . value) pairs. 
