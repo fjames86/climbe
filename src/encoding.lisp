@@ -908,3 +908,94 @@
 (defmethod encode-object ((cim cim-reference) stream)
   (encode-cimxml-instancename (cim-name cim) (cim-keys cim) stream))
 
+(defun encode (object &optional (stream *standard-output*))
+  (encode-object object stream))
+
+;; ------------------------
+	 
+(defun encode-mof-value (value type stream)  
+  (ecase type
+    ((:uint8 :uint16 :uint32 :uint64 :sint8 :sint16 :sint32 :sint64 :real32 :real64)
+     (format stream "~A" value))
+    (:string (format stream "\"~A\"" value))
+    (:datetime (format stream "~A" (datetime-string value)))
+    (:boolean (if value 
+		  (format stream "true")
+		  (format stream "false")))))
+
+(defun encode-mof-qualifiers (qualifiers stream)
+  (format stream "[")
+  (dolist* (qualifier qlist qualifiers)
+    (destructuring-bind (name . val) qualifier
+      (let ((q (cim-qualifier-by-name name)))
+	(if q
+	    (destructuring-qualifier (n str type def qualifiers) q
+	      (if (and (eq type :boolean) val)
+		  (format stream "~A" str)
+		  (progn
+		    (format stream "~A(" str)
+		    (encode-mof-value val type stream)
+		    (format stream ")"))))
+	    (progn
+	      (format stream "~A(" name)
+	      (encode-mof-value val :string stream)
+	      (format stream ")")))))
+    (when (cdr qlist)
+      (format stream ", ")))
+  (format stream "]"))
+
+(defun encode-mof-class (class stream)
+  (when (cim-qualifiers class)
+    (encode-mof-qualifiers (cim-qualifiers class) stream)
+    (format stream "~%"))
+
+  (format stream "class ~A" (cim-name class))
+  (when (cim-superclass class)
+    (format stream " : ~A" (cim-superclass class)))
+  (format stream " {~%")
+
+  (dolist (property (cim-properties class))
+    (destructuring-property (name type qualifiers origin value) property
+      (when qualifiers
+	(format stream "  ")
+	(encode-mof-qualifiers qualifiers stream)
+	(format stream "~%"))
+      (format stream "  ~A ~A;~%" (cim-primitive-string type) name)))
+
+  (dolist (method (cim-methods class))
+    (destructuring-method (name return-type parameters qualifiers function origin) method
+      (when qualifiers
+	(encode-mof-qualifiers qualifiers stream)
+	(format stream "~%"))
+
+      (format stream "  ~A ~A(" (cim-primitive-string return-type) name)
+      (dolist* (parameter plist parameters)
+	(destructuring-parameter (name type qualifiers) parameter
+	  (when qualifiers 
+	    (encode-mof-qualifiers qualifiers stream))
+	  (format stream "~A ~A" (cim-primitive-string type) name))
+	(when (cdr plist)
+	  (format stream ", ")))
+
+      (format stream ");~%")))
+
+  (format stream "};~%"))
+
+(defun encode-mof-instance (inst stream)
+  (format stream "instance ~A {~%" (cim-name inst))
+  (dolist (slot (cim-slots inst))
+    (destructuring-slot (name type val) slot
+      (format stream "~A ~A = " (cim-primitive-string type) name)
+      (encode-mof-value val type stream)
+      (format stream ";~%")))
+  (format stream "};~%"))
+
+(defgeneric encode-mof (object stream))
+
+(defmethod encode-mof ((class cim-class) stream)
+  (encode-mof-class class stream))
+
+(defmethod encode-mof ((inst cim-instance) stream)
+  (encode-mof-instance inst stream))
+
+

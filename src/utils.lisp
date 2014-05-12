@@ -94,3 +94,12 @@
 (defun assoc* (name list)
   (assoc name list :test #'string-equal))
 
+(defun find* (name list)
+  (find name list :test #'string-equal))
+
+(defmacro dolist* ((itemvar listvar list) &body body)
+  `(do ((,listvar ,list (cdr ,listvar)))
+       ((null ,listvar))
+     (let ((,itemvar (car ,listvar)))
+       ,@body)))
+

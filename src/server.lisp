@@ -509,7 +509,6 @@ Encoding must be either :CIMXML or :WSMAN. WS-Man encoding is not currently supp
 ;; )
 (defun reference-names-handler (name namespace &key resultclass)
   (declare (ignore resultclass))
-
   nil)
 
 ;; <propertyValue>GetProperty ( 

@@ -74,7 +74,7 @@
 
 (defun cim-association-p (class)
   "Is this an association class?"
-  (find :association (cim-qualifiers class) :key #'car :test #'string-equal))
+  (assoc* :association (cim-qualifiers class)))
 
 (defun cim-associator-of (name class)
   "Is class NAME an associator of CLASS?"
@@ -83,11 +83,15 @@
 
 (defun derive-association-classes (class)
   "Extract the class names of all the refernce properties of this class"
-  (mapcan (lambda (property)
-	    (destructuring-property (name type qualifiers origin value) property
-	      (when (cim-ref-p type)
-		(list (cim-ref-class type)))))
-	  (cim-properties class)))
+  (remove-duplicates 
+   (mapcan (lambda (property)
+	     (let (cl)
+	       (destructuring-property (name type qualifiers origin value) property
+		 (when (cim-ref-p type)
+		   (setf cl (cim-ref-class type))
+		   (list cl)))))
+	   (cim-properties class))
+   :test #'string-equal))
   
 ;; ---------- namespaces ---------------
 
@@ -132,9 +136,17 @@
 	(error "Superclass ~S not found" scl)))
     
     ;; remove it if it is already there
-    (when (find (cim-name class) classes :key #'cim-name)
+    (when (find (cim-name class) classes :key #'cim-name :test #'string-equal)
       (setf (namespace-classes namespace)
 	    (remove (cim-name class) classes :key #'cim-name)))
+
+    ;; ensure it's marked as an association class if required
+    (when (some (lambda (prop)
+		  (let ((type (cim-property-type prop)))
+		    (cim-ref-p type)))
+		(cim-properties class))
+      (unless (cim-association-p class)
+	(push (cons :association t) (cim-qualifiers class))))
 
     ;; do things if its an association class
     (when (cim-association-p class)
@@ -359,7 +371,7 @@
 	(let ((fn (cim-method-function meth)))
 	  (if fn
 		  (apply fn arguments)
-		  (cim-error :cim-err-not-found method-name)))))
+		  (cim-error :cim-err-not-supported method-name)))))
 
 ;; --------------------- instances ----------------
 
@@ -413,6 +425,15 @@
   (destructuring-property (name type qualifiers origin value) property
 	(make-cim-slot name type value)))
 
+(defmacro cim-instance (name &rest slots)
+  "Wrapper around make-cim-instance."
+  `(make-cim-instance ',name
+		      (list ,@(mapcar (lambda (slot)
+					(destructuring-slot (name type val) slot
+					  `(make-cim-slot ',name ',type ,val)))
+				      slots))))
+
+
 ;; ---------- references ----------
 
 (defun make-cim-reference (name &key namespace host keys)
@@ -425,11 +446,11 @@
 
 (defun cim-instance-reference (class instance)
   (make-cim-reference (cim-name class)
-					  :keys (mapcan (lambda (property)
-									  (destructuring-property (name type qualifiers origin value) property
-									    (when (assoc* :key qualifiers)
-										  (list (make-cim-slot name type (cim-slot-value instance name))))))
-									(cim-properties class))))
+		      :keys (mapcan (lambda (property)
+				      (destructuring-property (name type qualifiers origin value) property
+					(when (assoc* :key qualifiers)
+					  (list (make-cim-slot name type (cim-slot-value instance name))))))
+				    (cim-properties class))))
 
 (defun cim-reference-instance (class reference)
   (make-cim-instance (cim-name class)
