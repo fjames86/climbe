@@ -914,14 +914,34 @@
 ;; ------------------------
 	 
 (defun encode-mof-value (value type stream)  
-  (ecase type
-    ((:uint8 :uint16 :uint32 :uint64 :sint8 :sint16 :sint32 :sint64 :real32 :real64)
-     (format stream "~A" value))
-    (:string (format stream "\"~A\"" value))
-    (:datetime (format stream "~A" (datetime-string value)))
-    (:boolean (if value 
-		  (format stream "true")
-		  (format stream "false")))))
+  (cond
+    ((cim-ref-p type)
+     (format stream "~A." (cim-name value))
+     (dolist* (slot slist (cim-keys value))
+       (destructuring-slot (name type val) slot
+         (format stream "~A=" name)
+         (encode-mof-value val type stream)
+         (when (cdr slist)
+           (format stream ",")))))     
+    ((cim-array-p type)
+     (let ((tpe (cim-array-type type)))
+       (format stream "{")
+       (dolist* (val vlist value)
+         (encode-mof-value val tpe stream)
+         (when (cdr vlist)
+           (format stream ",")))
+       (format stream "}")))     
+    ((cim-refarray-p type)
+     (error "refarrays are not supported"))
+    (t
+     (ecase type
+       ((:uint8 :uint16 :uint32 :uint64 :sint8 :sint16 :sint32 :sint64 :real32 :real64)
+        (format stream "~A" value))
+       (:string (format stream "\"~A\"" value))
+       (:datetime (format stream "~A" (datetime-string value)))
+       (:boolean (if value 
+                     (format stream "true")
+                     (format stream "false")))))))
 
 (defun encode-mof-qualifiers (qualifiers stream)
   (format stream "[")
@@ -944,6 +964,29 @@
       (format stream ", ")))
   (format stream "]"))
 
+(defun encode-mof-property (property stream)
+  (destructuring-property (name type qualifiers origin value) property 
+    (when qualifiers
+      (format stream "  ")
+      (encode-mof-qualifiers qualifiers stream)
+      (format stream "~%"))
+    (cond
+      ((cim-ref-p type)
+       (format stream "  REF ~A ~A;~%" (cim-ref-class type) name))
+      ((cim-array-p type)
+       (format stream "  ~A ~A[" (cim-array-type type) name)
+       (when (cim-array-length type)
+         (format stream "~A" (cim-array-length type)))
+       (format stream "];~%"))
+      ((cim-refarray-p type)
+       (let ((ref (cim-array-type type)))
+         (format stream "  REF ~A ~A[" (cim-ref-class ref) name)
+         (when (cim-array-length type)
+           (format stream "~A" (cim-array-length type)))
+         (format stream "];~%")))
+      (t
+       (format stream "  ~A ~A;~%" (cim-primitive-string type) name)))))
+    
 (defun encode-mof-class (class stream)
   (when (cim-qualifiers class)
     (encode-mof-qualifiers (cim-qualifiers class) stream)
@@ -955,13 +998,8 @@
   (format stream " {~%")
 
   (dolist (property (cim-properties class))
-    (destructuring-property (name type qualifiers origin value) property
-      (when qualifiers
-	(format stream "  ")
-	(encode-mof-qualifiers qualifiers stream)
-	(format stream "~%"))
-      (format stream "  ~A ~A;~%" (cim-primitive-string type) name)))
-
+    (encode-mof-property property stream))
+  
   (dolist (method (cim-methods class))
     (destructuring-method (name return-type parameters qualifiers function origin) method
       (when qualifiers
@@ -981,13 +1019,37 @@
 
   (format stream "};~%"))
 
+(defun encode-mof-slot (slot stream)
+  (destructuring-slot (name type value) slot
+    (cond
+      ((cim-ref-p type)
+       (format stream "  REF ~A ~A" (cim-ref-class type) name)
+       (when value
+         (format stream " = ")
+         (encode-mof-value value type stream))
+       (format stream ";~%"))
+      ((cim-array-p type)
+       (format stream "  ~A ~A[" (cim-primitive-string (cim-array-type type)) name)
+       (when (cim-array-length type)
+         (format stream "~A" (cim-array-length type)))
+       (format stream "]")
+       (when value
+         (format stream " = ")
+         (encode-mof-value value type stream))
+       (format stream ";~%"))
+      ((cim-refarray-p type)
+       (error "refarrays are not supported"))
+      (t 
+       (format stream "  ~A ~A" (cim-primitive-string type) name)
+       (when (or (eq type :boolean) value)
+         (format stream " = ")
+         (encode-mof-value value type stream))
+       (format stream ";~%")))))
+
 (defun encode-mof-instance (inst stream)
   (format stream "instance ~A {~%" (cim-name inst))
   (dolist (slot (cim-slots inst))
-    (destructuring-slot (name type val) slot
-      (format stream "~A ~A = " (cim-primitive-string type) name)
-      (encode-mof-value val type stream)
-      (format stream ";~%")))
+    (encode-mof-slot slot stream))
   (format stream "};~%"))
 
 (defgeneric encode-mof (object stream))

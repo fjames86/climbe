@@ -76,7 +76,9 @@
 		   ;; encoding/decoding
 		   #:cim-encode
 		   #:cim-decode
-		   
+		   #:encode
+           #:encode-mof
+
 		   ;; client
 		   #:cim-get-class
 		   #:cim-get-instance
