@@ -306,7 +306,7 @@
 ;;<!ATTLIST CLASSNAME
 ;;    %CIMName;>
 (defun encode-cimxml-classname (classname stream)
-  (format stream "<CLASSNAME NAME=~S />~%" classname))
+  (format stream "<CLASSNAME NAME=\"~A\" />~%" classname))
 
 ;;<!ELEMENT INSTANCEPATH (NAMESPACEPATH,INSTANCENAME)>
 (defun encode-cimxml-instancepath (reference stream)
@@ -488,8 +488,11 @@
 ;;    xml:lang   NMTOKEN  #IMPLIED>
 (defun encode-cimxml-property-array (property stream)
   (destructuring-property (name type qualifiers origin value) property 
-    (format stream "<PROPERTY.ARRAY NAME=\"~A\" TYPE=\"~A\" CLASSORIGIN=\"~A\""
-	    name (cim-primitive-string (cim-array-type type)) origin)
+    (format stream "<PROPERTY.ARRAY NAME=\"~A\" TYPE=\"~A\""
+	    name (cim-primitive-string (cim-array-type type)))
+
+    (when origin 
+      (format stream " CLASSORIGIN=\"~A\"" origin))
 
     (awhen (cim-array-length type)
       (format stream " ARRAYSIZE=\"~A\"" it))
@@ -514,8 +517,11 @@
 ;;     %Propagated;>
 (defun encode-cimxml-property-reference (property stream)
   (destructuring-property (name type qualifiers origin value) property 
-    (format stream "<PROPERTY.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\" CLASSORIGIN=\"~A\">~%"
-	    name (cim-ref-class type) origin)
+    (format stream "<PROPERTY.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\""
+	    name (cim-ref-class type))
+    (when origin
+      (format stream "CLASSORIGIN=\"~A\"" origin))
+    (format stream ">~%")
 
     (dolist (qualifier qualifiers)
       (destructuring-bind (q . v) qualifier
@@ -534,8 +540,12 @@
 ;;     %Propagated;>
 (defun encode-cimxml-method (method stream)
   (destructuring-method (name return-type parameters qualifiers function origin) method
-    (format stream "<METHOD NAME=\"~A\" TYPE=\"~A\" CLASSORIGIN=\"~A\">~%"
-	    name (cim-primitive-string return-type) origin)
+    (format stream "<METHOD NAME=\"~A\" TYPE=\"~A\""
+	    name (cim-primitive-string return-type))
+
+    (when origin
+      (format stream "CLASSORIGIN=\"~A\"" origin))
+    (format stream ">~%")
 
     ;; qualifiers
     (dolist (qualifier qualifiers)

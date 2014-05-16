@@ -85,18 +85,16 @@
   "Extract the class names of all the refernce properties of this class"
   (remove-duplicates 
    (mapcan (lambda (property)
-	     (let (cl)
-	       (destructuring-property (name type qualifiers origin value) property
-		 (when (cim-ref-p type)
-		   (setf cl (cim-ref-class type))
-		   (list cl)))))
+	     (let ((type (cim-property-type property)))
+	       (when (cim-ref-p type)
+		 (list (cim-ref-class type)))))
 	   (cim-properties class))
    :test #'string-equal))
   
 ;; ---------- namespaces ---------------
 
 (defparameter *namespaces* (make-hash-table))
-(defparameter *namespace* nil)
+(defparameter *namespace* :root/cimv2)
 
 (defun %in-namespace (namespace)
   (let* ((kw (make-keyword namespace))
@@ -342,17 +340,32 @@
   (cim-error :cim-err-not-supported))
 
 ;;###############
-(defgeneric associations-of (class instance)
+;; ask an association class about its regular instance associations
+;; e.g. we have an assoc class A that associatates between B and C
+;; class A { ref B source; ref C dest; };
+;; we can ask A: 
+;; (associator-instances (class A) (inst B)) -> instances of C via this instance of B
+;; (assoicator-instances (class A) (inst C)) -> instances of B via this instance of C
+;; if the association class involved more than 2 classes then e.g.
+;; class A { ref B; ref C; ref D; };
+;; (associator-instances (class A) (inst B)) -> instances of C and D via this instance of B
+;; (associator-instances (class A) (inst C)) -> instances of B and D via this instance of C
+;; (associator-instances (class A) (inst D)) -> instances of B and C via this instance of D
+(defgeneric associator-instances (class instance)
   (:documentation "Enumerates (regular) instances of the classes associated with this association class."))
 
-(defmethod associations-of ((class cim-class) instance)
+(defmethod associator-instances ((class cim-class) instance)
   (cim-error :cim-err-not-supported))
 
 ;;###############
-(defgeneric references-of (class instance)
+;; ask an assocition class about its association instance associations
+;; with example above: 
+;; (reference-instances (class A) (inst B)) -> list of all instances of A associated with B
+;; (reference-instances (class A) (inst C)) -> list of all instances of A associated with C
+(defgeneric reference-instances (class instance)
   (:documentation "Enumerates instances of the association classes for this association class."))
 
-(defmethod references-of ((class cim-class) instance)
+(defmethod reference-instances ((class cim-class) instance)
   (cim-error :cim-err-not-supported))
 
 ;;###############

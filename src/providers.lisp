@@ -5,74 +5,78 @@
 
 (in-package :providers)
 
-
 #|
-#namespace "root/mynspace"
-class Person {
-String Name;
-Uint32 Age;
 
-String SayHello();
+class ClassA {
+  [Key]
+  String Name;
 };
+
+class ClassB {
+  [Key];
+  String Name;
+};
+
+[Association]
+class ClassAssoc {
+  [Key]
+  REF ClassA Prop1;
+  [Key]
+  REF ClassB Prop2;
+};
+
+
 |#
 
-(climbe:in-namespace "root/mynspace")
+(climbe:in-namespace "root/cimv2")
 
-(defun sayhello ()
-  "hello")
-
-(climbe:define-cim-class |Person| ()
-  ((|Name| :string)
-   (|Age| :uint32))
-  ((|SayHello| :string () :function #'sayhello)))
-
-
-(defmethod climbe:enumerate-instances ((class |Person|))
-  (list (climbe:cim-instance "Person"
-			     (|Name| :string "Frank")
-			     (|Age| :uint32 27))))
-
-
-;; -------------
-
-#|
-#namespace "root/mynspace"
-class Frank : Person {
- Boolean Bored;
- 
- String SayName([In] String Name, [Out] String Thing);
-};
-|#
-
-(climbe:in-namespace "root/mynspace")
-
-(climbe:define-cim-class |Frank| (|Person|)
-  ((|Bored| :boolean :description "Is Frank bored?"))
-  ((|SayName| :string ((|Name| :string :in t) (|Thing| :string :out t))))
-  (:qualifiers :description "Frank class"))
-
-(defmethod climbe:enumerate-instances ((cim |Frank|))
-  (list (climbe:cim-instance "Frank"
-			     (|Bored| :boolean t)
-			     (|Name| :string "Frank")
-			     (|Age| :unit32 31))))
-
-
-;; ----------
-
-(climbe:in-namespace "root/assoc")
-
-(climbe:define-cim-class |CIM_Base| ()
-  ((|Name| :string :key t :description "key propoerty"))
-  ()
-  (:qualifiers :description "Base class" :abstract t))
-
-(climbe:define-cim-class |CIM_MyClass| (|CIM_Base|)
-  ((|Age| :uint32 :description "age"))
-  ((|Mymethod| :string () :description "my method")))
-
-(climbe:define-cim-class |CIM_Assoc| ()
-  ((|Source| (:ref |CIM_MyClass|))
-   (|Dest| (:ref |CIM_MyClass|)))
+(climbe:define-cim-class |ClassA| ()
+  ((|Name| :string :key t))
   ())
+
+(climbe:define-cim-class |ClassB| ()
+  ((|Name| :string :key t))
+  ())
+
+(climbe:define-cim-class |ClassAssoc| ()
+  ((|Prop1| (:ref |ClassA|) :key t)
+   (|Prop2| (:ref |ClassA|) :key t))
+  ()
+  (:qualifiers :association t))
+
+(defparameter *classa* (list (climbe:cim-instance "ClassA" (|Name| :string "Frank"))))
+(defparameter *classb* (list (climbe:cim-instance "ClassB" (|Name| :string "James"))))
+(defparameter *assocs* (list (climbe:cim-instance "ClassAssoc" 
+					    (|Prop1| (:ref |ClassA|) (climbe::cim-instance-reference (climbe:cim-class-by-name :classa) (car *classa*)))
+					    (|Prop2| (:ref |ClassB|) (climbe::cim-instance-reference (climbe:cim-class-by-name :classb) (car *classb*))))))
+
+(defmethod climbe:enumerate-instances ((class |ClassA|))
+  *classa*)
+
+(defmethod climbe:enumerate-instances ((class |ClassB|))
+  *classb*)
+
+(defmethod climbe:enumerate-instances ((class |ClassAssoc|))
+  *assocs*)
+
+(defmethod climbe::associator-instances ((class |ClassAssoc|) instance)
+  (let ((name (climbe::cim-name instance)))
+    (cond
+      ((string-equal name :classa)
+       *classb*)
+      ((string-equal name :classb)
+       *classa*)
+      (t (climbe:cim-error :cim-err-invalid-parameter name)))))
+
+(defmethod climbe::reference-instances ((class |ClassAssoc|) instance)
+  (let ((name (climbe::cim-name instance)))
+    (cond
+      ((string-equal name :classa)
+       *assocs*)
+      ((string-equal name :classb)
+       *assocs*)
+      (t (climbe:cim-error :cim-err-invalid-parameter name)))))
+
+
+
 
