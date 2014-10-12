@@ -164,9 +164,29 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   ;; convert the qualifiers from keyword-pairs to assoc list
   (setf (cim-qualifiers class) (make-qualifiers-list (cim-qualifiers class))))
 
+(defmethod initialize-instance :after ((slot cim-standard-direct-slot-definition) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
+
+(defmethod initialize-instance :after ((slot cim-standard-effective-slot-definition) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
+
+
+
 (defmethod print-object ((class cim-class) stream)
   (print-unreadable-object (class stream :type t)
 	(format stream "~A" (cim-name class))))
+
+
+(defmethod print-object ((slot cim-standard-direct-slot-definition) stream)
+  (print-unreadable-object (slot stream :type t)
+	(format stream "~A :TYPE ~A" (cim-name slot) (cim-slot-type slot))))
+
+(defmethod print-object ((slot cim-standard-effective-slot-definition) stream)
+  (print-unreadable-object (slot stream :type t)
+	(format stream "~A :TYPE ~A" (cim-name slot) (cim-slot-type slot))))
+
 
 (defun find-cim-class (class-name &optional (namespace *namespace*))
   "Find a CIM class by the stringy CIM-NAME in the given namespace."
@@ -198,6 +218,15 @@ If CHILDREN is T all the CIM subclasses are also added."
 	(dolist (ch (closer-mop:class-direct-subclasses class))
 	  (add-class-to-namespace ch ns :children t)))
   class)
+
+;; gf for cim methods
+(defclass cim-generic-function (standard-generic-function)
+  ((cim-name :initarg :cim-name :accessor cim-name)
+   (qualifiers :initarg :qualifiers :accessor cim-qualifiers)
+   (return-type :initarg :return-type :accessor cim-return-type)
+   (parameters :initarg :parameters :accessor cim-parameters))
+  (:documentation "Represents a CIM class method."))
+  
 
 ;; --------------- cim types -----------
 
@@ -715,7 +744,100 @@ If CHILDREN is T all the CIM subclasses are also added."
   (:scope :property)
   (:flavour :disable-override))
 
+;; ---------- intrinsic methods --------
 
+;; basic methods
+(defgeneric enumerate-instances (class)
+  (:method-combination nconc))
+
+(defgeneric get-instance (instance)
+  (:method-combination or))
+
+(defgeneric create-instance (instance))
+
+(defgeneric modify-instance (instance))
+
+(defgeneric delete-instance (instance))
+
+;; associations
+(defgeneric association-instances (instance)
+  (:method-combination nconc))
+
+(defgeneric reference-instances (instance)
+  (:method-combination nconc))
+
+;; indications
+(defgeneric subscribe (instance))
+
+(defgeneric unsubscribe (instance))
+
+;; ------------ errors -----------
+
+;; base error type
+(define-condition cim-error (error)
+  ())
+
+(define-condition cim-error-failed (cim-error)
+  ())
+
+(define-condition cim-error-access-denied (cim-error)
+  ())
+
+(define-condition cim-error-invalid-namespace (cim-error)
+  ())
+
+(define-condition cim-error-invalid-parameter (cim-error)
+  ())
+
+(define-condition cim-error-invalid-class (cim-error)
+  ())
+
+(define-condition cim-error-not-found (cim-error)
+  ())
+
+(define-condition cim-error-not-supported (cim-error)
+  ())
+
+(define-condition cim-error-class-has-children (cim-error)
+  ())
+
+(define-condition cim-error-class-has-instances (cim-error)
+  ())
+
+(define-condition cim-error-invalid-superclass (cim-error)
+  ())
+
+(define-condition cim-error-already-exists (cim-error)
+  ())
+
+(define-condition cim-error-no-such-property (cim-error)
+  ())
+
+(define-condition cim-error-type-mismatch (cim-error)
+  ())
+
+(define-condition cim-error-query-language-not-supported (cim-error)
+  ())
+
+(define-condition cim-error-invalid-query (cim-error)
+  ())
+
+(define-condition cim-eror-method-not-available (cim-error)
+  ())
+
+(define-condition cim-error-method-not-found (cim-error)
+  ())
+
+(define-condition cim-error-unexpected-response (cim-error)
+  ())
+
+(define-condition cim-error-invalid-response-destination (cim-error)
+  ())
+
+(define-condition cim-error-namespace-not-empty (cim-error)
+  ())
+
+										   
 ;; ------------------------------
 ;; examples
 
@@ -735,3 +857,21 @@ If CHILDREN is T all the CIM subclasses are also added."
   ((frank :initarg :frank))
   (:metaclass cim-class)
   (:cim-name "Frank"))
+
+(defclass myclass4 (myclass)
+  ((myslot :initarg :myslot :cim-name "MySlot" :cim-type sint32
+		   :qualifiers (:key)))
+  (:metaclass cim-class)
+  (:cim-name "MyClass4"))
+
+#|
+(defgeneric my-method (instance x y z)
+  (:cim-name "MyMethod")
+  (:qualifiers (:description "My little method"))
+  (:return-type sint32)
+  (:parameters (x "x" string :in (:description "x parameter"))
+			   (y "y" string :out (:description "y parameter"))
+			   (z "z" datetime :out (:description "z paramter")))
+  (:generic-function-class cim-generic-function))
+|#
+
