@@ -747,23 +747,74 @@ If CHILDREN is T all the CIM subclasses are also added."
 ;; ---------- intrinsic methods --------
 
 ;; basic methods
-(defgeneric enumerate-instances (class)
+
+;; EnumerateInstances
+;; <namedInstance>* EnumerateInstances (
+;;         [IN] <className> ClassName,
+;;         [IN,OPTIONAL] boolean LocalOnly = true,
+;;         [IN,OPTIONAL] boolean DeepInheritance = true,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
+;; )
+(defgeneric enumerate-instances (class &key local-only deep-inheritance include-class-origin property-list)
   (:method-combination nconc))
 
-(defgeneric get-instance (instance)
+
+;; GetInstance
+;; <instance> GetInstance (
+;;         [IN] <instanceName> InstanceName,
+;;         [IN,OPTIONAL] boolean LocalOnly = true,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
+;; )
+(defgeneric get-instance (instance &key local-only include-class-origin property-list)
   (:method-combination or))
 
+;; <instanceName>  CreateInstance (
+;;        [IN] <instance> NewInstance
+;; )
 (defgeneric create-instance (instance))
 
+;; ModifyInstance
+;; void ModifyInstance (
+;;        [IN] <namedInstance> ModifiedInstance
+;; )
 (defgeneric modify-instance (instance))
 
+;; DeleteInstance
+;; void  DeleteInstance (
+;;         [IN] <instanceName> InstanceName
+;; )
 (defgeneric delete-instance (instance))
 
 ;; associations
-(defgeneric association-instances (instance)
+
+;;Associators
+;; <objectWithPath>* Associators (
+;;         [IN] <objectName> ObjectName,
+;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL,
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL,
+;;         [IN,OPTIONAL,NULL] string Role = NULL,
+;;         [IN,OPTIONAL,NULL] string ResultRole = NULL,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
+;; )
+(defgeneric association-instances (instance &key assoc-class result-class role result-role property-list)
   (:method-combination nconc))
 
-(defgeneric reference-instances (instance)
+;; References
+;; <objectWithPath>* References (
+;;         [IN] <objectName> ObjectName,
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL,
+;;         [IN,OPTIONAL,NULL] string Role = NULL,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
+;; )
+(defgeneric reference-instances (instance &key result-class role property-list)
   (:method-combination nconc))
 
 ;; indications
@@ -837,7 +888,36 @@ If CHILDREN is T all the CIM subclasses are also added."
 (define-condition cim-error-namespace-not-empty (cim-error)
   ())
 
-										   
+
+(defun cim-error (type)
+  "Raise a CIM error."
+  (declare (keyword type))
+  (error (cdr
+		  (assoc
+		   type
+		   '((:failed . cim-error-failed)
+			 (:access-denied . cim-error-access-denied)
+			 (:invalid-namespace . cim-error-invalid-namespace)
+			 (:invalid-parameter . cim-error-invalid-parameter)
+			 (:invalid-class . cim-error-invalid-class)
+			 (:not-found . cim-error-not-found)
+			 (:not-supported . cim-error-not-supported)
+			 (:class-has-children . cim-error-class-has-children)
+			 (:class-has-instances . cim-error-class-has-instances)
+			 (:invalid-superclass . cim-error-invalid-superclass)
+			 (:already-exists . cim-error-already-exists)
+			 (:no-such-property . cim-error-no-such-property)
+			 (:type-mismatch . cim-error-type-mismatch)
+			 (:query-language-not-supported . cim-error-query-language-not-supported)
+			 (:invalid-query . cim-error-invalid-query)
+			 (:method-not-available . cim-eror-method-not-available)
+			 (:method-not-found . cim-error-method-not-found)
+			 (:unexpected-response . cim-error-unexpected-response)
+			 (:invalid-response-destination . cim-error-invalid-response-destination)
+			 (:namespace-not-empty . cim-error-namespace-not-empty))))))
+
+
+
 ;; ------------------------------
 ;; examples
 
