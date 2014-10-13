@@ -103,3 +103,26 @@
      (let ((,itemvar (car ,listvar)))
        ,@body)))
 
+
+(defun read-until-eof (stream)
+  "Reads from the stream until all input is exhaustsed"
+  (with-output-to-string (s)
+    (loop for c = (read-char stream nil nil)
+         while c
+         do (princ c s))))
+
+
+(defun listen-request (port)
+  "Useful for testing input from other CIM clients"
+  (let ((socket (usocket:socket-listen "127.0.0.1" port :reuse-address t)))
+    (let ((stream (usocket:socket-accept socket)))
+      (prog1 (read-until-eof (usocket:socket-stream stream))
+        (usocket:socket-close socket)))))
+
+(defun whitespace-char-p (char)
+  "Is char a whitespace character?"
+  (declare (type character char))
+  (or (char= char #\space)
+      (char= char #\tab)
+      (char= char #\return)
+      (char= char #\linefeed)))

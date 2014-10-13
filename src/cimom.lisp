@@ -116,12 +116,12 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 (defclass cim-standard-direct-slot-definition (closer-mop:standard-direct-slot-definition)
   ((cim-name :initarg :cim-name :accessor cim-name)
    (cim-type :initarg :cim-type :accessor cim-slot-type)
-   (qualifiers :initarg :qualifiers :accessor cim-qualifiers)))
+   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
    
 (defclass cim-standard-effective-slot-definition (closer-mop:standard-effective-slot-definition)
   ((cim-name :initarg :cim-name :accessor cim-name)
    (cim-type :initarg :cim-type :accessor cim-slot-type)
-   (qualifiers :initarg :qualifiers :accessor cim-qualifiers)))
+   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
 
 (defmethod closer-mop:direct-slot-definition-class ((class cim-class) &rest initargs)
   (declare (ignore initargs))
@@ -152,7 +152,9 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   "Get all subclasses of the class."
   (declare (cim-class class))
   (let ((subs (closer-mop:class-direct-subclasses class)))
-	(mapcan #'cim-class-subclasses subs)))
+    (mapcan (lambda (sub)
+              (cons sub (cim-class-subclasses sub)))
+            subs)))
 
 (defmethod closer-mop:validate-superclass ((class cim-class) (super standard-class))
   t)
@@ -220,12 +222,12 @@ If CHILDREN is T all the CIM subclasses are also added."
   class)
 
 ;; gf for cim methods
-(defclass cim-generic-function (standard-generic-function)
-  ((cim-name :initarg :cim-name :accessor cim-name)
-   (qualifiers :initarg :qualifiers :accessor cim-qualifiers)
-   (return-type :initarg :return-type :accessor cim-return-type)
-   (parameters :initarg :parameters :accessor cim-parameters))
-  (:documentation "Represents a CIM class method."))
+;;(defclass cim-generic-function (standard-generic-function)
+;;  ((cim-name :initarg :cim-name :accessor cim-name)
+;;   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
+;;   (return-type :initarg :return-type :accessor cim-return-type)
+;;   (parameters :initarg :parameters :accessor cim-parameters))
+;;  (:documentation "Represents a CIM class method."))
   
 
 ;; --------------- cim types -----------
@@ -746,7 +748,7 @@ If CHILDREN is T all the CIM subclasses are also added."
 
 ;; ---------- intrinsic methods --------
 
-;; basic methods
+;; basic methods from http://www.dmtf.org/sites/default/files/standards/documents/DSP200.html
 
 ;; EnumerateInstances
 ;; <namedInstance>* EnumerateInstances (
@@ -757,10 +759,26 @@ If CHILDREN is T all the CIM subclasses are also added."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
 ;; )
-(defgeneric enumerate-instances (class &key local-only deep-inheritance include-class-origin property-list)
-  (:method-combination nconc))
+(defgeneric provider-enumerate-instances (class-name)
+  (:documentation "Provider generic eql-specialized on the class-name."))
 
+(defun enumerate-instances (class &key (local-only t) (deep-inheritance t) property-list)
+  "Call PROVIDER-ENUMERATE-INSTANCES on the class specified and each of its subclasses.
 
+If LOCAL-ONLY is T then only the local repository is searched.
+
+If DEEP-INHERITANCE is T then all subclasses are also enumerated.
+
+If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the return instances should contain."
+  (declare (ignore local-only property-list))
+  ;; call the generic on each of the classes, least-specific first
+  (do ((insts (provider-enumerate-instances (class-name class))
+              (nconc insts 
+                     (ignore-errors (provider-enumerate-instances (class-name (car classes))))))
+       (classes (when deep-inheritance (cim-class-subclasses class))
+                (cdr classes)))
+      ((null classes) insts)))
+      
 ;; GetInstance
 ;; <instance> GetInstance (
 ;;         [IN] <instanceName> InstanceName,
@@ -769,25 +787,72 @@ If CHILDREN is T all the CIM subclasses are also added."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
 ;; )
-(defgeneric get-instance (instance &key local-only include-class-origin property-list)
-  (:method-combination or))
+(defgeneric provider-get-instance (instance)
+  (:documentation "Provider method to find an instance. The instance provided are the argument should be expected to have its KEY properties set, but no others."))
+
+(defun get-instance (instance &key (local-only t) property-list)
+  "Find an instance of the class."
+  (declare (ignore local-only property-list))
+  (or (ignore-errors (provider-get-instance instance))
+      (some (lambda (sub-class)
+              (let ((inst (change-class instance (class-name sub-class))))
+                (handler-case 
+                    (provider-get-instance inst)
+                  (cim-error () nil))))
+            (cim-class-subclasses (class-of instance)))
+      (cim-error :not-found)))
+  
+(defmethod provider-get-instance ((instance cim-class))
+  (cim-error :not-supported))
+
+
 
 ;; <instanceName>  CreateInstance (
 ;;        [IN] <instance> NewInstance
 ;; )
-(defgeneric create-instance (instance))
+(defgeneric provider-create-instance (instance)
+  (:documentation "Create an instance with these properties."))
+
+(defun create-instance (instance)
+  "Create an instance of this class."
+  (declare (cim-class instance))
+  (provider-create-instance))
+
+(defmethod provider-create-instance ((instance cim-class))
+  (cim-error :not-supported))
+
+
 
 ;; ModifyInstance
 ;; void ModifyInstance (
 ;;        [IN] <namedInstance> ModifiedInstance
 ;; )
-(defgeneric modify-instance (instance))
+(defgeneric provider-modify-instance (instance)
+  (:documentation "Modify the properties of the given instance. The KEY slots of the instance name the target instance and should not be modified."))
+
+(defun modify-instance (instance)
+  "Modify the instance named by the KEY slots."
+  (declare (cim-class instance))
+  (provider-modify-instance instance))
+
+(defmethod provider-modify-instance ((instance cim-class))
+  (cim-error :not-supported))
 
 ;; DeleteInstance
 ;; void  DeleteInstance (
 ;;         [IN] <instanceName> InstanceName
 ;; )
-(defgeneric delete-instance (instance))
+(defgeneric provider-delete-instance (instance)
+  (:documentation "Delete the instance named by the KEY slots."))
+
+(defun delete-instance (instance)
+  "Delete the instance named by the KEY slots of the input instance."
+  (declare (cim-class instance))
+  (provider-delete-instance instance))
+
+(defmethod provider-delete-instance ((instance cim-class))
+  (cim-error :not-supported))
+
 
 ;; associations
 
@@ -802,8 +867,37 @@ If CHILDREN is T all the CIM subclasses are also added."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
 ;; )
-(defgeneric association-instances (instance &key assoc-class result-class role result-role property-list)
-  (:method-combination nconc))
+(defgeneric provider-association-instances (instance assoc-class &key role result-role)
+  (:documentation "Returns all concrete instances which are associated with the input instance.
+
+If ASSOC-CLASS is non-nil, it should be a symbol designating a class-name of the CIM Association class, mandating that each returned instance MUST be associated to the source instance via an instance of this Class or one of its subclasses.
+
+The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be associated to the source Object via an Association in which the source Object plays the specified role (i.e. the name of the Property in the Association Class that refers to the source Object MUST match the value of this parameter).
+
+The RESULT-ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be associated to the source Object via an Association in which the returned Object plays the specified role (i.e. the name of the Property in the Association Class that refers to the returned Object MUST match the value of this parameter)."))
+
+(defun association-instances (instance assoc-class &key result-class role result-role property-list)
+  "Find all concrete instances associated with the given instance.
+
+If RESULT-CLASS is non-nil, it should be a symbol designating a CIM Class name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be either an Instance of this class (or one of its subclasses).
+"
+  (declare (ignore property-list) 
+           (cim-class instance))
+  ;; if result-class is provided then filter the resulting instances for those of this class
+  (let ((insts (provider-association-instances instance 
+                                               assoc-class
+                                               :role role
+                                               :result-role result-role)))
+    (if result-class 
+        (mapcan (lambda (inst)
+                  (when (typep inst result-class)
+                    (list inst)))
+                insts)
+        insts)))
+
+(defmethod provider-association-instances ((instance cim-class) assoc-class &key &allow-other-keys)
+  (cim-error :not-supported))
+  
 
 ;; References
 ;; <objectWithPath>* References (
@@ -814,13 +908,34 @@ If CHILDREN is T all the CIM subclasses are also added."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
 ;; )
-(defgeneric reference-instances (instance &key result-class role property-list)
-  (:method-combination nconc))
+(defgeneric provider-reference-instances (instance &key role)
+  (:documentation "Returns all association instances which refer to the given INSTANCE.
+
+The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Objects MUST refer to the target Object via a Property whose name matches the value of this parameter."))
+
+(defun reference-instances (instance &key result-class role property-list)
+  "Returns all association instances which refer to the given INSTANCE.
+
+The RESULT-CLASS input parameter, if not NULL, MUST be a valid CIM Class name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be an Instance of this Class (or one of its subclasses), or this Class (or one of its subclasses).
+
+The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Objects MUST refer to the target Object via a Property whose name matches the value of this parameter.
+
+If the PROPERTY-LIST input parameter is not NULL, the members of the array define one or more Property names.  Each returned Object MUST NOT include elements for any Properties missing from this list.  If the PropertyList input parameter is an empty array this signifies that no Properties are included in each returned Object. If the PropertyList input parameter is NULL this specifies that all Properties (subject to the conditions expressed by the other parameters) are included in each returned Object."
+  (declare (ignore property-list)
+           (cim-class instance))
+  (let ((insts (provider-reference-instances instance result-class :role role)))
+    (if result-class
+        (mapcan (lambda (inst)
+                  (when (typep inst result-class)
+                    (list inst)))
+                insts)
+        insts)))
+
 
 ;; indications
-(defgeneric subscribe (instance))
+;;(defgeneric subscribe (instance))
 
-(defgeneric unsubscribe (instance))
+;;(defgeneric unsubscribe (instance))
 
 ;; ------------ errors -----------
 
@@ -927,11 +1042,27 @@ If CHILDREN is T all the CIM subclasses are also added."
   (:cim-name "MyClass")
   (:qualifiers :key))
 
+(defmethod provider-enumerate-instances ((class-name (eql 'myclass)))
+  (list 'inst1))
+
+(defmethod provider-get-instance ((instance myclass))
+  (cim-error :not-found))
+
 (defclass myclass2 (myclass)
   ((age :initarg :age :Accessor myclass-age))
   (:metaclass cim-class)
   (:cim-name "MyClass2")
   (:qualifiers :key (:description "My little class.")))
+
+(defmethod provider-enumerate-instances ((class-name (eql 'myclass2)))
+  (list 'inst2))
+
+(defmethod provider-get-instance ((instance myclass2))
+  'inst2)
+
+
+
+
 
 (defclass myclass3 (myclass)
   ((frank :initarg :frank))
@@ -944,14 +1075,28 @@ If CHILDREN is T all the CIM subclasses are also added."
   (:metaclass cim-class)
   (:cim-name "MyClass4"))
 
-#|
-(defgeneric my-method (instance x y z)
-  (:cim-name "MyMethod")
-  (:qualifiers (:description "My little method"))
-  (:return-type sint32)
-  (:parameters (x "x" string :in (:description "x parameter"))
-			   (y "y" string :out (:description "y parameter"))
-			   (z "z" datetime :out (:description "z paramter")))
-  (:generic-function-class cim-generic-function))
-|#
+
+(defclass myass ()
+  ((source :initform nil :initarg :source :accessor myass-source)
+   (target :initform nil :initarg :target :accessor myass-target))
+  (:metaclass cim-association)
+  (:cim-name "MyAss"))
+
+
+(defmethod provider-association-instances ((instance myclass) (assoc-class 'myass) &key &allow-other-keys)
+  (list (make-instance 'myclass2 :name "Frank")))
+
+(defmethod provider-association-instances ((instance myclass2) (assoc-class 'myass) &key &allow-other-keys)
+  (list (make-instance 'myclass :name "Frank")))
+
+
+;;(defgeneric my-method (instance x y z)
+;;  (:cim-name "MyMethod")
+;;  (:qualifiers (:description "My little method"))
+;;  (:return-type sint32)
+;;  (:parameters (x "x" string :in (:description "x parameter"))
+;;			   (y "y" string :out (:description "y parameter"))
+;;			   (z "z" datetime :out (:description "z paramter")))
+;;  (:generic-function-class cim-generic-function))
+
 
