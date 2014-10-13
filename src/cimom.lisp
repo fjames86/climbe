@@ -5,6 +5,22 @@
 
 (in-package :climbe.cimom)
 
+(defun kwassoc (item kwlist &key key test test-not)
+  (do ((kwlist kwlist (cddr kwlist)))
+      ((null kwlist))
+    (let ((name (let ((n (car kwlist)))
+                  (if key 
+                      (funcall key n)
+                      n))))
+      (when (or (and test (funcall test item name))
+                (and test-not (not (funcall test-not item name)))
+                (eql item name))
+        (return-from kwassoc 
+          (cons (car kwlist)
+                (cadr kwlist)))))))
+
+
+
 ;; ----- namespaces ------
 
 (defstruct cim-namespace
@@ -101,7 +117,8 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 
 (defclass cim-class (closer-mop:standard-class)
   ((cim-name :initarg :cim-name :accessor cim-name)
-   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers))
+   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
+   (methods :initarg :methods :initform nil :accessor cim-class-methods))
   (:documentation "Metaclass used to represent CIM classes."))
 
 (defclass cim-association (cim-class)
@@ -220,14 +237,6 @@ If CHILDREN is T all the CIM subclasses are also added."
 	(dolist (ch (closer-mop:class-direct-subclasses class))
 	  (add-class-to-namespace ch ns :children t)))
   class)
-
-;; gf for cim methods
-;;(defclass cim-generic-function (standard-generic-function)
-;;  ((cim-name :initarg :cim-name :accessor cim-name)
-;;   (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
-;;   (return-type :initarg :return-type :accessor cim-return-type)
-;;   (parameters :initarg :parameters :accessor cim-parameters))
-;;  (:documentation "Represents a CIM class method."))
   
 
 ;; --------------- cim types -----------
@@ -816,7 +825,7 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 (defun create-instance (instance)
   "Create an instance of this class."
   (declare (cim-class instance))
-  (provider-create-instance))
+  (provider-create-instance instance))
 
 (defmethod provider-create-instance ((instance cim-class))
   (cim-error :not-supported))
@@ -936,6 +945,71 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 ;;(defgeneric subscribe (instance))
 
 ;;(defgeneric unsubscribe (instance))
+
+
+;; -------------- extrinsic methods --------
+
+(defstruct cim-parameter 
+  name type qualifiers)
+
+
+(defclass cim-method ()
+  ((cim-name :initarg :cim-name :accessor cim-name)
+   (return-type :initarg :return-type :accessor cim-method-return-type)
+   (parameters :initarg :parameters :accessor cim-method-parameters)
+   (qualifiers :initarg :qualifiers :accessor cim-qualifiers))
+  (:metaclass closer-mop:funcallable-standard-class))
+
+(defmethod initialize-instance :after ((instance cim-method) &rest initargs &key &allow-other-keys)
+  (do ((kwlist initargs (cddr kwlist)))
+      ((null kwlist))
+    (case (car kwlist)
+      (:cim-name (setf (cim-name instance) (cadr kwlist)))
+      (:return-type (setf (cim-method-return-type instance) (cadr kwlist)))
+      (:parameters 
+       (setf (cim-method-parameters instance)
+             (mapcar (lambda (parameter)
+                       (destructuring-bind (lisp-name &key name type qualifiers) parameter
+                         (cons lisp-name
+                               (make-cim-parameter :name name
+                                                   :type type
+                                                   :qualifiers qualifiers))))
+                     (cadr kwlist))))
+      (:function 
+       (closer-mop:set-funcallable-instance-function instance (cadr kwlist))))))
+
+(def-cim-method mymethod ((instance myclass) (x uint32 "x" :in))
+  ((:return-type uint32)
+   (:cim-name "MyMethod"))
+  "My little class"
+  (declare (cim-class instance)
+           (uint32 x))
+  (values (1+ x)
+          nil))
+
+(defmacro def-cim-method (name ((instance-var class-name) &rest parameters) options &body body)
+  `(let ((method 
+          (make-instance 'cim-method
+                         :parameters
+                         (list ,@(mapcar (lambda (parameter)
+                                           (destructuring-bind (lisp-name type cim-name &rest qualifiers) parameter
+                                             `(cons ',lisp-name
+                                                    (make-cim-parameter 
+                                                     :name ,cim-name
+                                                     :type ',type
+                                                     :qualifiers (make-qualifiers-list (list ,@qualifiers))))))
+                                         parameters))
+                         :return-type ',(cadr (assoc :return-type options))
+                         :cim-name ,(cadr (assoc :cim-name options)))))
+     ;; define a Lisp function
+     (defun ,name (,instance-var ,@(mapcar #'car parameters)) ,@body)
+     ;; set the funcallable instance function
+     (closer-mop:set-funcallable-instance-function method (symbol-function ',name))
+     
+     ;; attach to the class
+     (let ((class (find-class ',class-name)))
+       (push method (cim-class-methods class)))
+     ',name))
 
 ;; ------------ errors -----------
 
@@ -1083,20 +1157,11 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
   (:cim-name "MyAss"))
 
 
-(defmethod provider-association-instances ((instance myclass) (assoc-class 'myass) &key &allow-other-keys)
+(defmethod provider-association-instances ((instance myclass) (assoc-class (eql 'myass)) &key &allow-other-keys)
   (list (make-instance 'myclass2 :name "Frank")))
 
-(defmethod provider-association-instances ((instance myclass2) (assoc-class 'myass) &key &allow-other-keys)
+(defmethod provider-association-instances ((instance myclass2) (assoc-class (eql 'myass)) &key &allow-other-keys)
   (list (make-instance 'myclass :name "Frank")))
 
-
-;;(defgeneric my-method (instance x y z)
-;;  (:cim-name "MyMethod")
-;;  (:qualifiers (:description "My little method"))
-;;  (:return-type sint32)
-;;  (:parameters (x "x" string :in (:description "x parameter"))
-;;			   (y "y" string :out (:description "y parameter"))
-;;			   (z "z" datetime :out (:description "z paramter")))
-;;  (:generic-function-class cim-generic-function))
 
 
