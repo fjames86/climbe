@@ -19,7 +19,25 @@
           (cons (car kwlist)
                 (cadr kwlist)))))))
 
+(defun adjoin* (item list &key key test test-not)
+  (declare (list list)
+		   ((or function null) key test test-not))
+  (do ((%list list (cdr %list))
+	   (ret nil))
+	  ((null %list) (cons item ret))
+	(let ((top (if key (funcall key (car %list)) (car %list))))
+	  (if (or (and test (funcall test item top))
+			  (and test-not (not (funcall test-not item top)))
+			  (eql item top))
+		(return-from adjoin* (append ret (list item) (cdr %list)))
+		(push (car %list) ret)))))
 
+(defmacro pushnew* (item list &key key test test-not)
+  (let ((gitem (gensym "ITEM"))
+		(glist (gensym "LIST")))
+	`(let* ((,gitem ,item)
+			(,glist (adjoin* ,gitem ,list :key ,key :test ,test :test-not ,test-not)))
+	   (setf ,list ,glist))))
 
 ;; ----- namespaces ------
 
@@ -960,33 +978,6 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
    (qualifiers :initarg :qualifiers :accessor cim-qualifiers))
   (:metaclass closer-mop:funcallable-standard-class))
 
-(defmethod initialize-instance :after ((instance cim-method) &rest initargs &key &allow-other-keys)
-  (do ((kwlist initargs (cddr kwlist)))
-      ((null kwlist))
-    (case (car kwlist)
-      (:cim-name (setf (cim-name instance) (cadr kwlist)))
-      (:return-type (setf (cim-method-return-type instance) (cadr kwlist)))
-      (:parameters 
-       (setf (cim-method-parameters instance)
-             (mapcar (lambda (parameter)
-                       (destructuring-bind (lisp-name &key name type qualifiers) parameter
-                         (cons lisp-name
-                               (make-cim-parameter :name name
-                                                   :type type
-                                                   :qualifiers qualifiers))))
-                     (cadr kwlist))))
-      (:function 
-       (closer-mop:set-funcallable-instance-function instance (cadr kwlist))))))
-
-(def-cim-method mymethod ((instance myclass) (x uint32 "x" :in))
-  ((:return-type uint32)
-   (:cim-name "MyMethod"))
-  "My little class"
-  (declare (cim-class instance)
-           (uint32 x))
-  (values (1+ x)
-          nil))
-
 (defmacro def-cim-method (name ((instance-var class-name) &rest parameters) options &body body)
   `(let ((method 
           (make-instance 'cim-method
@@ -1000,15 +991,25 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
                                                      :qualifiers (make-qualifiers-list (list ,@qualifiers))))))
                                          parameters))
                          :return-type ',(cadr (assoc :return-type options))
+						 :qualifiers '(,@(cdr (assoc :qualifiers options)))
                          :cim-name ,(cadr (assoc :cim-name options)))))
      ;; define a Lisp function
-     (defun ,name (,instance-var ,@(mapcar #'car parameters)) ,@body)
+     (defun ,name (,instance-var ,@(mapcar #'car parameters))
+	   (declare (,class-name ,instance-var)
+				,@(mapcar (lambda (parameter)
+							`(,(cadr parameter) ,(car parameter)))
+						  parameters))
+	   ,@body)
+	 
      ;; set the funcallable instance function
      (closer-mop:set-funcallable-instance-function method (symbol-function ',name))
      
      ;; attach to the class
      (let ((class (find-class ',class-name)))
-       (push method (cim-class-methods class)))
+       (pushnew* method (cim-class-methods class)
+				 :test (lambda (meth new-meth)
+						 (string-equal (cim-name meth)
+									   (cim-name new-meth)))))
      ',name))
 
 ;; ------------ errors -----------
@@ -1121,6 +1122,16 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 
 (defmethod provider-get-instance ((instance myclass))
   (cim-error :not-found))
+
+(def-cim-method mymethod ((instance myclass) (x uint32 "x" :in))
+  ((:return-type uint32)
+   (:qualifiers (:description "My method"))
+   (:cim-name "MyMethod"))
+  (declare (ignore instance))
+  (values (1+ x)
+          nil))
+
+
 
 (defclass myclass2 (myclass)
   ((age :initarg :age :Accessor myclass-age))
