@@ -134,7 +134,7 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 ;; ---------- classes ----------
 
 (defclass cim-class (closer-mop:standard-class)
-  ((cim-name :initarg :cim-name :accessor cim-name)
+  ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
    (methods :initarg :methods :initform nil :accessor cim-class-methods))
   (:documentation "Metaclass used to represent CIM classes."))
@@ -149,21 +149,32 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 
 ;; slots
 (defclass cim-standard-direct-slot-definition (closer-mop:standard-direct-slot-definition)
-  ((cim-name :initarg :cim-name :accessor cim-name)
-   (cim-type :initarg :cim-type :accessor cim-slot-type)
+  ((cim-name :initarg :cim-name :initarg nil :accessor cim-name)
+   (cim-type :initarg :cim-type :initform nil :accessor cim-slot-type)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
    
 (defclass cim-standard-effective-slot-definition (closer-mop:standard-effective-slot-definition)
-  ((cim-name :initarg :cim-name :accessor cim-name)
-   (cim-type :initarg :cim-type :accessor cim-slot-type)
+  ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
+   (cim-type :initarg :cim-type :initform nil :accessor cim-slot-type)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
+
+(defmethod print-object ((slot cim-standard-direct-slot-definition) stream)
+  (print-unreadable-object (slot stream :type t)
+    (format stream "~A" (cim-name slot))))
+
+(defmethod print-object ((slot cim-standard-effective-slot-definition) stream)
+  (print-unreadable-object (slot stream :type t)
+    (format stream "~A" (cim-name slot))))
+
 
 (defmethod closer-mop:direct-slot-definition-class ((class cim-class) &rest initargs)
   (declare (ignore initargs))
+;;  (break (format nil "~S" initargs))
   (find-class 'cim-standard-direct-slot-definition))
 
 (defmethod closer-mop:effective-slot-definition-class ((class cim-class) &rest initargs)
   (declare (ignore initargs))
+;;  (break (format nil "~S" initargs))
   (find-class 'cim-standard-effective-slot-definition))
 
 
@@ -256,6 +267,22 @@ If CHILDREN is T all the CIM subclasses are also added."
 	  (add-class-to-namespace ch ns :children t)))
   class)
   
+
+(defun cim-key-slots (object)
+  "Find the slots marked with the KEY qualifier."
+  (flet ((cim-class-key-slots (class)
+           (declare (cim-class class))
+           (let ((slots (closer-mop:class-slots class)))
+             (mapcan (lambda (slot)
+                       (let ((key (qualifier-p :key (cim-qualifiers slot))))
+                         (when (and key (cdr key))
+                           (list slot))))
+                     slots))))
+    (if (typep object 'cim-class)
+        (cim-class-key-slots object)
+        (cim-class-key-slots (class-of object)))))
+          
+
 
 ;; --------------- cim types -----------
 
@@ -449,6 +476,15 @@ If CHILDREN is T all the CIM subclasses are also added."
 				 (error "Qualifier ~S not found." name)))))
 		(t (error "Malformed qualifier-item ~S" item))))))
 	
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (defun qualifiers-list-helper (list)
+    "Used in macros"
+    (mapcar (lambda (item)
+              (if (listp item)
+                  `(list ,(car item) ,(cadr item))
+                  item))
+            list)))
+
 (defun %defqualifier (lisp-name qualifier)
   "Define a built-in qualifier."
   (declare (symbol lisp-name) (cim-qualifier qualifier))
@@ -468,6 +504,22 @@ If CHILDREN is T all the CIM subclasses are also added."
 								   (:qualifiers
 									`(,n (make-qualifiers-list (list ,@(cdr option))))))))
 							 options))))
+
+
+(defun qualifier-p (qualifier qualifiers)
+  "Find the qualifier provided in the alist of qualifier values.
+
+QUALIFIER may be a qualifier object (from FIND-QUALIFIER) or a Lisp name (suitable for input to FIND-QUALIFIER)."
+  (declare ((or symbol cim-qualifier) qualifier)
+           (list qualifiers))
+  (assoc (if (cim-qualifier-p qualifier)
+             qualifier
+             (find-qualifier qualifier))
+         qualifiers
+         :test #'eq))
+
+  
+
 
 ;; Meta-qualifiers
 (defqualifier :association boolean
@@ -798,6 +850,9 @@ If DEEP-INHERITANCE is T then all subclasses are also enumerated.
 
 If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the return instances should contain."
   (declare (ignore local-only property-list))
+  ;; if class is a symbol then look up the class
+  (when (symbolp class)
+    (setf class (find-class class)))
   ;; call the generic on each of the classes, least-specific first
   (do ((insts (provider-enumerate-instances (class-name class))
               (nconc insts 
@@ -970,47 +1025,73 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 (defstruct cim-parameter 
   name type qualifiers)
 
+(defstruct cim-method
+  name return-type parameters qualifiers function)
 
-(defclass cim-method ()
-  ((cim-name :initarg :cim-name :accessor cim-name)
-   (return-type :initarg :return-type :accessor cim-method-return-type)
-   (parameters :initarg :parameters :accessor cim-method-parameters)
-   (qualifiers :initarg :qualifiers :accessor cim-qualifiers))
-  (:metaclass closer-mop:funcallable-standard-class))
+(defmethod cim-name ((method cim-method))
+  (cim-method-name method))
+
+(defun add-method-to-class (method class &key (subclasses t))
+  "Add a method to a CIM class and all of its subclasses."
+  (declare (cim-method method)
+           (cim-class class))
+  ;; start by adding it to the class
+  (pushnew* method (cim-class-methods class)
+            :test (lambda (meth new-meth)
+                    (string-equal (cim-name meth)
+                                  (cim-name new-meth))))
+
+  ;; now iterate over the subclasses
+  (when subclasses
+    (dolist (subclass (cim-class-subclasses class))
+      (add-method-to-class method subclass :subclasses t)))
+
+  nil)
+
 
 (defmacro def-cim-method (name ((instance-var class-name) &rest parameters) options &body body)
-  `(let ((method 
-          (make-instance 'cim-method
-                         :parameters
-                         (list ,@(mapcar (lambda (parameter)
-                                           (destructuring-bind (lisp-name type cim-name &rest qualifiers) parameter
-                                             `(cons ',lisp-name
-                                                    (make-cim-parameter 
-                                                     :name ,cim-name
-                                                     :type ',type
-                                                     :qualifiers (make-qualifiers-list (list ,@qualifiers))))))
-                                         parameters))
-                         :return-type ',(cadr (assoc :return-type options))
-						 :qualifiers '(,@(cdr (assoc :qualifiers options)))
-                         :cim-name ,(cadr (assoc :cim-name options)))))
-     ;; define a Lisp function
-     (defun ,name (,instance-var ,@(mapcar #'car parameters))
-	   (declare (,class-name ,instance-var)
-				,@(mapcar (lambda (parameter)
-							`(,(cadr parameter) ,(car parameter)))
-						  parameters))
-	   ,@body)
-	 
-     ;; set the funcallable instance function
-     (closer-mop:set-funcallable-instance-function method (symbol-function ',name))
-     
-     ;; attach to the class
-     (let ((class (find-class ',class-name)))
-       (pushnew* method (cim-class-methods class)
-				 :test (lambda (meth new-meth)
-						 (string-equal (cim-name meth)
-									   (cim-name new-meth)))))
-     ',name))
+  (let ((gmethod (gensym "METHOD")))
+    `(let ((,gmethod (make-cim-method :name ,(cadr (assoc :cim-name options))
+                                      :return-type ',(cadr (assoc :return-type options))
+                                      :qualifiers (make-qualifiers-list (list ,@(qualifiers-list-helper (cdr (assoc :qualifiers options)))))
+                                      :parameters (list ,@(mapcar (lambda (parameter)
+                                                                    (destructuring-bind (lisp-name type cim-name &rest qualifiers) parameter
+                                                                      `(cons ',lisp-name
+                                                                             (make-cim-parameter 
+                                                                              :name ,cim-name
+                                                                              :type ',type
+                                                                              :qualifiers (make-qualifiers-list (list ,@(qualifiers-list-helper qualifiers)))))))
+                                                                  parameters)))))
+
+       ;; define a Lisp function
+       (defun ,name (,instance-var ,@(mapcar #'car parameters))
+         (declare (,class-name ,instance-var)
+                  ,@(mapcar (lambda (parameter)
+                              `(,(cadr parameter) ,(car parameter)))
+                            parameters))
+         ,@body)
+
+       ;; set the function to the symbol
+       (setf (cim-method-function ,gmethod) ',name)
+       
+       ;; attach to the class and all subclasses
+       (add-method-to-class ,gmethod (find-class ',class-name) :subclasses t)
+
+       ',name)))
+
+(defun find-cim-method (cim-name class)
+  "Find a CIM method on a class."
+  (declare (string cim-name) (cim-class class))
+  (find cim-name (cim-class-methods class)
+        :key #'cim-name 
+        :test #'string-equal))
+
+(defun invoke-method (cim-name class &rest args)
+  "Find a CIM method on the class and apply it to the args."
+  (let ((method (find-cim-method cim-name class)))
+    (if method
+        (apply (cim-method-function method) args)
+        (error "Method ~S not found" cim-name))))
 
 ;; ------------ errors -----------
 
@@ -1112,7 +1193,7 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 ;; examples
 
 (defclass myclass ()
-  ((name :initarg :name :accessor myclass-name))
+  ((name :initarg :name :accessor myclass-name :cim-name "Name"))
   (:metaclass cim-class)
   (:cim-name "MyClass")
   (:qualifiers :key))
@@ -1134,7 +1215,7 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 
 
 (defclass myclass2 (myclass)
-  ((age :initarg :age :Accessor myclass-age))
+  ((age :initarg :age :Accessor myclass-age :cim-name "Age"))
   (:metaclass cim-class)
   (:cim-name "MyClass2")
   (:qualifiers :key (:description "My little class.")))
@@ -1150,13 +1231,12 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 
 
 (defclass myclass3 (myclass)
-  ((frank :initarg :frank))
+  ((frank :initarg :frank :initform nil :cim-name "Frank"))
   (:metaclass cim-class)
   (:cim-name "Frank"))
 
 (defclass myclass4 (myclass)
-  ((myslot :initarg :myslot :cim-name "MySlot" :cim-type sint32
-		   :qualifiers (:key)))
+  ((myslot :initarg :myslot :cim-name "MySlot" :cim-type sint32 :qualifiers (:key)))
   (:metaclass cim-class)
   (:cim-name "MyClass4"))
 
@@ -1174,5 +1254,24 @@ If the PROPERTY-LIST input parameter is not NULL, the members of the array defin
 (defmethod provider-association-instances ((instance myclass2) (assoc-class (eql 'myass)) &key &allow-other-keys)
   (list (make-instance 'myclass :name "Frank")))
 
+
+
+(closer-mop:ensure-finalized (find-class 'myclass))
+(closer-mop:ensure-finalized (find-class 'myclass2))
+(closer-mop:ensure-finalized (find-class 'myclass3))
+(closer-mop:ensure-finalized (find-class 'myclass4))
+
+(defmacro def-cim-class (name direct-superclasses slots &rest options)
+  `(progn
+     (defclass ,name ,direct-superclasses 
+       ,slots 
+       ,@options 
+       (:metaclass 
+        ,(let ((quals (cdr (assoc :qualifiers options))))
+           (cond          
+             ((find :association quals) 'cim-association)
+             ((find :indication quals) 'cim-indication)
+             (t 'cim-class)))))
+     (closer-mop:ensure-finalized (find-class ',name))))
 
 
