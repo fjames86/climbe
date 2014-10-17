@@ -3,10 +3,12 @@
 (in-package :climbe)
 
 ;; ------------ errors -----------
+;; need to add codes and descriptions to the errors
 
 ;; base error type
 (define-condition cim-error (error)
-  ())
+  ((code :initform 0 :initarg :code :reader cim-error-code)
+   (description :initform "" :initarg :description :reader cim-error-description)))
 
 (define-condition cim-error-failed (cim-error)
   ())

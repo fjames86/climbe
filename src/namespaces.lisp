@@ -8,6 +8,9 @@
 (defstruct cim-namespace
   name parent children classes qualifiers)
 
+(defmethod cim-name ((namespace cim-namespace))
+  (cim-namespace-name namespace))
+
 (defmethod print-object ((ns cim-namespace) stream)
   (format stream "#S(CIM-NAMESPACE :NAME ~S :CHILDREN ~S)"
 	  (cim-namespace-name ns)
@@ -84,6 +87,14 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 		   (mapcar #'tree
 			   (cim-namespace-children ns)))))
     (tree root)))
+
+(defun namespace-list (namespace)
+  "Get the list of namespaces from the root node down to this namespace."
+  (declare (type cim-namespace namespace))
+  (let ((parent (cim-namespace-parent namespace)))
+    (if parent
+	(nconc (namespace-list parent) (list namespace))
+	(list namespace))))
 
 ;; current namespace
 (defparameter *namespace* (find-namespace "root")

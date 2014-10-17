@@ -2,9 +2,14 @@
 (defpackage :climbe
   (:use :cl)
   (:export
+   ;; utils
+   :defconstant*
+
    ;; errors
    :cim-error
    :ignore-cim-errors
+   :cim-error-code
+   :cim-error-description
 
    ;; namespaces
    :cim-namespace
@@ -12,6 +17,7 @@
    :find-namespace
    :namespace-tree
    :with-namespace
+   :namespace-list
 
    ;; types
    :sint8
@@ -30,9 +36,14 @@
    :datetime
 
    ;; qualifiers
+   :cim-qualifier
    :find-qualifier
    :defqualifier
-
+   :cim-qualifier-type
+   :cim-qualifier-scope
+   :cim-qualifier-flavour
+   :cim-qualifier-default 
+   
    ;; the metaclasses
    :cim-class
    :cim-association
@@ -51,7 +62,9 @@
    :invoke-method
    :cim-method
    :defcim
-
+   :cim-parameter  
+   :cim-parameter-type
+   
    ;; cimom
    :provider-enumerate-instances
    :enumerate-instances

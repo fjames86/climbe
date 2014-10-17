@@ -19,6 +19,9 @@
   (flavour nil :type list)
   (default nil :type cim-primitive))
 
+(defmethod cim-name ((qualifier cim-qualifier))
+  (cim-qualifier-name qualifier))
+
 ;; built-in qualifiers always available
 (defparameter *qualifiers* (make-hash-table))
 

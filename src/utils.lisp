@@ -39,3 +39,9 @@
     `(let* ((,gitem ,item)
 	    (,glist (adjoin* ,gitem ,list :key ,key :test ,test :test-not ,test-not)))
        (setf ,list ,glist))))
+
+(defmacro defconstant* (name value &optional doc)
+  "Define constants which are not EQL (such as strings etc.)."
+  `(defconstant ,name (if (boundp ',name) (symbol-value ',name) ,value)
+     ,@(when doc (list doc))))
+

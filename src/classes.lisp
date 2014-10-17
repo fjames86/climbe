@@ -211,6 +211,12 @@ If CHILDREN is T all the CIM subclasses are also added."
 (defmethod cim-name ((method cim-method))
   (cim-method-name method))
 
+(defmethod cim-name ((parameter cim-parameter))
+  (cim-parameter-name parameter))
+
+(defmethod cim-qualifiers ((parameter cim-parameter))
+  (cim-parameter-qualifiers parameter))
+
 (defun add-method-to-class (method class &key (subclasses t))
   "Add a method to a CIM class and all of its subclasses."
   (declare (cim-method method)
