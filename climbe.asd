@@ -22,22 +22,13 @@
   :components
   ((:module "src"
     :components
-    ((:file "package")
-	 
-     (:file "cimom" :depends-on ("package")))))
-;;
-;;	 ;; utilities used by everything else
-;;     (:file "utils" :depends-on ("package"))
-;;	 (:file "error" :depends-on ("utils"))
-;;	 (:file "climbe" :depends-on ("error"))
-;;	 (:file "messages" :depends-on ("climbe"))
-;;	 (:file "qualifiers" :depends-on ("messages"))
-;;	 (:file "encoding" :depends-on ("qualifiers"))
-;;	 (:file "decoding" :depends-on ("encoding"))
-;;
-;;	 (:file "client" :depends-on ("decoding"))
-;;	 (:file "server" :depends-on ("client"))
-;;	 )))
-  
+    ((:file "packages")
+     (:file "utils" :depends-on ("packages"))
+     (:file "errors" :depends-on ("utils"))
+     (:file "namespaces" :depends-on ("errors"))
+     (:file "types" :depends-on ("namespaces"))
+     (:file "qualifiers" :depends-on ("types"))
+     (:file "classes" :depends-on ("qualifiers"))     
+     (:file "cimom" :depends-on ("classes")))))  
   :depends-on (:closer-mop :cl-ppcre :s-xml :drakma :hunchentoot :bordeaux-threads))
 
