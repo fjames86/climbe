@@ -110,3 +110,16 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   `(let ((*namespace (find-namespace ,namespace)))
      ,@body))
 
+
+;; -------------
+
+;; this is used to represent a list of namespaces and a host togther. it is needed
+;; by the various encoding/decoding functions
+(defstruct namespace-path 
+  host namespace-list)
+
+(defun namespace-path (namespace &optional host)
+  (declare (type string namespace))
+  (make-namespace-path :host host
+		       :namespace-list (namespace-list namespace)))
+

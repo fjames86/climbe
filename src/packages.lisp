@@ -18,6 +18,12 @@
    :namespace-tree
    :with-namespace
    :namespace-list
+   :namespace-path
+   :cim-namespace-path
+   :cim-namespace-path-host
+   :cim-namespace-path-namespace-list 
+   :namespace-path-host 
+   :namespace-path-namespace-list 
 
    ;; types
    :sint8
