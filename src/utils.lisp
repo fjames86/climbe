@@ -4,6 +4,7 @@
 ;; general utilities we need
 
 (defun kwassoc (item kwlist &key key test test-not)
+  "Like assoc but with keyword lists."
   (do ((kwlist kwlist (cddr kwlist)))
       ((null kwlist))
     (let ((name (let ((n (car kwlist)))

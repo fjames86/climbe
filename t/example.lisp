@@ -81,10 +81,81 @@
 (closer-mop:ensure-finalized (find-class 'myclass4))
 
 
+;; -----------------------------------------
 
-(def-cim-class myclass5 (myclass)
-  ((limit uint32 :cim-name "Limit" :accessor myclass-limit :initform 0))
-  (:cim-name "MyClass5"))
+
+(defcim Person ()
+  ((name string 
+	 :initform "" 
+	 :initarg :name 
+	 :accessor person-name 
+	 :cim-name "Name"
+	 :qualifiers (:key (:description "Name of person")))
+   (age uint16
+	:initform 0
+	:initarg :age
+	:accessor person-age
+	:cim-name "Age"))
+  (:cim-name "Person")
+  (:qualifiers :abstract
+	       (:description "A base person class")))
+
+(defmethod print-object ((person person) stream)
+  (print-unreadable-object (person stream :type t)
+    (format stream ":NAME ~A" (person-name person))))
+
+(defcim Parent (person)
+  ()
+  (:cim-name "Parent")
+  (:qualifiers (:description "A parent person.")))
+
+(defvar *parents* (list (make-instance 'parent 
+				       :name "Fred" :age 30)
+			(make-instance 'parent
+				       :name "Alice" :age 30)))
+
+(defmethod provider-enumerate-instances ((class-name (eql 'parent)))
+  *parents*)
+
+(defmethod provider-get-instance ((instance person))
+  (find (person-name instance) *parents*
+	:key #'person-name
+	:test #'string-equal))
+
+(defcim Child (person)
+  ()
+  (:cim-name "Child")
+  (:qualifiers (:description "A child person.")))
+
+(defvar *children* (list (make-instance 'child :name "Bob" :age 2)))
+(defmethod provider-enumerate-instances ((class-name (eql 'child)))
+  *children*)
+
+(defmethod provider-get-instance ((instance child))
+  (find (person-name instance) *children*
+	:key #'person-name
+	:test #'string-equal))
+
+(defcim Parent-Child ()
+  ((parent parent 
+	   :initform nil 
+	   :initarg :parent
+	   :cim-name "Parent"
+	   :accessor parent-child-parent)
+   (child child
+	  :initform nil
+	  :initarg :child
+	  :cim-name "Child"
+	  :accessor parent-child-child))
+  (:cim-name "Parent_Child")
+  (:qualifiers :indication
+	       (:description "A parent-child linking associator.")))
+
+
+
+
+
+
 
 
 

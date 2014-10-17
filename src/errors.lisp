@@ -97,5 +97,9 @@
 	     (:namespace-not-empty . cim-error-namespace-not-empty))))))
 
 
+;; ignores only cim errors
+(defmacro ignore-cim-errors (&body body)
+  `(handler-case (progn ,@body)
+     (cim-error () nil)))
 
 

@@ -4,12 +4,14 @@
   (:export
    ;; errors
    :cim-error
+   :ignore-cim-errors
 
    ;; namespaces
    :cim-namespace
    :in-namespace
    :find-namespace
    :namespace-tree
+   :with-namespace
 
    ;; types
    :sint8
@@ -48,6 +50,7 @@
    :find-cim-method
    :invoke-method
    :cim-method
+   :defcim
 
    ;; cimom
    :provider-enumerate-instances

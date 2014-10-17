@@ -33,12 +33,17 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
   (when (symbolp class)
     (setf class (find-class class)))
   ;; call the generic on each of the classes, least-specific first
-  (do ((insts (provider-enumerate-instances (class-name class))
+  (do ((insts (ignore-cim-errors (provider-enumerate-instances (class-name class)))
               (nconc insts 
-                     (ignore-errors (provider-enumerate-instances (class-name (car classes))))))
+                     (ignore-cim-errors (provider-enumerate-instances (class-name (car classes))))))
        (classes (when deep-inheritance (cim-class-subclasses class))
                 (cdr classes)))
       ((null classes) insts)))
+
+;; default method that errors
+(defmethod provider-enumerate-instances ((class-name t))
+  (cim-error :not-supported))
+
 
 ;; GetInstance
 ;; <instance> GetInstance (
@@ -54,12 +59,10 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 (defun get-instance (instance &key (local-only t) property-list)
   "Find an instance of the class."
   (declare (ignore local-only property-list))
-  (or (ignore-errors (provider-get-instance instance))
+  (or (ignore-cim-errors (provider-get-instance instance))
       (some (lambda (sub-class)
               (let ((inst (change-class instance (class-name sub-class))))
-                (handler-case 
-                    (provider-get-instance inst)
-                  (cim-error () nil))))
+                (ignore-cim-errors (provider-get-instance inst))))
             (cim-class-subclasses (class-of instance)))
       (cim-error :not-found)))
 

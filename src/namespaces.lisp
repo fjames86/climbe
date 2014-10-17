@@ -77,18 +77,25 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
        (ns-list (cdr (parse-namespace name)) (cdr ns-list)))
       ((null ns-list) ns)))
 
-(defun namespace-tree (&optional root)
+(defun namespace-tree (&optional (root *namespaces*))
   "Convert namespaces to a tree for more easy inspection."
   (labels ((tree (ns)
 	     (cons (cim-namespace-name ns)
 		   (mapcar #'tree
 			   (cim-namespace-children ns)))))
-    (tree (if root root *namespaces*))))
+    (tree root)))
 
 ;; current namespace
 (defparameter *namespace* (find-namespace "root")
   "Current namespace to use when defining or searching.")
 
-(defmacro in-namespace (name)
+(defmacro in-namespace (namespace)
+  "Enter namespace, creating if it doesn't exist."
   `(eval-when (:compile-toplevel :load-toplevel :execute)
-     (setf *namespace* (ensure-namespace ,name))))
+     (setf *namespace* (ensure-namespace ,namespace))))
+
+(defmacro with-namespace ((namespace) &body body)
+  "Execute body with locally modified namespace."
+  `(let ((*namespace (find-namespace ,namespace)))
+     ,@body))
+

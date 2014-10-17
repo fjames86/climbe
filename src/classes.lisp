@@ -84,11 +84,28 @@
   ;; convert the qualifiers from keyword-pairs to assoc list
   (setf (cim-qualifiers class) (make-qualifiers-list (cim-qualifiers class))))
 
+(defmethod reinitialize-instance :after ((class cim-class) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  ;; convert the cim-name from (<name>) to <name>
+  (setf (cim-name class) (car (cim-name class)))
+  ;; convert the qualifiers from keyword-pairs to assoc list
+  (setf (cim-qualifiers class) (make-qualifiers-list (cim-qualifiers class))))
+  
+
 (defmethod initialize-instance :after ((slot cim-standard-direct-slot-definition) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
 
 (defmethod initialize-instance :after ((slot cim-standard-effective-slot-definition) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
+
+
+(defmethod reinitialize-instance :after ((slot cim-standard-direct-slot-definition) &rest initargs &key &allow-other-keys)
+  (declare (ignore initargs))
+  (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
+
+(defmethod reinitialize-instance :after ((slot cim-standard-effective-slot-definition) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   (setf (cim-qualifiers slot) (make-qualifiers-list (cim-qualifiers slot))))
 
@@ -157,7 +174,7 @@ If CHILDREN is T all the CIM subclasses are also added."
 
 
 
-(defmacro def-cim-class (name direct-superclasses slots &rest options)
+(defmacro defcim (name direct-superclasses slots &rest options)
   `(progn
      ;; define the class
      (defclass ,name ,direct-superclasses 
