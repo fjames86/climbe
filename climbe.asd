@@ -29,6 +29,9 @@
      (:file "types" :depends-on ("namespaces"))
      (:file "qualifiers" :depends-on ("types"))
      (:file "classes" :depends-on ("qualifiers"))     
-     (:file "cimom" :depends-on ("classes")))))  
+     (:file "cimom" :depends-on ("classes"))
+	 (:file "messages" :depends-on ("classes"))
+	 (:file "encoding" :depends-on ("messages"))
+	 (:file "decoding" :depends-on ("messages")))))
   :depends-on (:closer-mop :cl-ppcre :s-xml :drakma :hunchentoot :bordeaux-threads))
 

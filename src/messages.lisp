@@ -12,3 +12,7 @@
   method-name intrinsic-p return-value out-parameters)
 
 
+(defstruct cim-reference
+  namespace classname keyslots)
+
+

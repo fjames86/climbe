@@ -40,7 +40,8 @@
    :cim-datetime
    :cim-interval
    :datetime
-
+   :cim-primitive
+   
    ;; qualifiers
    :cim-qualifier
    :find-qualifier
@@ -55,11 +56,13 @@
    :cim-association
    :cim-indication
    :cim-class-slots
+   :cim-slot-type
    :cim-class-superclasses
    :cim-class-subclasses
    :find-cim-class
    :add-class-to-namespace
    :cim-key-slots
+   :cim-class-methods
    :cim-name
    :cim-qualifiers
    :def-cim-class
@@ -67,6 +70,7 @@
    :find-cim-method
    :invoke-method
    :cim-method
+   :cim-method-parameters
    :defcim
    :cim-parameter  
    :cim-parameter-type
@@ -87,6 +91,27 @@
    :provider-reference-instances
    :reference-instances
 
+   ;; messages
+   :cim-message
+   :cim-message-request
+   :cim-message-response
+   :cim-message-id
+   :cim-request
+   :cim-request-method-name
+   :cim-request-intrinsic-p
+   :cim-request-namespace-path
+   :cim-request-arguments
+   :cim-response
+   :cim-response-method-name
+   :cim-response-intrinsic-p
+   :cim-response-return-value
+   :cim-response-out-parameters
+   :cim-reference
+   :cim-reference-p
+   :cim-reference-namespace
+   :cim-reference-classname
+   :cim-reference-keyslots
+   
    ))
 
 
