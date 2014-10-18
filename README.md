@@ -1,62 +1,53 @@
 Climbe
 ======
 
-Climbe is a CIM engine, comprising both client and fully fledged CIMOM/server. It is written 
-in Common Lisp and uses the libraries Drakma and Hunchentoot for HTTP transport.
+Climbe is a CIM engine, comprising both CIMOM and client. Currently supports the CIMXML encoding protocol, but
+support for WS-Management (WS-Man) is intended. This should make it possible to interact with Windows WMI via the
+WinRM protocol (which is basically WS-Man). 
+
+CIMOM
+-------
+
+Providers are implemented by defining regular CLOS classes and specializing certain generics.
+
+```
+(defcim person ()
+  ((name string
+         :cim-name "Name"
+		 :qualifiers (:key (:description "Name of person"))
+		 :accessor person-name)
+   (age uint16
+        :cim-name "Age"
+		:qualifiers ((:description "Age of person"))
+		:accessor person-age))
+  (:cim-name "Person")
+  (:qualifiers (:description "Person class")))
+
+(defmethod provider-enumerate-instances ((class-name (eql 'person)))
+  (list (make-instance 'person :name "Bob" :age 31)))
+
+(defmethod provider-get-instance ((instance person))
+  (if (string-equal (person-name instance) "Bob")
+      (make-instance 'person :name "Bob" :age 31)
+	  (error :not-found)))
+
+```
 
 Client
 -------
 
-All the client calls begin with the CIM- prefix. 
-
-```
-(cim-enumerate-class-names "mycimserver.domain.com" "root/cimv2" :ssl t :authorization (list "username" "password"))
-
-(cim-get-class "mycimserver.domain.com" "MyClass" "root/cimv2" :ssl t :authorization (list "username" "password"))
-
-(cim-enumerate-instances "mycimserver.domain.com" "MyClass" "root/cimv2" :ssl t :authorization (list "username" "password"))
-```
+Not yet written.
 
 Server
 ------
 
-Example provider:
-```
-(defun sayhello () "hello")
+Not yet written.
 
-(in-namespace "root/cimv2")
+Indications
+-----------
 
-(define-cim-class |MyClass| ()
-  ((|Name| :string)
-   (|Age| :uint32))
-  ((|SayHello| :string () :function #'sayhello)
-   (|SayGoodbye| :string ())))
+Not yet supported.
 
-(defmethod enumerate-instances ((cim |MyClass|))
-  (list (make-cim-instance "MyClass" :slots (list (make-cim-slot "Name" :string "frank")))))
-
-;; define method handler later
-(define-cim-method |SayGoodBye| |MyClass| ()
-  "Goodbye")
-
-```
-
-Run the server using:
-```
-(start-cim-server)
-
-(stop-cim-server)
-```
-
-TODO
-----
-
-Lots of things not yet done or done badly. Here's an incomplete list:
-
-* Class inheritence (started, lots left to do)
-* Association classes
-* Embedded instances
-* Indications
 
 
 Frank James 2014.
