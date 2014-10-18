@@ -143,6 +143,7 @@
 
 ;;<!ELEMENT NAMESPACEPATH (HOST,LOCALNAMESPACEPATH)> 
 (defun encode-namespacepath (namespace-path)
+  (declare (type namespace-path namespace-path))
   (eformat "<NAMESPACEPATH>~%")
   (encode-host (namespace-path-host namespace-path))
   (encode-localnamespacepath (namespace-path-namespace-list namespace-path))
@@ -491,6 +492,23 @@
 ;;<!ELEMENT METHODCALL ((LOCALCLASSPATH|LOCALINSTANCEPATH),PARAMVALUE*)>
 ;;<!ATTLIST METHODCALL
 ;;     %CIMName;>
+(defun encode-methodcall (method-name reference param-values)
+  "REFERENCE is a CIM-REFERNCE object.
+
+PARAM-VALUES is a list of form (name value type)."
+  (eformat "<METHODCALL NAME=\"~A\">~%" method-name)
+  (let ((namespace (cim-reference-namespace reference))
+		(class-name (cim-reference-classname reference)))
+	(if (cim-reference-keyslots reference)
+		(encode-localinstancepath (parse-namespace namespace)
+								  class-name
+								  (cim-reference-keyslots reference))
+		(encode-localclasspath (parse-namespace namespace)
+							   class-name)))
+  (dolist (param-value param-values)
+	(destructuring-bind (name value type) param-value
+	  (encode-paramvalue name value type)))								
+  (eformat "</METHODCALL>~%"))
 
 ;;<!ELEMENT PARAMVALUE (VALUE|VALUE.REFERENCE|VALUE.ARRAY|VALUE.REFARRAY)?>
 ;;<!ATTLIST PARAMVALUE
@@ -543,10 +561,11 @@
 ;;<!ATTLIST ERROR
 ;;              CODE        CDATA   #REQUIRED
 ;;              DESCRIPTION CDATA   #IMPLIED>
-(defun encode-error (cim-error)
-  (eformat "<ERROR CODE=\"~A\" DESCRIPTION=\"~A\">~%" 
-	   (cim-error-code cim-error)
-	   (cim-error-description cim-error))
+(defun encode-error (code &optional instances)
+  (eformat "<ERROR CODE=\"~A\">~%" code)
+  (when instances
+	(dolist (instance instances)
+	  (encode-instance instance)))
   (eformat "</ERROR>~%"))
 
 

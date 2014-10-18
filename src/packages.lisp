@@ -24,7 +24,8 @@
    :cim-namespace-path-namespace-list 
    :namespace-path-host 
    :namespace-path-namespace-list 
-
+   :parse-namespace
+   
    ;; types
    :sint8
    :sint16
