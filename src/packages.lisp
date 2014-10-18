@@ -104,6 +104,7 @@
    :cim-request-intrinsic-p
    :cim-request-namespace-path
    :cim-request-arguments
+   :cim-request-reference
    :cim-response
    :cim-response-method-name
    :cim-response-intrinsic-p

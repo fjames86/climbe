@@ -54,19 +54,24 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 		    ns-list (cons n ns-list))
 	      (setf p nil)))))))
 
-(defun find-namespace (name)
+(defun find-namespace (namespace)
   "Find a namespace given the stringy name."
-  (declare (string name))
-  (do ((ns *namespaces*)
-       (ns-list (cdr (parse-namespace name)) (cdr ns-list)))
-      ((null ns-list) ns)
-    (let ((n (find (car ns-list) (cim-namespace-children ns)
-		   :test #'string-equal
-		   :key #'cim-namespace-name)))
-      (if n
-	  (setf ns n)
-	  (error "Namespace ~S not found" name)))))
-
+  (labels ((find-ns (ns name-list)
+			 (let ((name (car name-list)))
+			   (if (and (null (cdr name-list))
+						(string-equal name (cim-namespace-name ns)))
+				   ns
+				   (some (lambda (child)
+						   (find-ns child (cdr name-list)))
+						 (cim-namespace-children ns))))))
+	(let ((ns (find-ns *namespaces*
+					   (if (listp namespace)
+						   namespace
+						   (parse-namespace namespace)))))
+	  (if ns
+		  ns
+		  (error "Namespace ~S not found" namespace)))))
+		  
 (defun ensure-namespace (name)
   "Ensure the namespace exists, creating it and its nodes if they don't yet exist."
   (declare (string name))

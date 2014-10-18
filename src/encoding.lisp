@@ -1,9 +1,5 @@
 
-
-(defpackage :climbe.encoding.cimxml
-  (:use :cl :climbe))
-
-(in-package :climbe.encoding.cimxml)
+(in-package :climbe)
 
 (defconstant* +cim-version+ "2.0")
 (defconstant* +dtd-version+ "2.1")
@@ -14,13 +10,13 @@
   (declare (string format-string))
   (apply #'format t format-string args))
 
-(defun encode-boolean (boolean)
+(defun encode-cimxml-boolean (boolean)
   "CIM string for a bool"
   (if boolean
       "true"
       "false"))
 
-(defun encode-type (type)
+(defun encode-cimxml-type (type)
   "Returns the CIM string representation of the Lisp type."
   (string type))
 
@@ -28,9 +24,9 @@
 ;;<!ATTLIST CIM
 ;;         CIMVERSION CDATA #REQUIRED 
 ;;         DTDVERSION CDATA #REQUIRED>
-(defun encode-cim (message)  
+(defun encode-cimxml-cim (message)  
   (eformat "<CIM CIMVERSION=\"~A\" DTDVERSION=\"~A\">~%" +cim-version+ +dtd-version+)
-  (encode-message message)
+  (encode-cimxml-message message)
   (eformat "</CIM>"))
 
 ;;<!ELEMENT DECLARATION  (DECLGROUP|DECLGROUP.WITHNAME|DECLGROUP.WITHPATH)+>
@@ -48,22 +44,22 @@
 ;;     ISARRAY        (true|false)     #IMPLIED
 ;;     %ArraySize;
 ;;     %QualifierFlavor;>
-(defun encode-qualifier.declaration (qualifier)
+(defun encode-cimxml-qualifier.declaration (qualifier)
   (declare (type cim-qualifier qualifier))
   (let ((type (cim-qualifier-type qualifier)))
     (eformat "<QUALIFIER.DECLARATION NAME=\"~A\" Type=\"~A\"/>~%"
 	     (cim-name qualifier)
 	     type)
-    (encode-scope (cim-qualifier-scope qualifier))
+    (encode-cimxml-scope (cim-qualifier-scope qualifier))
     (let ((default (cim-qualifier-default qualifier)))
       (when default
 	(cond
 	  ((and (listp type) (eq (car type) 'array))
-	   (encode-value.array default))
+	   (encode-cimxml-value.array default))
 	  ((eq type 'boolean)
-	   (encode-value (encode-boolean default)))
+	   (encode-cimxml-value (encode-cimxml-boolean default)))
 	  (t
-	   (encode-value default)))))
+	   (encode-cimxml-value default)))))
     (eformat "</QUALIFIER.DECLARATION>~%")))
 	
 ;;<!ELEMENT SCOPE EMPTY>
@@ -75,26 +71,26 @@
 ;;         METHOD       (true|false)      "false"
 ;;         PARAMETER    (true|false)      "false"
 ;;         INDICATION   (true|false)      "false">
-(defun encode-scope (scope-list)
+(defun encode-cimxml-scope (scope-list)
   (apply #'eformat "<SCOPE CLASS=\"~A\" ASSOCIATION=\"~A\" REFERENCE=\"~A\" PROPERTY=\"~A\" METHOD=\"~A\" PARAMETER=\"~A\" INDICATION=\"~A\" />~%"
-	 (mapcar #'encode-boolean
+	 (mapcar #'encode-cimxml-boolean
 		 (mapcar (lambda (scope)
 			   (member scope scope-list))
 			 '(:class :association :reference :property :method :parameter :indication)))))
 
 ;;<!ELEMENT VALUE (#PCDATA)>
-(defun encode-value (value)
+(defun encode-cimxml-value (value)
   (eformat "<VALUE>~A</VALUE>~%" value))
 
 ;;<!ELEMENT VALUE.ARRAY (VALUE*)>
-(defun encode-value.array (value-list)
+(defun encode-cimxml-value.array (value-list)
   (eformat "<VALUE.ARRAY>~%")
   (dolist (value value-list)
-    (encode-value value))
+    (encode-cimxml-value value))
   (eformat "</VALUE.ARRAY>~%"))
 
 ;;<!ELEMENT VALUE.REFERENCE (CLASSPATH|LOCALCLASSPATH|CLASSNAME|INSTANCEPATH|LOCALINSTANCEPATH|INSTANCENAME)>
-(defun encode-value.reference (reference)
+(defun encode-cimxml-value.reference (reference)
   (let ((namespace (cim-reference-namespace reference))
 		(classname (cim-reference-classname reference))
 		(keyslots (cim-reference-keyslots reference)))
@@ -115,171 +111,174 @@
 	   nil))))
 
 ;;<!ELEMENT VALUE.REFARRAY (VALUE.REFERENCE*)>
-(defun encode-value.refarray (value-list)
+(defun encode-cimxml-value.refarray (value-list)
   (eformat "<VALUE.REFERENCE>~%")
   (dolist (value value-list)
-	(encode-value.reference value))
+	(encode-cimxml-value.reference value))
   (eformat "</VALUE.REFERENCE>~%"))
 
 ;;<!ELEMENT VALUE.OBJECT (CLASS|INSTANCE)>
-(defun encode-value.object (object)
+(defun encode-cimxml-value.object (object)
   (eformat "<VALUE.OBJECT>~%")
   (if (typep object 'cim-class)
-	  (encode-class object)
-	  (encode-instance object))
+	  (encode-cimxml-class object)
+	  (encode-cimxml-instance object))
   (eformat "</VALUE.OBJECT>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDINSTANCE (INSTANCENAME,INSTANCE)>
-(defun encode-value.namedinstance (instance)
+(defun encode-cimxml-value.namedinstance (instance)
   (eformat "<VALUE.NAMEDINSTANCE>~%")
-  (let ((class (class-of instance)))
-	(encode-instancename (cim-name class)
-						 (instance-key-slots instance)))
-  (encode-instance instance)
+  (if (cim-instance-p instance)
+	  (encode-cimxml-instancename (cim-instance-classname instance)
+								  (cim-instance-slots instance))
+	  (let ((class (class-of instance)))
+		(encode-cimxml-instancename (cim-name class)
+									(instance-key-slots instance))))
+  (encode-cimxml-instance instance)
   (eformat "</VALUE.NAMEDINSTANCE>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDOBJECT (CLASS|(INSTANCENAME,INSTANCE))>
-(defun encode-value.namedobject (object)
+(defun encode-cimxml-value.namedobject (object)
   (eformat "<VALUE.NAMEDOBJECT>~%")
   (cond
 	((typep object 'cim-class)
-	 (encode-class object))
+	 (encode-cimxml-class object))
 	(t
 	 (let ((class (class-of object)))
-	   (encode-instancename (cim-name class) (instance-slots object))
-	   (encode-instance object))))
+	   (encode-cimxml-instancename (cim-name class) (instance-slots object))
+	   (encode-cimxml-instance object))))
   (eformat "</VALUE.NAMEDOBJECT>~%"))
 
 ;;<!ELEMENT VALUE.OBJECTWITHPATH ((CLASSPATH,CLASS)|(INSTANCEPATH,INSTANCE))>
-(defun encode-value.objectwithpath (object namespace-path)
+(defun encode-cimxml-value.objectwithpath (object namespace-path)
   (eformat "<VALUE.OBJECTWITHPATH>~%")
   (cond
 	((typep object 'cim-class)
-	 (encode-classpath namespace-path (cim-name object))
-	 (encode-class object))
+	 (encode-cimxml-classpath namespace-path (cim-name object))
+	 (encode-cimxml-class object))
 	(t
 	 (let ((class (class-of object)))
-	   (encode-instancepath namespace-path (cim-name class) (instance-slots object))
-	   (encode-instance object))))
+	   (encode-cimxml-instancepath namespace-path (cim-name class) (instance-slots object))
+	   (encode-cimxml-instance object))))
   (eformat "</VALUE.OBJECTWITHPATH>~%"))
   
 ;;<!ELEMENT VALUE.OBJECTWITHLOCALPATH ((LOCALCLASSPATH,CLASS)|(LOCALINSTANCEPATH,INSTANCE))>
-(defun encode-value.objectwithlocalpath (object namespace-list)
+(defun encode-cimxml-value.objectwithlocalpath (object namespace-list)
   (eformat "<VALUE.OBJECTWITHLOCALPATH>~%")
   (cond
 	((typep object 'cim-class)
-	 (encode-localclasspath namespace-list (cim-name object))
-	 (encode-class object))
+	 (encode-cimxml-localclasspath namespace-list (cim-name object))
+	 (encode-cimxml-class object))
 	(t
 	 (let ((class (class-of object)))
-	   (encode-localinstancepath namespace-list (cim-name class) (instance-slots object))
-	   (encode-instance object))))
+	   (encode-cimxml-localinstancepath namespace-list (cim-name class) (instance-slots object))
+	   (encode-cimxml-instance object))))
   (eformat "</VALUE.OBJECTWITHLOCALPATH>~%"))
 
 ;;<!ELEMENT VALUE.NULL EMPTY>
-(defun encode-null ()
+(defun encode-cimxml-null ()
   (eformat "<VALUE.NULL />~%"))
 
 ;;<!ELEMENT NAMESPACEPATH (HOST,LOCALNAMESPACEPATH)> 
-(defun encode-namespacepath (namespace-path)
+(defun encode-cimxml-namespacepath (namespace-path)
   (declare (type namespace-path namespace-path))
   (eformat "<NAMESPACEPATH>~%")
-  (encode-host (namespace-path-host namespace-path))
-  (encode-localnamespacepath (namespace-path-namespace-list namespace-path))
+  (encode-cimxml-host (namespace-path-host namespace-path))
+  (encode-cimxml-localnamespacepath (namespace-path-namespace-list namespace-path))
   (eformat "</NAMESPACEPATH>~%"))
 
 ;;<!ELEMENT LOCALNAMESPACEPATH (NAMESPACE+)> 
-(defun encode-localnamespacepath (namespace-list)
+(defun encode-cimxml-localnamespacepath (namespace-list)
   (eformat "<LOCALNAMESPACEPATH>~%")
   (dolist (namespace namespace-list)
-    (encode-namespace namespace))
+    (encode-cimxml-namespace namespace))
   (eformat "</LOCALNAMESPACEPATH>~%"))
 
 ;;<!ELEMENT HOST (#PCDATA)> 
-(defun encode-host (host)
+(defun encode-cimxml-host (host)
   (eformat "<HOST>~A</HOST>~%" host))
 
 ;;<!ELEMENT NAMESPACE EMPTY> 
 ;;<!ATTLIST NAMESPACE
 ;;    %CIMName;> 
-(defun encode-namespace (namespace)
-  (declare (type cim-namespace namespace))
-  (eformat "<NAMESPACE NAME=\"~A\" />~%" (cim-name namespace)))
+(defun encode-cimxml-namespace (namespace)
+  (declare (string namespace))
+  (eformat "<NAMESPACE NAME=\"~A\" />~%" namespace))
 
 ;;<!ELEMENT CLASSPATH (NAMESPACEPATH,CLASSNAME)>
-(defun encode-classpath (namespace-path class-name)
+(defun encode-cimxml-classpath (namespace-path class-name)
   (eformat "<CLASSPATH>~%")
-  (encode-namespacepath namespace-path)
-  (encode-classname class-name)
+  (encode-cimxml-namespacepath namespace-path)
+  (encode-cimxml-classname class-name)
   (eformat "</CLASSPATH>~%"))
 
 ;;<!ELEMENT LOCALCLASSPATH (LOCALNAMESPACEPATH, CLASSNAME)>
-(defun encode-localclasspath (namespace-list class-name)
+(defun encode-cimxml-localclasspath (namespace-list class-name)
   (eformat "<LOCALCLASSPATH>~%")
-  (encode-localnamespacepath namespace-list)
-  (encode-classname class-name)
+  (encode-cimxml-localnamespacepath namespace-list)
+  (encode-cimxml-classname class-name)
   (eformat "</LOCALCLASSPATH>~%"))
 
 ;;<!ELEMENT CLASSNAME EMPTY>
 ;;<!ATTLIST CLASSNAME
 ;;    %CIMName;>
-(defun encode-classname (class-name)
+(defun encode-cimxml-classname (class-name)
   (eformat "<CLASSNAME NAME=\"~A\" />~%" class-name))
 
 ;;<!ELEMENT INSTANCEPATH (NAMESPACEPATH,INSTANCENAME)>
-(defun encode-instancepath (namespace-path class-name key-slots)
+(defun encode-cimxml-instancepath (namespace-path class-name key-slots)
   (eformat "<INSTANCEPATH>~%")
-  (encode-namespacepath namespace-path)
-  (encode-instancename class-name key-slots)
+  (encode-cimxml-namespacepath namespace-path)
+  (encode-cimxml-instancename class-name key-slots)
   (eformat "</INSTANCEPATH>~%"))
 
 ;;<!ELEMENT LOCALINSTANCEPATH (LOCALNAMESPACEPATH,INSTANCENAME)>
-(defun encode-localinstancepath (namespace-list class-name key-slots)
+(defun encode-cimxml-localinstancepath (namespace-list class-name key-slots)
   (eformat "<LOCALINSTANCEPATH>~%")
-  (encode-localnamespacepath namespace-list)
-  (encode-instancename class-name key-slots)
+  (encode-cimxml-localnamespacepath namespace-list)
+  (encode-cimxml-instancename class-name key-slots)
   (eformat "</LOCALINSTANCEPATH>~%"))
 
 ;;<!ELEMENT INSTANCENAME (KEYBINDING*|KEYVALUE?|VALUE.REFERENCE?)>
 ;;<!ATTLIST INSTANCENAME
 ;;    %ClassName;>
-(defun encode-instancename (class-name key-slots)
+(defun encode-cimxml-instancename (class-name key-slots)
   (eformat "<INSTANCENAME CLASSNAME=\"~A\">~%" class-name)
   (cond
 	((cim-reference-p key-slots)
-	 (encode-value.reference key-slots))
+	 (encode-cimxml-value.reference key-slots))
 	((atom key-slots)
-	 (encode-keyvalue key-slots))
+	 (encode-cimxml-keyvalue key-slots))
 	(t
 	 (dolist (key-slot key-slots)
-	   (encode-keybinding (car key-slot) (cdr key-slot)))))
+	   (encode-cimxml-keybinding (car key-slot) (cdr key-slot)))))
   (eformat "</INSTANCENAME>~%"))
 
 ;;<!ELEMENT OBJECTPATH (INSTANCEPATH|CLASSPATH)>
-(defun encode-objectpath (namespace-path class-name &optional key-slots)
+(defun encode-cimxml-objectpath (namespace-path class-name &optional key-slots)
   (eformat "<OBJECTPATH>~%")
   (if key-slots
-	  (encode-instancepath namespace-path class-name key-slots)
-	  (encode-classpath namespace-path class-name))
+	  (encode-cimxml-instancepath namespace-path class-name key-slots)
+	  (encode-cimxml-classpath namespace-path class-name))
   (eformat "</OBJECTPATH>~%"))
 
 ;;<!ELEMENT KEYBINDING (KEYVALUE|VALUE.REFERENCE)>
 ;;<!ATTLIST KEYBINDING
 ;;    %CIMName;>
-(defun encode-keybinding (name value)
+(defun encode-cimxml-keybinding (name value)
   (eformat "<KEYBINDING NAME=\"~A\">~%" name)
   ;; FIXME: needs to handle value.reference values too!!!
-  (encode-keyvalue value)
+  (encode-cimxml-keyvalue value)
   (eformat "</KEYBINDING>~%"))
 
 ;;<!ELEMENT KEYVALUE (#PCDATA)>
 ;;<!ATTLIST KEYVALUE
 ;;     VALUETYPE    (string|boolean|numeric)  "string"
 ;;     %CIMType;    #IMPLIED>
-(defun encode-keyvalue (value)
+(defun encode-cimxml-keyvalue (value)
   (let ((tv (cond ((stringp value) (list "string" value))
 				  ((numberp value) (list "numeric" value))
-				  (t (list "boolean" (encode-boolean value))))))
+				  (t (list "boolean" (encode-cimxml-boolean value))))))
 	(eformat "<KEYVALUE VALUETYPE=\"~A\">~A</KEYVALUE>~%"
 			 (first tv) (second tv))))
 
@@ -287,7 +286,7 @@
 ;;<!ATTLIST CLASS 
 ;;    %CIMName;
 ;;    %SuperClass;>
-(defun encode-class (class)
+(defun encode-cimxml-class (class)
   (declare (type cim-class class))
   (let ((super-class (cim-class-superclasses class)))
 	(if super-class
@@ -297,23 +296,31 @@
 		(eformat "<CLASS NAME=\"~A\">~%" (cim-name class))))
   (dolist (qualifier (cim-qualifiers class))
 	(destructuring-bind (q . v) qualifier
-	  (encode-qualifier q v)))
+	  (encode-cimxml-qualifier q v)))
   (dolist (slot (cim-class-slots class))
-	(encode-slot slot))
+	(encode-cimxml-slot slot))
   (dolist (method (cim-class-methods class))
-	(encode-method method))
+	(encode-cimxml-method method))
   (eformat "</CLASS>~%"))
 
 ;;<!ELEMENT INSTANCE (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*)>
 ;;<!ATTLIST INSTANCE
 ;;         %ClassName;
 ;;         xml:lang   NMTOKEN  #IMPLIED>
-(defun encode-instance (instance)
-  (let ((class (class-of instance)))
-	(eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-name class))
-	(dolist (slot (cim-class-slots class))
-	  (encode-property slot (slot-value instance (class-name slot))))
-	(eformat "</INSTANCE>~%")))
+(defun encode-cimxml-instance (instance)
+  (cond
+	((cim-instance-p instance)
+	 (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-instance-classname instance))
+	 (dolist (slot (cim-instance-slots instance))
+	   (destructuring-bind (slot-name slot-value slot-type) slot
+		 (encode-cimxml-slot* slot-name slot-value slot-type)))
+	 (eformat "</INSTANCE>~%"))
+	(t 
+	 (let ((class (class-of instance)))
+	   (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-name class))
+	   (dolist (slot (cim-class-slots class))
+		 (encode-cimxml-slot slot (slot-value instance (class-name slot))))
+	   (eformat "</INSTANCE>~%")))))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>
 ;;<!ATTLIST QUALIFIER 
@@ -322,20 +329,20 @@
 ;;     %Propagated;
 ;;     %QualifierFlavor;
 ;;     xml:lang  NMTOKEN  #IMPLIED>
-(defun encode-qualifier (qualifier value)
+(defun encode-cimxml-qualifier (qualifier value)
   (declare (type cim-qualifier qualifier))
   (let ((type (cim-qualifier-type qualifier)))
     (eformat "<QUALIFIER NAME=\"~A\" Type=\"~A\"/>~%"
 	     (cim-name qualifier)
 	     type)
-    (encode-scope (cim-qualifier-scope qualifier))
+    (encode-cimxml-scope (cim-qualifier-scope qualifier))
     (cond
       ((and (listp type) (eq (car type) 'array))
-       (encode-value.array value))
+       (encode-cimxml-value.array value))
       ((eq type 'boolean)
-       (encode-value (encode-boolean value)))
+       (encode-cimxml-value (encode-cimxml-boolean value)))
       (t
-       (encode-value value))))
+       (encode-cimxml-value value))))
     (eformat "</QUALIFIER>~%"))
 
 ;;<!ELEMENT PROPERTY (QUALIFIER*,VALUE?)>
@@ -346,13 +353,13 @@
 ;;     %Propagated;
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
-(defun encode-property (slot &optional value)
-  (eformat "<PROPERTY NAME=\"~A\" TYPE=\"~A\">~%" (cim-name slot) (encode-type (cim-slot-type slot)))
+(defun encode-cimxml-property (slot &optional value)
+  (eformat "<PROPERTY NAME=\"~A\" TYPE=\"~A\">~%" (cim-name slot) (encode-cimxml-type (cim-slot-type slot)))
   (dolist (qualifier (cim-qualifiers slot))
 	(destructuring-bind (q . v) qualifier
-	  (encode-qualifier q v)))
+	  (encode-cimxml-qualifier q v)))
   (when (or value (eq (cim-slot-type slot) 'boolean))
-	(encode-value value))
+	(encode-cimxml-value value))
   (eformat "</PROPERTY>~%"))
 
 ;;<!ELEMENT PROPERTY.ARRAY (QUALIFIER*,VALUE.ARRAY?)>
@@ -364,15 +371,15 @@
 ;;    %Propagated;
 ;;    %EmbeddedObject;
 ;;    xml:lang   NMTOKEN  #IMPLIED>
-(defun encode-property.array (slot &optional value)
+(defun encode-cimxml-property.array (slot &optional value)
   (eformat "<PROPERTY.ARRAY NAME=\"~A\" TYPE=\"~A\">~%"
 		   (cim-name slot)
-		   (encode-type (cim-slot-type slot)))
+		   (encode-cimxml-type (cim-slot-type slot)))
   (dolist (qualifier (cim-qualifiers slot))
 	(destructuring-bind (q . v) qualifier
-	  (encode-qualifier q v)))
+	  (encode-cimxml-qualifier q v)))
   (when value
-	(encode-value.array value))
+	(encode-cimxml-value.array value))
   (eformat "</PROPERTY.ARRAY>~%"))
 
 ;;<!ELEMENT PROPERTY.REFERENCE (QUALIFIER*,VALUE.REFERENCE?)>
@@ -381,29 +388,35 @@
 ;;     %ReferenceClass;
 ;;     %ClassOrigin;
 ;;     %Propagated;>
-(defun encode-property.reference (slot &optional value)
+(defun encode-cimxml-property.reference (slot &optional value)
   (eformat "<PROPERTY.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 		   (cim-name slot)
 		   (cim-name (find-class (cim-slot-type slot))))
   (dolist (qualifier (cim-qualifiers slot))
 	(destructuring-bind (q . v) qualifier
-	  (encode-qualifier q v)))
+	  (encode-cimxml-qualifier q v)))
   (when value
-	(encode-value.reference value))
+	(encode-cimxml-value.reference value))
   (eformat "</PROPERTY.REFERENCE>~%"))
   
 
 ;; Lisp function to encode a Slot. It wraps the above 3 property calls
-(defun encode-slot (slot &optional value)
+(defun encode-cimxml-slot (slot &optional value)
   (let ((type (cim-slot-type slot)))
 	(cond
 	  ((and (listp type) (eq (car type) 'array))
-	   (encode-property.array slot value))
+	   (encode-cimxml-property.array slot value))
 	  ((subtypep type 'cim-primitive)
-	   (encode-property slot value))
+	   (encode-cimxml-property slot value))
 	  (t
 	   ;; another type, must be a reference
-	   (encode-property.reference slot value)))))
+	   (encode-cimxml-property.reference slot value)))))
+
+(defun encode-cimxml-slot* (slot-name slot-value slot-type)
+  (encode-cimxml-slot (make-instance 'cim-standard-effective-slot-definition
+									 :cim-type slot-type
+									 :cim-name slot-name)
+					  slot-value))
 
 ;;<!ELEMENT METHOD (QUALIFIER*,(PARAMETER|PARAMETER.REFERENCE|PARAMETER.ARRAY|PARAMETER.REFARRAY)*)>
 ;;<!ATTLIST METHOD 
@@ -411,39 +424,39 @@
 ;;     %CIMType;          #IMPLIED 
 ;;     %ClassOrigin;
 ;;     %Propagated;>
-(defun encode-method (method)
+(defun encode-cimxml-method (method)
   (eformat "<METHOD NAME=\"~A\">~%" (cim-name method))
   (dolist (qualifier (cim-qualifiers method))
 	(destructuring-bind (q . v) qualifier
-	  (encode-qualifier q v)))
+	  (encode-cimxml-qualifier q v)))
   (dolist (parameter (cim-method-parameters method))
-	(encode-parameter parameter))
+	(encode-cimxml-parameter parameter))
   (eformat "</METHOD>~%"))
 
 ;;<!ELEMENT PARAMETER (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER 
 ;;     %CIMName;
 ;;     %CIMType;      #REQUIRED>
-(defun %encode-parameter (parameter)
+(defun %encode-cimxml-parameter (parameter)
   (eformat "<PARAMETER NAME=\"~A\" TYPE=\"~A\">~%"
 	   (cim-name parameter)
-	   (encode-type (cim-parameter-type parameter)))
+	   (encode-cimxml-type (cim-parameter-type parameter)))
   (dolist (qualifier (cim-qualifiers parameter))
     (destructuring-bind (q . val) qualifier
-      (encode-qualifier q val)))
+      (encode-cimxml-qualifier q val)))
   (eformat "</PARAMETER>~%"))
 
 ;;<!ELEMENT PARAMETER.REFERENCE (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.REFERENCE
 ;;     %CIMName;
 ;;     %ReferenceClass;>
-(defun encode-parameter.reference (parameter)
+(defun encode-cimxml-parameter.reference (parameter)
   (eformat "<PARAMETER.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 	   (cim-name parameter)
 	   (cim-name (find-class (cim-parameter-type parameter))))
   (dolist (qualifier (cim-qualifiers parameter))
     (destructuring-bind (q . val) qualifier
-      (encode-qualifier q val)))
+      (encode-cimxml-qualifier q val)))
   (eformat "</PARAMETER.REFERENCE>~%"))
   
 ;;<!ELEMENT PARAMETER.ARRAY (QUALIFIER*)>
@@ -451,13 +464,13 @@
 ;;     %CIMName;
 ;;     %CIMType;           #REQUIRED
 ;;     %ArraySize;>
-(defun encode-parameter.array (parameter)
+(defun encode-cimxml-parameter.array (parameter)
   (eformat "<PARAMETER.ARRAY NAME=\"~A\" TYPE=\"~A\">~%"
 	   (cim-name parameter)
-	   (encode-type (cim-parameter-type parameter)))
+	   (encode-cimxml-type (cim-parameter-type parameter)))
   (dolist (qualifier (cim-qualifiers parameter))
     (destructuring-bind (q . val) qualifier
-      (encode-qualifier q val)))
+      (encode-cimxml-qualifier q val)))
   (eformat "</PARAMETER.ARRAY>~%"))
 
 ;;<!ELEMENT PARAMETER.REFARRAY (QUALIFIER*)>
@@ -465,28 +478,28 @@
 ;;     %CIMName;
 ;;     %ReferenceClass;
 ;;     %ArraySize;>
-(defun encode-parameter.refarray (parameter)
+(defun encode-cimxml-parameter.refarray (parameter)
   (eformat "<PARAMETER.REFARRAY NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 	   (cim-name parameter)
 	   (cim-name (find-class (cim-parameter-type parameter))))
   (dolist (qualifier (cim-qualifiers parameter))
     (destructuring-bind (q . val) qualifier
-      (encode-qualifier q val)))
+      (encode-cimxml-qualifier q val)))
   (eformat "</PARAMETER.REFARRAY>~%"))
 
 
 ;; Lisp function to wrap the above calls to the various parameter encoders
-(defun encode-parameter (parameter)
+(defun encode-cimxml-parameter (parameter)
   (let ((type (cim-parameter-type parameter)))
 	(cond
 	  ((and (listp type) (eq (car type) 'array))
 	   (if (subtypep (cadr type) 'cim-primitive)
-		   (encode-parameter.array parameter)
-		   (encode-parameter.refarray parameter)))
+		   (encode-cimxml-parameter.array parameter)
+		   (encode-cimxml-parameter.refarray parameter)))
 	  ((subtypep type 'cim-primitive)
-	   (%encode-parameter parameter))
+	   (%encode-cimxml-parameter parameter))
 	  (t
-	   (encode-parameter.reference parameter)))))
+	   (encode-cimxml-parameter.reference parameter)))))
 
 
 ;;<!ELEMENT MESSAGE (SIMPLEREQ|MULTIREQ|SIMPLERSP|MULTIRSP|
@@ -494,7 +507,7 @@
 ;;<!ATTLIST MESSAGE
 ;;         ID             CDATA     #REQUIRED
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
-(defun encode-message (message)
+(defun encode-cimxml-message (message)
   (let ((request (cim-message-request message))
 	(response (cim-message-response message)))
     (eformat "<MESSAGE ID=\"~A\" PROTOCOLVERSION=\"~A\">~%"
@@ -503,35 +516,42 @@
     (cond
       ((consp request)
        ;; list of requests, i.e. a multireq node
-       (encode-multireq request))
+       (encode-cimxml-multireq request))
       ((atom request)
-       (encode-simplereq request))
+       (encode-cimxml-simplereq request))
       ((consp response)
        ;; list of responses, i.e. a multirsp node
-       (encode-multirsp response))
+       (encode-cimxml-multirsp response))
       ((atom response)
-       (encode-simplersp response))
+       (encode-cimxml-simplersp response))
       (t (error "Unable to handle message ~S" message)))
     (eformat "</MESSAGE>~%")))
 
 
 ;;<!ELEMENT MULTIREQ (SIMPLEREQ,SIMPLEREQ+)>
-(defun encode-multireq (request-list)
+(defun encode-cimxml-multireq (request-list)
   (eformat "<MULTIREQ>~%")
   (dolist (req request-list)
-    (encode-simplereq req))
+    (encode-cimxml-simplereq req))
   (eformat "</MULTIREQ>~%"))
 
 ;;<!ELEMENT SIMPLEREQ (METHODCALL|IMETHODCALL)>
-(defun encode-simplereq (request)
+(defun encode-cimxml-simplereq (request)
+  (declare (type cim-request request))
   (eformat "<SIMPLEREQ>~%")
-  (eformat "~A" request)
-  (eformat "</SIMPLEREQ>~~%"))
+  (if (cim-request-intrinsic-p request)
+	  (encode-cimxml-imethodcall (cim-request-method-name request)
+						  (namespace-path-namespace-list (cim-request-namespace-path request))
+						  (cim-request-arguments request))
+	  (encode-cimxml-methodcall (cim-request-method-name request)
+						 (cim-request-reference request)
+						 (cim-request-arguments request)))  
+  (eformat "</SIMPLEREQ>~%"))
 
 ;;<!ELEMENT METHODCALL ((LOCALCLASSPATH|LOCALINSTANCEPATH),PARAMVALUE*)>
 ;;<!ATTLIST METHODCALL
 ;;     %CIMName;>
-(defun encode-methodcall (method-name reference param-values)
+(defun encode-cimxml-methodcall (method-name reference param-values)
   "REFERENCE is a CIM-REFERNCE object.
 
 PARAM-VALUES is a list of form (name value type)."
@@ -539,14 +559,14 @@ PARAM-VALUES is a list of form (name value type)."
   (let ((namespace (cim-reference-namespace reference))
 		(class-name (cim-reference-classname reference)))
 	(if (cim-reference-keyslots reference)
-		(encode-localinstancepath (parse-namespace namespace)
+		(encode-cimxml-localinstancepath (parse-namespace namespace)
 								  class-name
 								  (cim-reference-keyslots reference))
-		(encode-localclasspath (parse-namespace namespace)
+		(encode-cimxml-localclasspath (parse-namespace namespace)
 							   class-name)))
   (dolist (param-value param-values)
 	(destructuring-bind (name value type) param-value
-	  (encode-paramvalue name value type)))								
+	  (encode-cimxml-paramvalue name value type)))								
   (eformat "</METHODCALL>~%"))
 
 ;;<!ELEMENT PARAMVALUE (VALUE|VALUE.REFERENCE|VALUE.ARRAY|VALUE.REFARRAY)?>
@@ -554,62 +574,68 @@ PARAM-VALUES is a list of form (name value type)."
 ;;     %CIMName;
 ;;     %ParamType;    #IMPLIED
 ;;     %EmbeddedObject;>
-(defun encode-paramvalue (name value type)
+(defun encode-cimxml-paramvalue (name value type)
   (eformat "<PARAMVALUE NAME=\"~A\">~%" name)
   (cond
 	((and (listp type) (eq (car type) 'array))
 	 (if (subtypep (cadr type) 'cim-primitive)
-		 (encode-value.array value)
-		 (encode-value.refarray value)))
+		 (encode-cimxml-value.array value)
+		 (encode-cimxml-value.refarray value)))
 	((cim-reference-p value)
-	 (encode-value.reference value))
-	(t (encode-value value)))
+	 (encode-cimxml-value.reference value))
+	(t (encode-cimxml-value value)))
   (eformat "</PARAMVALUE>~%"))
 
 ;;<!ELEMENT IMETHODCALL (LOCALNAMESPACEPATH,IPARAMVALUE*)>
 ;;<!ATTLIST IMETHODCALL
 ;;     %CIMName;>
-(defun encode-imethodcall (method-name namespace-list params)
+(defun encode-cimxml-imethodcall (method-name namespace-list params)
+  (declare (type string method-name)
+		   (type list namespace-list params))
   (eformat "<IMETHODCALL NAME=\"~A\">~%" method-name)
-  (encode-localnamespacepath namespace-list)
+  (encode-cimxml-localnamespacepath namespace-list)
   (dolist (param-value params)
-	(destructuring-bind (name param-type value) param-value
-	  (encode-iparamvalue name param-type value)))
+	(destructuring-bind (name value param-type) param-value
+	  (encode-cimxml-iparamvalue name param-type value)))
   (eformat "</IMETHODCALL>~%"))
 
 ;;<!ELEMENT IPARAMVALUE (VALUE|VALUE.ARRAY|VALUE.REFERENCE|CLASSNAME|INSTANCENAME|QUALIFIER.DECLARATION|
 ;;              CLASS|INSTANCE|VALUE.NAMEDINSTANCE)?>
 ;;<!ATTLIST IPARAMVALUE
 ;;     %CIMName;>
-(defun encode-iparamvalue (name param-type value)
+(defun encode-cimxml-iparamvalue (name param-type value)
   (eformat "<IPARAMVALUE NAME=\"~A\">~%" name)
   (ecase param-type
 	(:value
-	 (encode-value value))
+	 (encode-cimxml-value value))
+	(:value.array
+	 (encode-cimxml-value.array value))
+	(:value.reference
+	 (encode-cimxml-value.reference value))
 	(:classname
-	 (encode-classname value))
+	 (encode-cimxml-classname value))
 	(:instancename
-	 (let ((class (class-of value)))
-	   (encode-instancename (cim-name class) (instance-key-slots value))))
+	 (encode-cimxml-instancename (cim-instance-classname value)
+								 (cim-instance-slots value)))	
 	(:qualifier.declaration
 	 (error "FIXME!!!"))
 	(:class
-	 (encode-class value))
+	 (encode-cimxml-class value))
 	(:instance
-	 (encode-instance value))
+	 (encode-cimxml-instance value))
 	(:value.namedinstance
-	 (encode-value.namedinstance value)))
+	 (encode-cimxml-value.namedinstance value)))
   (eformat "</IPARAMVALUE>~%"))
   
 ;; <!ELEMENT MULTIRSP (SIMPLERSP,SIMPLERSP+)>
-(defun encode-multirsp (response-list)
+(defun encode-cimxml-multirsp (response-list)
   (eformat "<MULTIRSP>~%")
   (dolist (rsp response-list)
-    (encode-simplersp rsp))
+    (encode-cimxml-simplersp rsp))
   (eformat "</MULTIRSP>~%"))
 
 ;;<!ELEMENT SIMPLERSP (METHODRESPONSE|IMETHODRESPONSE)>
-(defun encode-simplersp (response)
+(defun encode-cimxml-simplersp (response)
   (eformat "<SIMPLERSP>~%")
   (eformat "~A~%" response)
   (eformat "</SIMPLERSP>~%"))
@@ -617,31 +643,31 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT METHODRESPONSE (ERROR|(RETURNVALUE?,PARAMVALUE*))>
 ;;<!ATTLIST METHODRESPONSE
 ;;           %CIMName;>
-(defun encode-methodresponse (method-name value out-params)
+(defun encode-cimxml-methodresponse (method-name value out-params)
   (eformat "<METHODRESPONSE NAME=\"~A\">~%" method-name)
-  (encode-returnvalue value)
+  (encode-cimxml-returnvalue value)
   (dolist (out-param out-params)
 	(destructuring-bind (name val type) out-param
-	  (encode-paramvalue name val type)))
+	  (encode-cimxml-paramvalue name val type)))
   (eformat "</METHODNAME>~%"))
   
 ;;<!ELEMENT IMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST IMETHODRESPONSE
 ;;           %CIMName;>
-(defun encode-imethodresponse (method-name return-type value)
+(defun encode-cimxml-imethodresponse (method-name return-type value)
   (eformat "<IMETHODRESPONSE NAME=\"~A\">~%" method-name)
-  (encode-ireturnvalue return-type value)
+  (encode-cimxml-ireturnvalue return-type value)
   (eformat "</IMETHODRESPONSE>~%"))
 
 ;;<!ELEMENT ERROR (INSTANCE*)
 ;;<!ATTLIST ERROR
 ;;              CODE        CDATA   #REQUIRED
 ;;              DESCRIPTION CDATA   #IMPLIED>
-(defun encode-error (code &optional instances)
+(defun encode-cimxml-error (code &optional instances)
   (eformat "<ERROR CODE=\"~A\">~%" code)
   (when instances
 	(dolist (instance instances)
-	  (encode-instance instance)))
+	  (encode-cimxml-instance instance)))
   (eformat "</ERROR>~%"))
 
 
@@ -649,53 +675,53 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ATTLIST RETURNVALUE
 ;;         %EmbeddedObject;
 ;;     %ParamType;     #IMPLIED>
-(defun encode-returnvalue (value)
+(defun encode-cimxml-returnvalue (value)
   (eformat "<RETURNVALUE>~%")
   (if (cim-reference-p value)
-	  (encode-value.reference value)
-	  (encode-value value))
+	  (encode-cimxml-value.reference value)
+	  (encode-cimxml-value value))
   (eformat "</RETURNVALUE>~%"))
 	  
 ;;<!ELEMENT IRETURNVALUE (CLASSNAME*|INSTANCENAME*|VALUE*|VALUE.OBJECTWITHPATH*|VALUE.OBJECTWITHLOCALPATH*
 ;;              VALUE.OBJECT*|OBJECTPATH*|QUALIFIER.DECLARATION*|VALUE.ARRAY?|VALUE.REFERENCE?|
 ;;               CLASS*|INSTANCE*|VALUE.NAMEDINSTANCE*)>
-(defun encode-ireturnvalue (return-type value)
+(defun encode-cimxml-ireturnvalue (return-type value)
   (eformat "<IRETURNVALUE>~%")
   (ecase return-type
 	(:classname
 	 (dolist (class-name value)
-	   (encode-classname class-name)))
+	   (encode-cimxml-classname class-name)))
 	(:instancename
 	 (dolist (instance value)
-	   (encode-instancename (cim-name (class-of instance))
+	   (encode-cimxml-instancename (cim-name (class-of instance))
 							(instance-key-slots instance))))
 	(:value
 	 (dolist (v value)
-	   (encode-value v)))
+	   (encode-cimxml-value v)))
 	(:value.objectwithpath
 	 (destructuring-bind (object path) value
-	   (encode-value.objectwithpath object path)))
+	   (encode-cimxml-value.objectwithpath object path)))
 	(:value.objectwithlocalpath
 	 (destructuring-bind (object path) value
-	   (encode-value.objectwithlocalpath object path)))
+	   (encode-cimxml-value.objectwithlocalpath object path)))
 	(:value.object
 	 (dolist (object value)
-	   (encode-value.object object)))
+	   (encode-cimxml-value.object object)))
 	((:objectpath)
 	 (destructuring-bind (path class-name &optional key-slots) value
-	   (encode-objectpath path class-name key-slots)))
+	   (encode-cimxml-objectpath path class-name key-slots)))
 	(:value.array
-	 (encode-value.array value))
+	 (encode-cimxml-value.array value))
 	(:value.reference
-	 (encode-value.reference value))
+	 (encode-cimxml-value.reference value))
 	(:class
 	 (dolist (class value)
-	   (encode-class class)))
+	   (encode-cimxml-class class)))
 	(:instance
 	 (dolist (instance value)
-	   (encode-instance instance)))
+	   (encode-cimxml-instance instance)))
 	(:value.namedinstance
-	 (encode-value.namedinstance value)))
+	 (encode-cimxml-value.namedinstance value)))
   (eformat "</IRETURNVALUE>~%"))
 
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
@@ -717,4 +743,215 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT EXPPARAMVALUE (INSTANCE?)>
 ;;<!ATTLIST EXPPARAMVALUE 
 ;;    %CIMName;>
+
+
+
+
+;;; --------------
+
+(defun encode-cimxml-request (method-name
+					   &key (id 1) (namespace "root") intrinsic-p
+					   arguments class-name key-slots)					   
+  (encode-cimxml-cim
+   (make-cim-message
+	:id id
+	:request
+	(make-cim-request
+	 :method-name method-name
+	 :intrinsic-p intrinsic-p
+	 :namespace-path
+	 (make-namespace-path
+	  :namespace-list (parse-namespace namespace))
+	 :arguments arguments
+	 :reference
+	 (make-cim-reference
+	  :namespace namespace
+	  :classname class-name
+	  :keyslots key-slots)))))
+
+;; <class>GetClass ( 
+;;         [IN] <className> ClassName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun encode-get-class (class-name &key
+						 (namespace "root")
+						 (local-only t)
+						 (include-qualifiers t)
+						 include-class-origin
+						 property-list)
+  (encode-cimxml-request
+   "GetClass"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("ClassName" ,class-name :classname)
+	 ("LocalOnly" ,(encode-cimxml-boolean local-only) :value)
+	 ("IncludeQualifiers" ,(encode-cimxml-boolean include-qualifiers) :value)
+	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
+	 ("PropertyList" ,property-list :value.array))))
+	 
+;; <instance>GetInstance ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun encode-get-instance (instance-name &key
+							(namespace "root")
+							include-class-origin
+							property-list)
+  (encode-cimxml-request
+   "GetInstance"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("InstanceName" ,instance-name :instancename)
+	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
+	 ("PropertyList" ,property-list :value.array))))
+  
+
+;;void  DeleteClass (
+;;        [IN] <className> ClassName 
+;; )
+
+;;void  DeleteInstance ( 
+;;         [IN] <instanceName> InstanceName 
+;; )
+(defun encode-delete-instance (instance &key (namespace "root"))
+  (encode-cimxml-request
+   "DeleteInstance"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("InstanceName" ,instance :instancename))))
+
+;;void CreateClass ( 
+;;        [IN] <class> NewClass 
+;; )
+
+;;CreateInstance
+;; <instanceName>CreateInstance ( 
+;;        [IN] <instance> NewInstance 
+;; )
+(defun encode-create-instance (instance &key (namespace "root"))
+  (encode-cimxml-request
+   "CreateInstance"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("NewInstance" ,instance :instance))))
+  
+;;void ModifyClass ( 
+;;        [IN] <class> ModifiedClass 
+;; )
+
+;;void ModifyInstance ( 
+;;        [IN] <namedInstance> ModifiedInstance, 
+;;        [IN, OPTIONAL] boolean IncludeQualifiers = true,  (DEPRECATED)
+;;        [IN, OPTIONAL, NULL] string propertyList[] = NULL 
+;; )
+(defun encode-modify-instance (instance &key (namespace "root") property-list)
+  (encode-cimxml-request
+   "ModifyInstance"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("ModifiedInstance" ,instance :value.namedinstance)
+	 ("propertyList" ,property-list :value.array))))
+
+
+;; <class>*EnumerateClasses ( 
+;;         [IN,OPTIONAL,NULL] <className> ClassName=NULL, 
+;;         [IN,OPTIONAL] boolean DeepInheritance = false,
+;;         [IN,OPTIONAL] boolean LocalOnly = true, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false 
+;; )
+
+;;<className>*EnumerateClassNames ( 
+;;         [IN,OPTIONAL,NULL] <className> ClassName = NULL, 
+;;         [IN,OPTIONAL] boolean DeepInheritance = false 
+;; )
+
+;;<namedInstance>*EnumerateInstances ( 
+;;         [IN] <className> ClassName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean DeepInheritance = true, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+
+;;<instanceName>*EnumerateInstanceNames ( 
+;;         [IN] <className> ClassName 
+;; )
+
+;; <object>*ExecQuery ( 
+;;         [IN] string QueryLanguage, 
+;;         [IN] string Query 
+;; )
+
+;; <objectWithPath>*Associators ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL,
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL,NULL] string ResultRole = NULL, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false, (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+
+;; <objectPath>*AssociatorNames ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
+;; )
+
+;; <objectWithPath>*References ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL,
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+				   
+;;<objectPath>*ReferenceNames ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL 
+;; )
+
+;; <propertyValue>GetProperty ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN] string PropertyName 
+;; )
+
+;; void SetProperty ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN] string PropertyName, 
+;;         [IN,OPTIONAL,NULL] <propertyValue> NewValue = NULL 
+;; )
+
+;; <qualifierDecl>GetQualifier ( 
+;;         [IN] string QualifierName 
+;; )
+
+;; void SetQualifier ( 
+;;         [IN] <qualifierDecl> QualifierDeclaration 
+;; )
+
+;; void DeleteQualifier ( 
+;;         [IN] string QualifierName 
+;; )
+
+;; <qualifierDecl>*EnumerateQualifiers ( 
+;; )
 
