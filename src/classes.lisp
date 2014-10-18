@@ -172,7 +172,21 @@ If CHILDREN is T all the CIM subclasses are also added."
         (cim-class-key-slots object)
         (cim-class-key-slots (class-of object)))))
 
+(defun instance-slots (instance)
+  (let ((slots (cim-class-slots (class-of instance))))
+	(mapcar (lambda (slot)
+			  (list (cim-name slot)
+					(slot-value instance (class-name slot))
+					(cim-slot-type slot)))
+			slots)))
 
+(defun instance-key-slots (instance)
+  (let ((slots (cim-key-slots instance)))
+	(mapcar (lambda (slot)
+			  (list (cim-name slot)
+					(slot-value instance (class-name slot))
+					(cim-slot-type slot)))
+			slots)))
 
 (defmacro defcim (name direct-superclasses slots &rest options)
   `(progn

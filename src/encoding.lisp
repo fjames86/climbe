@@ -130,12 +130,51 @@
   (eformat "</VALUE.OBJECT>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDINSTANCE (INSTANCENAME,INSTANCE)>
+(defun encode-value.namedinstance (instance)
+  (eformat "<VALUE.NAMEDINSTANCE>~%")
+  (let ((class (class-of instance)))
+	(encode-instancename (cim-name class)
+						 (instance-key-slots instance)))
+  (encode-instance instance)
+  (eformat "</VALUE.NAMEDINSTANCE>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDOBJECT (CLASS|(INSTANCENAME,INSTANCE))>
+(defun encode-value.namedobject (object)
+  (eformat "<VALUE.NAMEDOBJECT>~%")
+  (cond
+	((typep object 'cim-class)
+	 (encode-class object))
+	(t
+	 (let ((class (class-of object)))
+	   (encode-instancename (cim-name class) (instance-slots object))
+	   (encode-instance object))))
+  (eformat "</VALUE.NAMEDOBJECT>~%"))
 
 ;;<!ELEMENT VALUE.OBJECTWITHPATH ((CLASSPATH,CLASS)|(INSTANCEPATH,INSTANCE))>
-
+(defun encode-value.objectwithpath (object namespace-path)
+  (eformat "<VALUE.OBJECTWITHPATH>~%")
+  (cond
+	((typep object 'cim-class)
+	 (encode-classpath namespace-path (cim-name object))
+	 (encode-class object))
+	(t
+	 (let ((class (class-of object)))
+	   (encode-instancepath namespace-path (cim-name class) (instance-slots object))
+	   (encode-instance object))))
+  (eformat "</VALUE.OBJECTWITHPATH>~%"))
+  
 ;;<!ELEMENT VALUE.OBJECTWITHLOCALPATH ((LOCALCLASSPATH,CLASS)|(LOCALINSTANCEPATH,INSTANCE))>
+(defun encode-value.objectwithlocalpath (object namespace-list)
+  (eformat "<VALUE.OBJECTWITHLOCALPATH>~%")
+  (cond
+	((typep object 'cim-class)
+	 (encode-localclasspath namespace-list (cim-name object))
+	 (encode-class object))
+	(t
+	 (let ((class (class-of object)))
+	   (encode-localinstancepath namespace-list (cim-name class) (instance-slots object))
+	   (encode-instance object))))
+  (eformat "</VALUE.OBJECTWITHLOCALPATH>~%"))
 
 ;;<!ELEMENT VALUE.NULL EMPTY>
 (defun encode-null ()
@@ -530,12 +569,38 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT IMETHODCALL (LOCALNAMESPACEPATH,IPARAMVALUE*)>
 ;;<!ATTLIST IMETHODCALL
 ;;     %CIMName;>
+(defun encode-imethodcall (method-name namespace-list params)
+  (eformat "<IMETHODCALL NAME=\"~A\">~%" method-name)
+  (encode-localnamespacepath namespace-list)
+  (dolist (param-value params)
+	(destructuring-bind (name param-type value) param-value
+	  (encode-iparamvalue name param-type value)))
+  (eformat "</IMETHODCALL>~%"))
 
 ;;<!ELEMENT IPARAMVALUE (VALUE|VALUE.ARRAY|VALUE.REFERENCE|CLASSNAME|INSTANCENAME|QUALIFIER.DECLARATION|
 ;;              CLASS|INSTANCE|VALUE.NAMEDINSTANCE)?>
 ;;<!ATTLIST IPARAMVALUE
 ;;     %CIMName;>
-
+(defun encode-iparamvalue (name param-type value)
+  (eformat "<IPARAMVALUE NAME=\"~A\">~%" name)
+  (ecase param-type
+	(:value
+	 (encode-value value))
+	(:classname
+	 (encode-classname value))
+	(:instancename
+	 (let ((class (class-of value)))
+	   (encode-instancename (cim-name class) (instance-key-slots value))))
+	(:qualifier.declaration
+	 (error "FIXME!!!"))
+	(:class
+	 (encode-class value))
+	(:instance
+	 (encode-instance value))
+	(:value.namedinstance
+	 (encode-value.namedinstance value)))
+  (eformat "</IPARAMVALUE>~%"))
+  
 ;; <!ELEMENT MULTIRSP (SIMPLERSP,SIMPLERSP+)>
 (defun encode-multirsp (response-list)
   (eformat "<MULTIRSP>~%")
@@ -552,10 +617,21 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT METHODRESPONSE (ERROR|(RETURNVALUE?,PARAMVALUE*))>
 ;;<!ATTLIST METHODRESPONSE
 ;;           %CIMName;>
-
+(defun encode-methodresponse (method-name value out-params)
+  (eformat "<METHODRESPONSE NAME=\"~A\">~%" method-name)
+  (encode-returnvalue value)
+  (dolist (out-param out-params)
+	(destructuring-bind (name val type) out-param
+	  (encode-paramvalue name val type)))
+  (eformat "</METHODNAME>~%"))
+  
 ;;<!ELEMENT IMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST IMETHODRESPONSE
 ;;           %CIMName;>
+(defun encode-imethodresponse (method-name return-type value)
+  (eformat "<IMETHODRESPONSE NAME=\"~A\">~%" method-name)
+  (encode-ireturnvalue return-type value)
+  (eformat "</IMETHODRESPONSE>~%"))
 
 ;;<!ELEMENT ERROR (INSTANCE*)
 ;;<!ATTLIST ERROR
@@ -583,8 +659,44 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT IRETURNVALUE (CLASSNAME*|INSTANCENAME*|VALUE*|VALUE.OBJECTWITHPATH*|VALUE.OBJECTWITHLOCALPATH*
 ;;              VALUE.OBJECT*|OBJECTPATH*|QUALIFIER.DECLARATION*|VALUE.ARRAY?|VALUE.REFERENCE?|
 ;;               CLASS*|INSTANCE*|VALUE.NAMEDINSTANCE*)>
-
-
+(defun encode-ireturnvalue (return-type value)
+  (eformat "<IRETURNVALUE>~%")
+  (ecase return-type
+	(:classname
+	 (dolist (class-name value)
+	   (encode-classname class-name)))
+	(:instancename
+	 (dolist (instance value)
+	   (encode-instancename (cim-name (class-of instance))
+							(instance-key-slots instance))))
+	(:value
+	 (dolist (v value)
+	   (encode-value v)))
+	(:value.objectwithpath
+	 (destructuring-bind (object path) value
+	   (encode-value.objectwithpath object path)))
+	(:value.objectwithlocalpath
+	 (destructuring-bind (object path) value
+	   (encode-value.objectwithlocalpath object path)))
+	(:value.object
+	 (dolist (object value)
+	   (encode-value.object object)))
+	((:objectpath)
+	 (destructuring-bind (path class-name &optional key-slots) value
+	   (encode-objectpath path class-name key-slots)))
+	(:value.array
+	 (encode-value.array value))
+	(:value.reference
+	 (encode-value.reference value))
+	(:class
+	 (dolist (class value)
+	   (encode-class class)))
+	(:instance
+	 (dolist (instance value)
+	   (encode-instance instance)))
+	(:value.namedinstance
+	 (encode-value.namedinstance value)))
+  (eformat "</IRETURNVALUE>~%"))
 
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
 

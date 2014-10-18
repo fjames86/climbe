@@ -63,6 +63,8 @@
    :find-cim-class
    :add-class-to-namespace
    :cim-key-slots
+   :instance-slots
+   :instance-key-slots
    :cim-class-methods
    :cim-name
    :cim-qualifiers
