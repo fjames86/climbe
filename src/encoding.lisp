@@ -1,9 +1,12 @@
 
 (in-package :climbe)
 
+;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0200_1.4.0.pdf
+;; http://www.dmtf.org/sites/default/files/standards/documents/DSP200.html
+
 (defconstant* +cim-version+ "2.0")
-(defconstant* +dtd-version+ "2.1")
-(defconstant* +protocol-version+ +cim-version+)
+(defconstant* +dtd-version+ "2.0")
+(defconstant* +protocol-version+ "1.0")
 
 (defun eformat (format-string &rest args)
   "Encoding format function."
@@ -18,7 +21,7 @@
 
 (defun encode-cimxml-type (type)
   "Returns the CIM string representation of the Lisp type."
-  (string type))
+  (string-downcase (string type)))
 
 ;;<!ELEMENT CIM (MESSAGE|DECLARATION)>
 ;;<!ATTLIST CIM
@@ -354,7 +357,8 @@
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
 (defun encode-cimxml-property (slot &optional value)
-  (eformat "<PROPERTY NAME=\"~A\" TYPE=\"~A\">~%" (cim-name slot) (encode-cimxml-type (cim-slot-type slot)))
+  (eformat "<PROPERTY NAME=\"~A\" TYPE=\"~A\">~%"
+		   (cim-name slot) (encode-cimxml-type (cim-slot-type slot)))
   (dolist (qualifier (cim-qualifiers slot))
 	(destructuring-bind (q . v) qualifier
 	  (encode-cimxml-qualifier q v)))
@@ -509,7 +513,9 @@
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
 (defun encode-cimxml-message (message)
   (let ((request (cim-message-request message))
-	(response (cim-message-response message)))
+		(response (cim-message-response message))
+		(exp-request (cim-message-exp-request message))
+		(exp-response (cim-message-exp-response message)))
     (eformat "<MESSAGE ID=\"~A\" PROTOCOLVERSION=\"~A\">~%"
 	     (cim-message-id message)
 	     +protocol-version+)
@@ -517,13 +523,23 @@
       ((consp request)
        ;; list of requests, i.e. a multireq node
        (encode-cimxml-multireq request))
-      ((atom request)
+      (request
        (encode-cimxml-simplereq request))
       ((consp response)
        ;; list of responses, i.e. a multirsp node
        (encode-cimxml-multirsp response))
-      ((atom response)
+      (response
        (encode-cimxml-simplersp response))
+	  ((and exp-request (listp (car exp-request)))
+	   (encode-cimxml-multiexpreq exp-request))
+	  (exp-request
+	   (destructuring-bind (method-name params) exp-request
+		 (encode-cimxml-simpleexpreq method-name params)))
+	  ((and exp-response (listp (car exp-response)))
+	   (encode-cimxml-multiexprsp exp-response))
+	  (exp-response
+	   (destructuring-bind (method-name return-type value) exp-response
+		 (encode-cimxml-simpleexprsp method-name return-type value)))
       (t (error "Unable to handle message ~S" message)))
     (eformat "</MESSAGE>~%")))
 
@@ -637,7 +653,15 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT SIMPLERSP (METHODRESPONSE|IMETHODRESPONSE)>
 (defun encode-cimxml-simplersp (response)
   (eformat "<SIMPLERSP>~%")
-  (eformat "~A~%" response)
+  (if (cim-response-intrinsic-p response)
+	  (encode-cimxml-imethodresponse
+	   (cim-response-method-name response)
+	   (cim-response-return-type response)
+	   (cim-response-return-value response))
+	  (encode-cimxml-methodresponse
+	   (cim-response-method-name response)
+	   (cim-response-return-value response)
+	   (cim-response-out-parameters response)))
   (eformat "</SIMPLERSP>~%"))
 
 ;;<!ELEMENT METHODRESPONSE (ERROR|(RETURNVALUE?,PARAMVALUE*))>
@@ -689,15 +713,22 @@ PARAM-VALUES is a list of form (name value type)."
   (eformat "<IRETURNVALUE>~%")
   (ecase return-type
 	(:classname
-	 (dolist (class-name value)
-	   (encode-cimxml-classname class-name)))
+	 (if (consp value)
+		 (dolist (class-name value)
+		   (encode-cimxml-classname class-name))
+		 (encode-cimxml-classname value)))
 	(:instancename
-	 (dolist (instance value)
-	   (encode-cimxml-instancename (cim-name (class-of instance))
-							(instance-key-slots instance))))
+	 (if (consp value)
+		 (dolist (instance value)
+		   (encode-cimxml-instancename (cim-name (class-of instance))
+									   (instance-key-slots instance)))
+		 (encode-cimxml-instancename (cim-name (class-of value))
+									 (instance-key-slots value))))
 	(:value
-	 (dolist (v value)
-	   (encode-cimxml-value v)))
+	 (if (consp value)
+		 (dolist (v value)
+		   (encode-cimxml-value v))
+		 (encode-cimxml-value value)))
 	(:value.objectwithpath
 	 (destructuring-bind (object path) value
 	   (encode-cimxml-value.objectwithpath object path)))
@@ -705,8 +736,10 @@ PARAM-VALUES is a list of form (name value type)."
 	 (destructuring-bind (object path) value
 	   (encode-cimxml-value.objectwithlocalpath object path)))
 	(:value.object
-	 (dolist (object value)
-	   (encode-cimxml-value.object object)))
+	 (if (consp value)
+		 (dolist (object value)
+		   (encode-cimxml-value.object object))
+		 (encode-cimxml-value.object value)))
 	((:objectpath)
 	 (destructuring-bind (path class-name &optional key-slots) value
 	   (encode-cimxml-objectpath path class-name key-slots)))
@@ -715,35 +748,72 @@ PARAM-VALUES is a list of form (name value type)."
 	(:value.reference
 	 (encode-cimxml-value.reference value))
 	(:class
-	 (dolist (class value)
-	   (encode-cimxml-class class)))
+	 (if (consp value)
+		 (dolist (class value)
+		   (encode-cimxml-class class))
+		 (encode-cimxml-class value)))
 	(:instance
-	 (dolist (instance value)
-	   (encode-cimxml-instance instance)))
+	 (if (consp value)
+		 (dolist (instance value)
+		   (encode-cimxml-instance instance))
+		 (encode-cimxml-instance value)))
 	(:value.namedinstance
 	 (encode-cimxml-value.namedinstance value)))
   (eformat "</IRETURNVALUE>~%"))
 
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
+(defun encode-cimxml-multiexpreq (requests)
+  (eformat "<MULTIEXPREQ>~%")
+  (dolist (request requests)
+	(destructuring-bind (method-name params) request
+	  (encode-cimxml-simpleexpreq method-name params)))
+  (eformat "</MULTIEXPREQ>~%"))
 
 ;;<!ELEMENT SIMPLEEXPREQ (EXPMETHODCALL)>
+(defun encode-cimxml-simpleexpreq (method-name params)
+  (eformat "<SIMPLEEXPREQ>~%")
+  (encode-cimxml-expmethodcall method-name params)
+  (eformat "</SIMPLEEXPREQ>~%"))
 
 ;;<!ELEMENT EXPMETHODCALL (EXPPARAMVALUE*)>
 ;;<!ATTLIST EXPMETHODCALL 
 ;;    %CIMName;>
+(defun encode-cimxml-expmethodcall (method-name params)
+  (eformat "<EXPMETHODCALL NAME=\"~A\">~%" method-name)
+  (dolist (param params)
+	(destructuring-bind (name value) param
+	  (encode-cimxml-expparamvalue name value)))
+  (eformat "</EXPMETHODCALL>~%"))
 
 ;;<!ELEMENT MULTIEXPRSP (SIMPLEEXPRSP,SIMPLEEXPRSP+)>
+(defun encode-cimxml-multiexprsp (responses)
+  (eformat "<MULTIEXPRSP>~%")
+  (dolist (response responses)
+	(destructuring-bind (method-name return-type value) response
+	  (encode-cimxml-simpleexprsp method-name return-type value)))
+  (eformat "</MULTIEXPRSP>~%"))
 
 ;;<!ELEMENT SIMPLEEXPRSP (EXPMETHODRESPONSE)>
+(defun encode-cimxml-simpleexprsp (method-name return-type value)
+  (eformat "<SIMPLEEXPRSP>~%")
+  (encode-cimxml-expmethodresponse method-name return-type value)
+  (eformat "</SIMPLEEXPRSP>~%"))
 
 ;;<!ELEMENT EXPMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST EXPMETHODRESPONSE
 ;;      %CIMName;>
+(defun encode-cimxml-expmethodresponse (method-name return-type value)
+  (eformat "<EXPMETHODRESPONSE NAME=\"~A\">~%" method-name)
+  (encode-cimxml-ireturnvalue return-type value)
+  (eformat "</EXPMETHODRESPONSE>~%"))
 
 ;;<!ELEMENT EXPPARAMVALUE (INSTANCE?)>
 ;;<!ATTLIST EXPPARAMVALUE 
 ;;    %CIMName;>
-
+(defun encode-cimxml-expparamvalue (name value)
+  (eformat "<EXPPARAMVALUE NAME=\"~A\">~%" name)
+  (encode-cimxml-instance value)
+  (eformat "</EXPPARAMVALUE>~%"))
 
 
 
@@ -752,7 +822,7 @@ PARAM-VALUES is a list of form (name value type)."
 (defun encode-cimxml-request (method-name
 					   &key (id 1) (namespace "root") intrinsic-p
 					   arguments class-name key-slots)
-  "Encode a full CIM request message."
+  "Encode a CIM request message."
   (encode-cimxml-cim
    (make-cim-message
 	:id id
@@ -1080,4 +1150,55 @@ PARAM-VALUES is a list of form (name value type)."
    :namespace namespace))
 
 
+;; you can subscribe to an indicaiton by creating an instance of
+;; CIM_IndicationSubscription class which is an association class
+;; between CIM_IndicationFilter and CIM_IndicationHandler classes.
+;; CIM_IndicationFilter defines the filter criteria and data
+;; project list to describe the desired indication stream.
+;; CIM_IndicationHandler defines the desired indication encoding,
+;; destination location, and protocol for delivering the indication stream.
+(defun encode-subscribe ()
+  nil)
 
+;; delete the instances created above?
+(defun encode-unsubscribe ()
+  nil)
+
+
+;; --------------- export messsages ------
+
+(defun encode-cimxml-exp-request (method-name &key (id 1) params)
+  "Encode an export request."
+  (encode-cimxml-cim
+   (make-cim-message
+	:id id
+	:exp-request
+	(list method-name params))))
+
+;; ExportIndication
+;;  void ExportIndication ( 
+;;         [IN] <instance> NewIndication 
+;;  )
+(defun encode-export-indication (instance)
+  (encode-cimxml-exp-request
+   "ExportIndication"
+   :params
+   `(("NewIndication" ,instance))))
+
+
+
+;; ------------------
+
+(defun encode-cimxml-response (method-name return-value &key
+							   (id 1) intrinsic-p return-type
+							   out-parameters) 
+  (encode-cimxml-cim
+   (make-cim-message
+	:response
+	(make-cim-response
+	 :method-name method-name
+	 :intrinsic-p intrinsic-p
+	 :return-value return-value
+	 :return-type return-type
+	 :out-parameters out-parameters)
+	:id id)))
