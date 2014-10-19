@@ -751,7 +751,8 @@ PARAM-VALUES is a list of form (name value type)."
 
 (defun encode-cimxml-request (method-name
 					   &key (id 1) (namespace "root") intrinsic-p
-					   arguments class-name key-slots)					   
+					   arguments class-name key-slots)
+  "Encode a full CIM request message."
   (encode-cimxml-cim
    (make-cim-message
 	:id id
@@ -863,7 +864,6 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ModifiedInstance" ,instance :value.namedinstance)
 	 ("propertyList" ,property-list :value.array))))
 
-
 ;; <class>*EnumerateClasses ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName=NULL, 
 ;;         [IN,OPTIONAL] boolean DeepInheritance = false,
@@ -871,11 +871,35 @@ PARAM-VALUES is a list of form (name value type)."
 ;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false 
 ;; )
+(defun encode-enumerate-classes (&key
+								 (namespace "root") class-name deep-inheritance
+								 (local-only t) (include-qualifiers t)
+								 include-class-origin)
+  (encode-cimxml-request
+   "EnumerateClasses"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(,@(when class-name `(("ClassName" ,class-name :classname)))
+	   ("DeepInheritance" ,(encode-cimxml-boolean deep-inheritance) :value)
+	   ("LocalOnly" ,(encode-cimxml-boolean local-only) :value)
+	   ("IncludeQualifiers" ,(encode-cimxml-boolean include-qualifiers) :value)
+	   ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value))))
 
 ;;<className>*EnumerateClassNames ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName = NULL, 
 ;;         [IN,OPTIONAL] boolean DeepInheritance = false 
 ;; )
+(defun encode-enumerate-class-names (&key
+									 (namespace "root") class-name
+									 deep-inheritance)
+  (encode-cimxml-request
+   "EnumerateClassNames"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(,@(when class-name `(("ClassName" ,class-name :classname)))
+	   ("DeepInheritance" ,(encode-cimxml-boolean deep-inheritance) :value))))
 
 ;;<namedInstance>*EnumerateInstances ( 
 ;;         [IN] <className> ClassName, 
@@ -885,11 +909,30 @@ PARAM-VALUES is a list of form (name value type)."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun encode-enumerate-instances (class-name &key
+								 (namespace "root") (deep-inheritance t)
+								 include-class-origin property-list)
+  (encode-cimxml-request
+   "EnumerateInstances"
+   :namespace namespace
+   :intrinsic-p t
+   :arguments
+   `(("ClassName" ,class-name :classname)
+	 ("DeepInheritance" ,(encode-cimxml-boolean deep-inheritance) :value)
+	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
+	 ("PropertyList" ,property-list :value.array))))
 
 ;;<instanceName>*EnumerateInstanceNames ( 
 ;;         [IN] <className> ClassName 
 ;; )
-
+(defun encode-enumerate-instance-names (class-name &key (namespace "root"))
+  (encode-cimxml-request
+   "EnumerateInstanceNames"
+   :intrinsic-p t
+   :namespace namespace
+   :arguments
+   `(("ClassName" ,class-name :classname))))
+										
 ;; <object>*ExecQuery ( 
 ;;         [IN] string QueryLanguage, 
 ;;         [IN] string Query 
@@ -905,7 +948,28 @@ PARAM-VALUES is a list of form (name value type)."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
-
+(defun encode-associators (object-name &key
+						   (namespace "root")
+						   assoc-class result-class role result-role
+						   include-class-origin property-list)
+  (encode-cimxml-request
+   "Associators"
+   :intrinsic-p t
+   :namespace namespace
+   :arguments
+   `(("ObjectName" ,object-name ,(cond
+								  ((cim-instance-p object-name)
+								   :value.namedinstance)
+								  ((typep object-name 'cim-class)
+								   :class)
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
+	 ,@(when assoc-class `(("AssocClass" ,assoc-class :classname)))
+	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
+	 ,@(when role `(("Role" ,role :value)))
+	 ,@(when result-role `(("ResultRole" ,result-role :value)))
+	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
+	 ("PropertyList" ,property-list :value.array))))
+				   
 ;; <objectPath>*AssociatorNames ( 
 ;;         [IN] <objectName> ObjectName, 
 ;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL, 
@@ -913,6 +977,24 @@ PARAM-VALUES is a list of form (name value type)."
 ;;         [IN,OPTIONAL,NULL] string Role = NULL, 
 ;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
 ;; )
+(defun encode-associator-names (object-name &key
+								(namespace "root")
+								assoc-class result-class role result-role)
+  (encode-cimxml-request
+   "AssociatorNames"
+   :intrinsic-p t
+   :namespace namespace
+   :arguments
+   `(("ObjectName" ,object-name ,(cond
+								  ((cim-instance-p object-name)
+								   :value.namedinstance)
+								  ((typep object-name 'cim-class)
+								   :class)
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
+	 ,@(when assoc-class `(("AssocClass" ,assoc-class :classname)))
+	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
+	 ,@(when role `(("Role" ,role :value)))
+	 ,@(when result-role `(("ResultRole" ,result-role :value))))))
 
 ;; <objectWithPath>*References ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -922,12 +1004,49 @@ PARAM-VALUES is a list of form (name value type)."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun encode-references (object-name &key
+						  (namespace "root")
+						  result-class role result-role
+						  include-class-origin property-list)
+  (encode-cimxml-request
+   "References"
+   :intrinsic-p t
+   :namespace namespace
+   :arguments
+   `(("ObjectName" ,object-name ,(cond
+								  ((cim-instance-p object-name)
+								   :value.namedinstance)
+								  ((typep object-name 'cim-class)
+								   :class)
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
+	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
+	 ,@(when role `(("Role" ,role :value)))
+	 ,@(when result-role `(("ResultRole" ,result-role :value)))
+	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
+	 ("PropertyList" ,property-list :value.array))))
+
 				   
 ;;<objectPath>*ReferenceNames ( 
 ;;         [IN] <objectName> ObjectName, 
 ;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
 ;;         [IN,OPTIONAL,NULL] string Role = NULL 
 ;; )
+(defun encode-reference-names (object-name &key
+						  (namespace "root")
+						  result-class role)
+  (encode-cimxml-request
+   "ReferenceNames"
+   :intrinsic-p t
+   :namespace namespace
+   :arguments
+   `(("ObjectName" ,object-name ,(cond
+								  ((cim-instance-p object-name)
+								   :value.namedinstance)
+								  ((typep object-name 'cim-class)
+								   :class)
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
+	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
+	 ,@(when role `(("Role" ,role :value))))))
 
 ;; <propertyValue>GetProperty ( 
 ;;         [IN] <instanceName> InstanceName, 
@@ -954,4 +1073,11 @@ PARAM-VALUES is a list of form (name value type)."
 
 ;; <qualifierDecl>*EnumerateQualifiers ( 
 ;; )
+(defun encode-enumerate-qualifiers (&key (namespace "root"))
+  (encode-cimxml-request
+   "EnumerateQualifiers"
+   :intrinsic-p t
+   :namespace namespace))
+
+
 
