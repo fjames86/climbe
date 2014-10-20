@@ -11,7 +11,7 @@ CIMOM
 Providers are implemented by defining regular CLOS classes and specializing certain generics.
 
 ```
-(defcim person ()
+(defcim-class person ()
   ((name string
          :cim-name "Name"
 		 :qualifiers (:key (:description "Name of person"))
@@ -31,12 +31,26 @@ Providers are implemented by defining regular CLOS classes and specializing cert
       (make-instance 'person :name "Bob" :age 31)
 	  (error :not-found)))
 
+(defcim-method hello ((instance person) (message string "Message" :in (:description "Message to say")))
+  ((:cim-name "Hello")
+   (:return-type string)
+   (:qualifiers (:description "Say hello")))
+ (format nil "Hello, ~A" message))
+ 
 ```
 
 Client
 -------
 
-Not yet written.
+Each of the intrinsic methods has an encoding function to generate the
+CIM-XML content. Use the CALL-CIM-SERVER function.
+
+```
+;; call EnumerateInstances
+(call-cim-server (encode-enumerate-instances "Person" :namespace "root/cimv2")
+                 :uri "http://my-server:5898/cimom")
+
+```
 
 Server
 ------
