@@ -1,6 +1,7 @@
 
 (defpackage :climbe
   (:use :cl)
+;;  (:nicknames :cim)
   (:export
    ;; utils
    :defconstant*
@@ -22,6 +23,7 @@
    :cim-namespace-path
    :cim-namespace-path-host
    :cim-namespace-path-namespace-list 
+   :cim-namespace-classes
    :namespace-path-host 
    :namespace-path-namespace-list 
    :parse-namespace
@@ -62,19 +64,19 @@
    :cim-class-subclasses
    :find-cim-class
    :add-class-to-namespace
+   :remove-class-from-namespace
    :cim-key-slots
    :instance-slots
    :instance-key-slots
    :cim-class-methods
    :cim-name
    :cim-qualifiers
-   :def-cim-class
-   :def-cim-method
    :find-cim-method
    :invoke-method
    :cim-method
    :cim-method-parameters
-   :defcim
+   :defcim-class
+   :defcim-method
    :cim-parameter  
    :cim-parameter-type
    

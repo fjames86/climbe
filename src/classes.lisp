@@ -41,12 +41,10 @@
 
 (defmethod closer-mop:direct-slot-definition-class ((class cim-class) &rest initargs)
   (declare (ignore initargs))
-  ;;  (break (format nil "~S" initargs))
   (find-class 'cim-standard-direct-slot-definition))
 
 (defmethod closer-mop:effective-slot-definition-class ((class cim-class) &rest initargs)
   (declare (ignore initargs))
-  ;;  (break (format nil "~S" initargs))
   (find-class 'cim-standard-effective-slot-definition))
 
 
@@ -157,7 +155,24 @@ If CHILDREN is T all the CIM subclasses are also added."
       (add-class-to-namespace ch ns :children t)))
   class)
 
+(defun remove-class-from-namespace (class ns &key (children t) super-classes)
+  "Remove a class from a namespace.
 
+If CHILDREN is T all the CIM subclasses are also removed.
+
+If SUPER-CLASSES is T all the superclasses are also removed."
+  (when (symbolp class)
+    (setf class (find-class class)))
+  (let ((classes (cim-namespace-classes ns))
+        (rlist (append (list class) 
+                       (when super-classes (cim-class-superclasses class))
+                       (when children (cim-class-subclasses class)))))
+    (setf (cim-namespace-classes ns)
+          (remove-if (lambda (cl)
+                       (member cl rlist))
+                     classes))
+    class))
+    
 (defun cim-key-slots (object)
   "Find the slots marked with the KEY qualifier."
   (flet ((cim-class-key-slots (class)
@@ -188,7 +203,7 @@ If CHILDREN is T all the CIM subclasses are also added."
 					(cim-slot-type slot)))
 			slots)))
 
-(defmacro defcim (name direct-superclasses slots &rest options)
+(defmacro defcim-class (name direct-superclasses slots &rest options)
   `(progn
      ;; define the class
      (defclass ,name ,direct-superclasses 
@@ -220,7 +235,7 @@ If CHILDREN is T all the CIM subclasses are also added."
   name type qualifiers)
 
 (defstruct cim-method
-  name return-type parameters qualifiers function)
+  name return-type in-params out-params qualifiers function)
 
 (defmethod cim-name ((method cim-method))
   (cim-method-name method))
@@ -249,35 +264,78 @@ If CHILDREN is T all the CIM subclasses are also added."
   nil)
 
 
-(defmacro def-cim-method (name ((instance-var class-name) &rest parameters) options &body body)
-  (let ((gmethod (gensym "METHOD")))
-    `(let ((,gmethod (make-cim-method :name ,(cadr (assoc :cim-name options))
-                                      :return-type ',(cadr (assoc :return-type options))
-                                      :qualifiers (make-qualifiers-list (list ,@(qualifiers-list-helper (cdr (assoc :qualifiers options)))))
-                                      :parameters (list ,@(mapcar (lambda (parameter)
-                                                                    (destructuring-bind (lisp-name type cim-name &rest qualifiers) parameter
-                                                                      `(cons ',lisp-name
-                                                                             (make-cim-parameter 
-                                                                              :name ,cim-name
-                                                                              :type ',type
-                                                                              :qualifiers (make-qualifiers-list (list ,@(qualifiers-list-helper qualifiers)))))))
-                                                                  parameters)))))
+(defmacro defcim-method (name ((instance-var class-name) &rest parameters) options &body body)
+  (let ((return-type (cadr (assoc :return-type options)))
+        (fn (cadr (assoc :function options)))
+        (in-params (mapcan (lambda (parameter)
+                             (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
+                               (declare (ignore lisp-name type cim-name))
+                               (when (member :in qualifiers)
+                                 (list parameter))))
+                           parameters))
+        (out-params (mapcan (lambda (parameter)
+                              (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
+                                (declare (ignore lisp-name type cim-name))
+                                (when (member :out qualifiers)
+                                 (list parameter))))
+                            parameters)))
+    (unless return-type 
+      (error "A :RETURN-TYPE option must be supplied."))
+    `(progn       
+       ,(unless fn
+          `(progn
+             ;; define a Lisp function with ftype declarations
+             (declaim (ftype (function ((or null ,class-name) ,@(mapcar #'cadr in-params)) ,return-type)
+                             ,name))
+             (defun ,name (,instance-var ,@(mapcar #'car in-params))
+               (declare (type (or null ,class-name) ,instance-var)
+                        ,@(mapcar (lambda (param)
+                                    (destructuring-bind (lisp-name type &rest args) param
+                                      (declare (ignore args))
+                                      `(type ,type ,lisp-name)))
+                                  in-params))
+               ,@body)))
 
-       ;; define a Lisp function
-       (defun ,name (,instance-var ,@(mapcar #'car parameters))
-         (declare (,class-name ,instance-var)
-                  ,@(mapcar (lambda (parameter)
-                              `(,(cadr parameter) ,(car parameter)))
-                            parameters))
-         ,@body)
-
-       ;; set the function to the symbol
-       (setf (cim-method-function ,gmethod) ',name)
-       
-       ;; attach to the class and all subclasses
-       (add-method-to-class ,gmethod (find-class ',class-name) :subclasses t)
-
+       ;; make a method and attach the function
+       (add-method-to-class 
+        (make-cim-method :name 
+                         ,(cadr (assoc :cim-name options))
+                         :return-type 
+                         ',(cadr (assoc :return-type options))
+                         :qualifiers 
+                         (make-qualifiers-list 
+                          (list ,@(qualifiers-list-helper 
+                                   (cdr (assoc :qualifiers options)))))
+                         :in-params
+                         (list ,@(mapcar (lambda (parameter)
+                                           (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
+                                             `(cons ',lisp-name
+                                                    (make-cim-parameter 
+                                                     :name ,(if cim-name cim-name (string lisp-name))
+                                                     :type ',type
+                                                     :qualifiers (make-qualifiers-list 
+                                                                  (list ,@(qualifiers-list-helper 
+                                                                           qualifiers)))))))
+                                         in-params))
+                         :out-params
+                         (list ,@(mapcar (lambda (parameter)
+                                           (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
+                                             `(cons ',lisp-name
+                                                    (make-cim-parameter 
+                                                     :name ,(if cim-name cim-name (string lisp-name))
+                                                     :type ',type
+                                                     :qualifiers (make-qualifiers-list 
+                                                                  (list ,@(qualifiers-list-helper 
+                                                                           qualifiers)))))))
+                                         out-params))
+                         :function 
+                         ,(if fn fn `(function ,name)))
+        (find-class ',class-name) 
+        :subclasses t)
+         
+       ;; for the sanity of the REPL 
        ',name)))
+
 
 (defun find-cim-method (cim-name class)
   "Find a CIM method on a class."
@@ -288,6 +346,8 @@ If CHILDREN is T all the CIM subclasses are also added."
 
 (defun invoke-method (cim-name class &rest args)
   "Find a CIM method on the class and apply it to the args."
+  (when (symbolp class)
+    (setf class (find-class class)))
   (let ((method (find-cim-method cim-name class)))
     (if method
         (apply (cim-method-function method) args)

@@ -77,6 +77,7 @@
   (declare (symbol lisp-name) (cim-qualifier qualifier))
   (setf (gethash lisp-name *qualifiers*) qualifier))
 
+;; macro to define a qualifier.
 (defmacro defqualifier (name type &rest options)
   `(%defqualifier ',name
 		  (make-cim-qualifier
@@ -86,8 +87,15 @@
 				 (ecase n
 				   ((:name :default)
 				    `(,n ,(cadr option)))
-				   ((:scope :flavour)
-				    `(,n (list ,@(cdr option))))
+				   (:scope
+                    ;; expand to (the ...) forms to ensure the scopes/flavours are valid keywords
+				    `(,n (list ,@(mapcar (lambda (scope)
+                                           `(the cim-scope ,scope))
+                                         (cdr option)))))
+                   (:flavour 
+                    `(,n (list ,@(mapcar (lambda (flavour)
+                                           `(the cim-flavour ,flavour))
+                                         (cdr option)))))
 				   (:qualifiers
 				    `(,n (make-qualifiers-list (list ,@(cdr option))))))))
 			     options))))
@@ -181,7 +189,7 @@ QUALIFIER may be a qualifier object (from FIND-QUALIFIER) or a Lisp name (suitab
   (:default t))
 (defqualifier :embedded-instance string
   (:name "EmbeddedInstance")
-  (:scope :propery :parameter :method)
+  (:scope :property :parameter :method)
   (:flavour :enable-override))
 (defqualifier :embedded-object boolean
   (:name "EmbeddedObject")
@@ -393,7 +401,7 @@ QUALIFIER may be a qualifier object (from FIND-QUALIFIER) or a Lisp name (suitab
   (:flavour :enable-override))
 (defqualifier :syntax string
   (:name "Syntax")
-  (:scope :propery :reference :parameter :method)
+  (:scope :property :reference :parameter :method)
   (:flavour :enable-override))
 (defqualifier :syntax-type string
   (:name "SyntaxType")
