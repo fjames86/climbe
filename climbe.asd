@@ -32,6 +32,7 @@
      (:file "cimom" :depends-on ("classes"))
 	 (:file "messages" :depends-on ("classes"))
 	 (:file "encoding" :depends-on ("messages"))
-	 (:file "decoding" :depends-on ("messages")))))
-  :depends-on (:closer-mop :cl-ppcre :s-xml :drakma :hunchentoot :bordeaux-threads))
+;;	 (:file "decoding" :depends-on ("messages"))
+     (:file "client" :depends-on ("encoding")))))
+  :depends-on (:closer-mop :cl-ppcre :s-xml :drakma :hunchentoot :bordeaux-threads :babel))
 

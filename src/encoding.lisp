@@ -28,6 +28,7 @@
 ;;         CIMVERSION CDATA #REQUIRED 
 ;;         DTDVERSION CDATA #REQUIRED>
 (defun encode-cimxml-cim (message)  
+  (eformat "<?xml version=\"1.0\" encoding=\"utf-8\" ?>~%")
   (eformat "<CIM CIMVERSION=\"~A\" DTDVERSION=\"~A\">~%" +cim-version+ +dtd-version+)
   (encode-cimxml-message message)
   (eformat "</CIM>"))
@@ -823,22 +824,23 @@ PARAM-VALUES is a list of form (name value type)."
 					   &key (id 1) (namespace "root") intrinsic-p
 					   arguments class-name key-slots)
   "Encode a CIM request message."
-  (encode-cimxml-cim
-   (make-cim-message
-	:id id
-	:request
-	(make-cim-request
-	 :method-name method-name
-	 :intrinsic-p intrinsic-p
-	 :namespace-path
-	 (make-namespace-path
-	  :namespace-list (parse-namespace namespace))
-	 :arguments arguments
-	 :reference
-	 (make-cim-reference
-	  :namespace namespace
-	  :classname class-name
-	  :keyslots key-slots)))))
+  (with-output-to-string (*standard-output*)    
+    (encode-cimxml-cim
+     (make-cim-message
+      :id id
+      :request
+      (make-cim-request
+       :method-name method-name
+       :intrinsic-p intrinsic-p
+       :namespace-path
+       (make-namespace-path
+        :namespace-list (parse-namespace namespace))
+       :arguments arguments
+       :reference
+       (make-cim-reference
+        :namespace namespace
+        :classname class-name
+        :keyslots key-slots))))))
 
 ;; <class>GetClass ( 
 ;;         [IN] <className> ClassName, 

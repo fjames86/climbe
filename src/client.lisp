@@ -6,10 +6,21 @@
 
 (defun call-cim-server (encoded &key
 						(uri *cim-uri*) drakma-args)
-  (apply #'drakma:http-request uri
-		 :method :post
-		 :content encoded
-		 drakma-args))
+  (multiple-value-bind (response return-code headers puri stream must-close reason)
+      (apply #'drakma:http-request uri
+             :method :post
+             :content encoded
+             drakma-args)
+    (declare (ignore headers puri stream must-close))
+    (case return-code
+      (200
+       ;; all went well
+       (etypecase response
+         (string response)
+         (vector (babel:octets-to-string response))))       
+      (otherwise 
+       (error "Return ~A Reason: ~A" return-code reason)))))
+      
 
 ;; need to make the message objects
 

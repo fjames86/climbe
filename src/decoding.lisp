@@ -6,36 +6,71 @@
 (in-package :climbe.decoding.cimxml)
 
 
-;; decode raw xml using s-xml library
-(defun decode-cim-new-element (name attributes seed)
-  (format t "[START] Name: ~S ATT: ~S SEED: ~S~%" name attributes seed)
-  (list name))
-
-(defun decode-cim-finish-element (name attributes parent-seed seed)
-  (format t "[FINISH] Name: ~S ATT: ~S PARENT: ~S SEED: ~S~%" name attributes parent-seed seed)
-  (list parent-seed))
-
-(defun decode-cim-text (string seed)
-  (format t "[TEXT] NAME: ~S SEED: ~S~%" string seed)
-  nil)
+;; use cxml
 
 
-(defun decode-xml (stream)
-  "generates nested lists for the xml tags read from stream" 
-  (s-xml:start-parse-xml
-   stream
-   (make-instance 's-xml:xml-parser-state
-		  :new-element-hook #'decode-cim-new-element
-		  :finish-element-hook #'decode-cim-finish-element
-		  :text-hook #'decode-cim-text)))
+(defparameter *cim-dtd* nil)
+
+(defun load-dtd (&optional name)
+  (setf *cim-dtd*
+        (cxml:parse-dtd-file (make-pathname :name (if name name "DSP0203_2.4.0") 
+                                            :type "dtd")))
+  *cim-dtd*)
+
+(defun decode-cim (string)
+  "Decode a CIMXML encoded string."
+  (declare (type string string))
+  (cxml:parse-octets (babel:string-to-octets string)
+                     (cxml-xmls:make-xmls-builder)))
+
+(defun test ()
+  (decode-cim "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\"><MESSAGE ID=\"1\" PROTOCOLVERSION=\"2.0\"><SIMPLERSP><IMETHODRESPONSE NAME=\"EnumerateClassNames\"><IRETURNVALUE><CLASSNAME NAME=\"MyClass1\" /><CLASSNAME NAME=\"MyClass2\" /></IRETURNVALUE></IMETHODRESPONSE></SIMPLERSP></MESSAGE></CIM>
+"))
+
+
+(defelement cim (cimversion dtdversion) (or message declaration)
+  (cond
+    (message message)
+    (declaration declaration)
+    (t (error "invalid"))))
+
+;;<!ELEMENT MESSAGE (SIMPLEREQ|MULTIREQ|SIMPLERSP|MULTIRSP|
+;;          SIMPLEEXPREQ|MULTIEXPREQ|SIMPLEEXPRSP|MULTIEXPRSP)>
+;;<!ATTLIST MESSAGE
+;;         ID             CDATA     #REQUIRED
+;;         PROTOCOLVERSION CDATA     #REQUIRED>
+
+(defelement message (id protocolversion) (or simplereq multireq simplersp multirsp)
+            
 
 
 
+
+(defmacro defelement (name (contents-var attributes) &body body)
+  (let ((gtag (gensym "TAG"))
+        (gatts (gensym "ATTS")))
+    `(defun ,(intern (concatenate 'string "DECODE-CIMXML-" (symbol-name name))) (,gtag ,gatts ,contents-var)
+       (assert (string-equal ,gtag ,(string-upcase (symbol-name name))))
+       (let (,@(mapcar (lambda (attribute)
+                         `(,attribute (cadr (find ,(string-upcase (symbol-name attribute))
+                                                  ,gatts 
+                                                  :test #'string-equal 
+                                                  :key #'car))))
+                       attributes))
+         (macrolet ((decode (tag)))
+           `(apply (function ,(intern (concatenate 'string "DECODE-CIMXML-" (string-upcase (symbol-name tag)))))
+                   
+         ,@body))))
+     
 
 ;;<!ELEMENT CIM (MESSAGE|DECLARATION)>
 ;;<!ATTLIST CIM
 ;;         CIMVERSION CDATA #REQUIRED 
 ;;         DTDVERSION CDATA #REQUIRED>
+(defun decode-cimxml-cim (tag attributes value)
+  (assert (string-equal tag "CIM"))
+  (apply #'decode-cimxml-message (car value)))
 
 ;;<!ELEMENT DECLARATION  (DECLGROUP|DECLGROUP.WITHNAME|DECLGROUP.WITHPATH)+>
 
@@ -198,7 +233,7 @@
 ;;<!ATTLIST MESSAGE
 ;;         ID             CDATA     #REQUIRED
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
-
+  
 ;;<!ELEMENT MULTIREQ (SIMPLEREQ,SIMPLEREQ+)>
 
 ;;<!ELEMENT SIMPLEREQ (METHODCALL|IMETHODCALL)>
