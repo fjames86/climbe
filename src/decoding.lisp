@@ -1,12 +1,6 @@
 
 
-(defpackage :climbe.decoding.cimxml
-  (:use :cl :climbe))
-
-(in-package :climbe.decoding.cimxml)
-
-
-;; use cxml
+(in-package :climbe)
 
 
 (defparameter *cim-dtd* nil)
