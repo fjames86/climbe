@@ -1,90 +1,87 @@
 
 
-(defpackage :ctags
-  (:use :cl))
+(in-package :climbe)
 
-(in-package :ctags)
+(defun find-tag (name tags)
+  "Find the tag with the name provided. Expects TAGS to be an alist."
+  (declare (type string name))
+  (find name tags :key #'first :test #'string-equal))
 
-(defun find-one (predicate list &key key)
-  "Find one and only one element of the list which matches the predicate.
+(defun find-tags (name tags)
+  "Find all tags with a matching name."
+  (mapcan (lambda (tag)
+            (when (string-equal name (first tag))
+              (list tag)))
+          tags))
 
-Returns (VALUES match found)."
-  (do ((list list (cdr list))
-	   (match nil)
-	   (found nil))
-	  ((null list)
-	   (values match found))	
-	(let ((val (if key
-				   (funcall key (car list))
-				   (car list))))
-	  (when (funcall predicate val)
-		(if found
-			(return-from find-one (values nil nil))
-			(setf match val
-				  found t))))))
+(defun last-char (string)
+  (declare (type string string))
+  (char string (1- (length string))))
 
-(defun find-all (source list &key key test)
-  "Find all the items in the SOURCE list from the LIST. Apply KEY and TEST to find as usual.
+(defun element-list-p (symbol)
+  (let ((char (last-char (symbol-name symbol))))
+    (char= char #\*)))
 
-Returns (MATCH-LIST FOUND)"
-  (values
-   (mapcan (lambda (item)
-			 (let ((val (find item list :key key :test test)))
-			   (if val
-				   (list val)
-				   (return-from find-all (values nil nil)))))
-		   source)
-   t))
+(defun element-name (symbol)
+  (let ((string (symbol-name symbol)))
+    (if (char= (last-char string) #\*)
+        (subseq string 0 (1- (length string)))
+        string)))
 
 
-;; pattern = [x?|(y+,z*)] -> (one (one x) (every (some y) (multi z)))
+(defmacro deftag (name attributes elements &body body)
+  "Define a decoding handler. 
 
-;; (every x y) '(x y z) -> (x y)
-(defun apply-tag (pattern form)
-  (if (symbolp pattern)
-	  (find-one (lambda (val)
-				  (eql pattern val))
-				form)
-	  (let ((op (car pattern)))
-		(ecase op
-		  (:one
-		   ;; (one &rest pats) -> matched form
-		   (destructuring-bind (&rest pats) (cdr pattern)
-			 ;; there should be one and only one matched tag
-			 (multiple-value-bind (match found)
-				 (find-one (lambda (pat)
-							 (apply-tag pat form))
-						   pats)
-			   (if found
-				   match
-				   (error "pattern failed ~S ~S" pattern form)))))
-		  (:every
-		   ;; (every &rest pats)
-		   (destructuring-bind (&rest pats) (cdr pattern)
-			 ;; every pattern must match a form
-			 (find-all pats form
-					   :test (lambda (pat)
+ATTRIBUTES should be a list of symbols that will be bound to the attrbiutes of the same string name.
 
+ELEMENTS should be either a symbol, in which case it will be bound directly to the unprocessed content, or a 
+list of symbols naming other tag-names. These will be bound to the symbol.
 
-
-(defparameter *prefix* "")
-
-(defmacro deftag (name attributes tag-form &body body)
+If an element name ends with a #\* character it will refer to a list of such elements and will be bound to a list instead. The resulting Lisp symbol will NOT have the #\* character at the end."
   (let ((gtag (gensym "TAG"))
-		(gname (gensym "NAME"))
-		(gattrs (gensym "ATTRS"))
-		(gcontents (gensym "CONTENTS")))
-	`(defun ,(intern (concatenate 'string *prefix* (symbol-name name)))
-		 (,gtag)
-	   (destructuring-bind (,gname ,gattrs ,gcontents) ,gtag
-		 (assert (string-equal ,gname ,(symbol-name name)))
-		 (let (,@(mapcar (lambda (attr)
-						   `(,attr (cadr (find ,(symbol-name attr) ,gattrs
-											   :test #'string-equal
-											   :key #'car))))
-						 attributes))
-		   ,@body)))))
+        (gname (gensym "NAME"))
+        (gattrs (gensym "ATTRS"))
+        (gcontent (gensym "CONTENT"))
+        (gelements (mapcar (lambda (element)
+                             (gensym (symbol-name element)))
+                           (unless (symbolp elements)
+                             elements))))
+    `(defun ,(intern (concatenate 'string "DECODE-CIMXML-" (symbol-name name)))
+         (,gtag)
+       (destructuring-bind (,gname ,gattrs &rest ,gcontent) ,gtag
+         ,(unless attributes 
+                  `(declare (ignore ,gattrs)))
+         (assert (string-equal ,gname ,(symbol-name name)))
+         ;; extract the element tags
+         (let (,@(mapcar (lambda (gelement element)
+                           (let ((element-name (element-name element)))
+                             `(,gelement ,(if (element-list-p element)
+                                              `(find-tags ,element-name ,gcontent)
+                                              `(find-tag ,element-name ,gcontent)))))
+                         gelements
+                         (unless (symbolp elements) elements)))
+           ;; decode the elements 
+           (let (,@(mapcar (lambda (gelement element)
+                             (let ((element-name (element-name element)))
+                               `(,(intern element-name) 
+                                  (when ,gelement
+                                    ,(if (element-list-p element)
+                                         `(mapcar (function ,(intern (concatenate 'string 
+                                                                                  "DECODE-CIMXML-" 
+                                                                                  element-name)))
+                                                  ,gelement)
+                                         `(,(intern (concatenate 'string 
+                                                                 "DECODE-CIMXML-" 
+                                                                 element-name))
+                                            ,gelement))))))
+                           gelements
+                           (unless (symbolp elements) elements))
+                 ;; extract the attributes
+                 ,@(mapcar (lambda (attr)
+                             `(,attr (second (find-tag ,(symbol-name attr) ,gattrs))))
+                           attributes)
+                   ;; if binding to the entire content
+                   ,@(when (symbolp elements)
+                           `((,elements ,gcontent))))
+               ,@body))))))
 
-
-
-										 

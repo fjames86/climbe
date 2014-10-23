@@ -92,12 +92,14 @@
 	(:invalid-response-destination cim-error-invalid-response-destination 19)
 	(:namespace-not-empty cim-error-namespace-not-empty 20)))
   
-(defun cim-error (type)
+(defun cim-error (type &optional description)
   "Raise a CIM error."
-  (declare (keyword type))
-  (destructuring-bind (kwname name code) (assoc type *cim-error-types*)
+  (destructuring-bind (kwname name code) (find-if (lambda (err-type)
+                                                    (or (eq (first err-type) type)
+                                                        (= (third err-type) type)))
+                                                  *cim-error-types*)
 	(declare (ignore kwname))
-	(error name :code code)))
+	(error name :code code :description description)))
 
 ;; ignores only cim errors
 (defmacro ignore-cim-errors (&body body)
