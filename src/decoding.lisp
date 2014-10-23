@@ -2,19 +2,23 @@
 
 (in-package :climbe)
 
-(defun decode-cim (string)
+(defun decode-xml (string)
   "Decode a CIMXML encoded string."
   (declare (type string string))
-  (cxml:parse-octets (babel:string-to-octets string)
-                     (cxml-xmls:make-xmls-builder)))
-
-(defun test-content ()
-  (decode-cim "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
-<CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\"><MESSAGE ID=\"1\" PROTOCOLVERSION=\"2.0\"><SIMPLERSP><IMETHODRESPONSE NAME=\"EnumerateClassNames\"><IRETURNVALUE><CLASSNAME NAME=\"MyClass1\" /><CLASSNAME NAME=\"MyClass2\" /></IRETURNVALUE></IMETHODRESPONSE></SIMPLERSP></MESSAGE></CIM>
-"))
-
+  (cxml:parse-octets 
+   (babel:string-to-octets 
+    (remove-if (lambda (char)
+                 (member char '(#\newline #\return) 
+                         :test #'char=))
+               string))
+   (cxml-xmls:make-xmls-builder)))
+  
+(defun decode-cim (string)
+  (decode-cimxml-cim (decode-xml string)))
 
 (defun decode-boolean (string)
+  "Returns T is the string is the literal value \"true\" otherwise nil."
+  (declare (type string string))
   (string-equal string "true"))
 
 
@@ -74,7 +78,7 @@
     
 ;;<!ELEMENT VALUE (#PCDATA)>
 (deftag value () data
-  data)
+  (car data))
 
 ;;<!ELEMENT VALUE.ARRAY (VALUE*)>
 (deftag value.array () (value*)
@@ -344,11 +348,12 @@
 ;;<!ATTLIST MESSAGE
 ;;         ID             CDATA     #REQUIRED
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
-(deftag message (id) (simplereq multireq simplersp multirsp) ;; simpleexpreq multiexpreq simpleexprsp multiexprsp)
-;;  (declare (ignore simpleexpreq multiexpreq simpleexprsp multiexprsp))
+(deftag message (id) (simplereq multireq simplersp multirsp simpleexpreq multiexpreq simpleexprsp multiexprsp)
   (make-cim-message :id (parse-integer id)
                     :request (or simplereq multireq)
-                    :response (or simplersp multirsp)))
+                    :response (or simplersp multirsp)
+                    :exp-request (or simpleexpreq multiexpreq)
+                    :exp-response (or simpleexprsp multiexprsp)))
 
 ;;<!ELEMENT MULTIREQ (SIMPLEREQ,SIMPLEREQ+)>
 (deftag multireq () (simplereq*)
@@ -391,7 +396,10 @@
 ;;     %CIMName;>
 (deftag iparamvalue (name) (value value.array value.reference classname instancename qualifier.declaration class instance value.namedinstance)
   (list name
-        (or value value.array value.reference classname instancename qualifier.declaration class instance value.namedinstance)))
+        (or value value.array value.reference 
+            classname class 
+            qualifier.declaration 
+            instance instancename value.namedinstance)))
 
 ;; <!ELEMENT MULTIRSP (SIMPLERSP,SIMPLERSP+)>
 (deftag multirsp () (simplersp*)
@@ -459,22 +467,42 @@
     (t (error "No Tag?"))))
                   
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
+(deftag multiexpreq () (simpleexpreq*)
+  simpleexpreq)
 
 ;;<!ELEMENT SIMPLEEXPREQ (EXPMETHODCALL)>
-
+(deftag simpleexpreq () (expmethodcall)
+  expmethodcall)
+   
 ;;<!ELEMENT EXPMETHODCALL (EXPPARAMVALUE*)>
 ;;<!ATTLIST EXPMETHODCALL 
 ;;    %CIMName;>
+(deftag expmethodcall (name) (expparamvalue*)
+  (make-cim-request 
+   :method-name name
+   :intrinsic-p t
+   :arguments expparamvalue))
 
 ;;<!ELEMENT MULTIEXPRSP (SIMPLEEXPRSP,SIMPLEEXPRSP+)>
+(deftag multiexprsp () (simpleexprsp*)
+  simpleexprsp)
 
 ;;<!ELEMENT SIMPLEEXPRSP (EXPMETHODRESPONSE)>
+(deftag simpleexprsp () (expmethodresponse)
+  expmethodresponse)
 
 ;;<!ELEMENT EXPMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST EXPMETHODRESPONSE
 ;;      %CIMName;>
+(deftag expmethodresponse (name) (ireturnvalue error)
+  (declare (ignore error))
+  (make-cim-response 
+   :method-name name
+   :intrinsic-p t
+   :return-value ireturnvalue))
 
 ;;<!ELEMENT EXPPARAMVALUE (INSTANCE?)>
 ;;<!ATTLIST EXPPARAMVALUE 
 ;;    %CIMName;>
-
+(deftag expparamvalue (name) (instance)
+  (list name instance))
