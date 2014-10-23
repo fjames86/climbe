@@ -8,7 +8,7 @@
   (cxml:parse-octets (babel:string-to-octets string)
                      (cxml-xmls:make-xmls-builder)))
 
-(defun test ()
+(defun test-content ()
   (decode-cim "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 <CIM CIMVERSION=\"2.0\" DTDVERSION=\"2.0\"><MESSAGE ID=\"1\" PROTOCOLVERSION=\"2.0\"><SIMPLERSP><IMETHODRESPONSE NAME=\"EnumerateClassNames\"><IRETURNVALUE><CLASSNAME NAME=\"MyClass1\" /><CLASSNAME NAME=\"MyClass2\" /></IRETURNVALUE></IMETHODRESPONSE></SIMPLERSP></MESSAGE></CIM>
 "))
@@ -16,6 +16,10 @@
 
 (defun decode-boolean (string)
   (string-equal string "true"))
+
+
+
+
 
 ;;<!ELEMENT CIM (MESSAGE|DECLARATION)>
 ;;<!ATTLIST CIM

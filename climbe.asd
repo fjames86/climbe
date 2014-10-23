@@ -35,5 +35,5 @@
      (:file "tags" :depends-on ("packages"))
 	 (:file "decoding" :depends-on ("tags"))
      (:file "client" :depends-on ("encoding")))))
-  :depends-on (:closer-mop :cl-ppcre :s-xml :drakma :hunchentoot :bordeaux-threads :babel))
+  :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :bordeaux-threads :babel))
 
