@@ -688,8 +688,11 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ATTLIST ERROR
 ;;              CODE        CDATA   #REQUIRED
 ;;              DESCRIPTION CDATA   #IMPLIED>
-(defun encode-cimxml-error (code &optional instances)
-  (eformat "<ERROR CODE=\"~A\">~%" code)
+(defun encode-cimxml-error (condition &optional instances)
+  (eformat "<ERROR CODE=\"~A\" DESCRIPTION=\"~A\">~%"
+		   (cim-error-code condition)
+		   (let ((desc (cim-error-description condition)))
+			 (if desc desc "")))
   (when instances
 	(dolist (instance instances)
 	  (encode-cimxml-instance instance)))

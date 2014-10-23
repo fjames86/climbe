@@ -94,12 +94,26 @@
   
 (defun cim-error (type &optional description)
   "Raise a CIM error."
-  (destructuring-bind (kwname name code) (find-if (lambda (err-type)
-                                                    (or (eq (first err-type) type)
-                                                        (= (third err-type) type)))
-                                                  *cim-error-types*)
+  (destructuring-bind (kwname name code)
+	  (find-if (lambda (err-type)
+				 (or (eq (first err-type) type)
+					 (eq (third err-type) type)))
+			   *cim-error-types*)
 	(declare (ignore kwname))
 	(error name :code code :description description)))
+
+(defun make-cim-error (type &optional description)
+  "Make a CIM-ERROR condition object." 
+  (destructuring-bind (kwname name code)
+	  (find-if (lambda (err-type)
+				 (or (eq (first err-type) type)
+					 (eq (third err-type) type)))
+			   *cim-error-types*)
+	(declare (ignore kwname))
+	(make-condition name
+					:code code
+					:description description)))
+
 
 ;; ignores only cim errors
 (defmacro ignore-cim-errors (&body body)

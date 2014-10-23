@@ -6,18 +6,31 @@
 
 (defun call-cim-server (encoded &key
 						(uri *cim-uri*) drakma-args)
+  "Calls the server and returns the decoded result. Returns a CIM-MESSAGE structure.
+
+ENCODED is a string of the encoded message. Create it by calling one of the various ENCODE-* functions, such as ENCODE-GET-INSTANCE etc.
+
+URI is the name of the server to call.
+
+DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
+  (declare (type string encoded uri))
   (multiple-value-bind (response return-code headers puri stream must-close reason)
       (apply #'drakma:http-request uri
              :method :post
              :content encoded
+;;			 :additional-headers
+;;			 `(("CIMOperation" . ,cim-operation)
+;;			   ("CIMMethod" . ,cim-method)
+;;			   ("CIMObject" . ,cim-object))
              drakma-args)
     (declare (ignore headers puri stream must-close))
     (case return-code
       (200
        ;; all went well
-       (etypecase response
-         (string response)
-         (vector (babel:octets-to-string response))))       
+	   (decode-cim
+		(etypecase response
+		  (string response)
+		  (vector (babel:octets-to-string response)))))
       (otherwise 
        (error "Return ~A Reason: ~A" return-code reason)))))
       

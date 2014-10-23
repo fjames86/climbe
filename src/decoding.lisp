@@ -3,7 +3,7 @@
 (in-package :climbe)
 
 (defun decode-xml (string)
-  "Decode a CIMXML encoded string."
+  "Decode a CIMXML encoded string into nested lists."
   (declare (type string string))
   (cxml:parse-octets 
    (babel:string-to-octets 
@@ -14,6 +14,8 @@
    (cxml-xmls:make-xmls-builder)))
   
 (defun decode-cim (string)
+  "Decode a CIMXML encoded string."
+  (declare (type string string))
   (decode-cimxml-cim (decode-xml string)))
 
 (defun decode-boolean (string)
@@ -435,7 +437,9 @@
 ;;              DESCRIPTION CDATA   #IMPLIED>
 (deftag error (code description) (instance*)
   (declare (ignore instance))
-  (cim-error code description))
+  ;; we only want to make an error condition object,
+  ;; not actually signal the error. That should be done higher up?
+  (make-cim-error code description))
 
 ;;<!ELEMENT RETURNVALUE (VALUE|VALUE.REFERENCE)>
 ;;<!ATTLIST RETURNVALUE
