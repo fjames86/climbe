@@ -3,7 +3,7 @@
 (in-package :climbe)
 
 (defun decode-xml (string)
-  "Decode a CIMXML encoded string into nested lists."
+  "Decode a CIMXML encoded string into nested lists. Note that because we need to already have the entire xml in the string this doesn't scale well to large content. "
   (declare (type string string))
   (cxml:parse-octets 
    (babel:string-to-octets 
@@ -12,19 +12,44 @@
                          :test #'char=))
                string))
    (cxml-xmls:make-xmls-builder)))
-  
+
+(defun decode-xml-file (path)
+  "Parse an entire xml file. Because it has to load the whole file first this does not scale well - do not use it to load large schema definitions. "
+  (with-open-file (f path :direction :input :element-type '(unsigned-byte 8))
+    (cxml:parse-stream f (cxml-xmls:make-xmls-builder))))
+
 (defun decode-cim (string)
-  "Decode a CIMXML encoded string."
+  "Decode a CIMXML encoded string. The xml must consist of a single toplevel CIM tag."
   (declare (type string string))
   (decode-cimxml-cim (decode-xml string)))
+
 
 (defun decode-boolean (string)
   "Returns T is the string is the literal value \"true\" otherwise nil."
   (declare (type string string))
   (string-equal string "true"))
 
+(defconstant* +cim-type-strings+ 
+    '(("boolean" boolean)
+      ("sint8" sint8)
+      ("sint16" sint16)
+      ("sint32" sint32)
+      ("sint64" sint64)
+      ("uint8" uint8)
+      ("uint16" uint16)
+      ("uint32" uint32)
+      ("uint64" uint64)
+      ("char16" character)
+      ("string" string)
+      ("datetime" datetime)))
 
-
+(defun decode-cim-type (string)
+  (let ((type (second (find string +cim-type-strings+ 
+			    :test #'string-equal
+			    :key #'first))))
+    (if type
+	type
+	(error "Type ~S not found" string))))
 
 
 ;;<!ELEMENT CIM (MESSAGE|DECLARATION)>
@@ -34,18 +59,31 @@
 (deftag cim () (message declaration)
   (cond
     (message message)     
-    (declaration (error "Declarations not supported"))))
+    (declaration declaration)
+    (t (error "No content"))))
 
 ;;<!ELEMENT DECLARATION  (DECLGROUP|DECLGROUP.WITHNAME|DECLGROUP.WITHPATH)+>
-(deftag declaration () content
-  (declare (ignore content))
-  nil)
+(deftag declaration () (declgroup* declgroup.withname* declgroup.withpath*)
+  (append declgroup
+	  declgroup.withname
+	  declgroup.withpath))
 
 ;;<!ELEMENT DECLGROUP  ((LOCALNAMESPACEPATH|NAMESPACEPATH)?,QUALIFIER.DECLARATION*,VALUE.OBJECT*)>
+(deftag declgroup () (localnamespacepath namespacepath qualifier.declaration* value.object*)
+  (make-cim-declaration :namespace (or localnamespacepath namespacepath)
+			:qualifiers qualifier.declaration
+			:classes value.object))
 
 ;;<!ELEMENT DECLGROUP.WITHNAME  ((LOCALNAMESPACEPATH|NAMESPACEPATH)?,QUALIFIER.DECLARATION*,VALUE.NAMEDOBJECT*)>
+(deftag declgroup.withname () (localnamespacepath namespacepath qualifier.declaration* value.namedobject*)
+  (let ((namespace (or localnamespacepath namespacepath)))
+    (make-cim-declaration :namespace namespace
+			  :qualifiers qualifier.declaration
+			  :classes value.namedobject)))
 
 ;;<!ELEMENT DECLGROUP.WITHPATH  (VALUE.OBJECTWITHPATH|VALUE.OBJECTWITHLOCALPATH)*>
+(deftag declgroup.withpath () (value.objectwithpath* value.objectwithlocalpath*)
+  (make-cim-declaration :classes (append value.objectwithpath value.objectwithlocalpath)))
 
 ;;<!ELEMENT QUALIFIER.DECLARATION (SCOPE?,(VALUE|VALUE.ARRAY)?)>
 ;;<!ATTLIST QUALIFIER.DECLARATION 
@@ -76,11 +114,12 @@
   (mapcan (lambda (string sym)
             (when (decode-boolean string)
               (list sym)))
-          (list class association reference property method parameter indication)))
+          (list class association reference property method parameter indication)
+	  (list :class :association :reference :property :method :parameter :indication)))
     
 ;;<!ELEMENT VALUE (#PCDATA)>
 (deftag value () data
-  (car data))
+  (first data))
 
 ;;<!ELEMENT VALUE.ARRAY (VALUE*)>
 (deftag value.array () (value*)
@@ -148,12 +187,12 @@
                        :namespace-list localnamespacepath))
 
 ;;<!ELEMENT LOCALNAMESPACEPATH (NAMESPACE+)> 
-(deftag localnamespacepath () (namespace*)
+(deftag localnamespacepath () (namespace+)
   namespace)
 
 ;;<!ELEMENT HOST (#PCDATA)> 
 (deftag host () data
-  data)
+  (first data))
 
 ;;<!ELEMENT NAMESPACE EMPTY> 
 ;;<!ATTLIST NAMESPACE
@@ -225,7 +264,17 @@
 ;;     VALUETYPE    (string|boolean|numeric)  "string"
 ;;     %CIMType;    #IMPLIED>
 (deftag keyvalue (valuetype) data
-  (list data valuetype))
+  (let ((str (first data)))
+    (list (cond
+	    ((string-equal valuetype "boolean") 
+	     (decode-boolean str))
+	    ((string-equal valuetype "numeric")
+	     ;; we cannot use read-from-string here for security reasons i.e. a #. code injection	     
+	     (parse-number:parse-number str))
+	    ((string-equal valuetype "string")
+	     str)
+	    (t (error "Invalid VALUETYPE ~S" valuetype)))
+	  valuetype)))
 
 ;;<!ELEMENT CLASS (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*,METHOD*)>
 ;;<!ATTLIST CLASS 
@@ -236,8 +285,16 @@
   (make-instance 'cim-class 
                  :qualifiers qualifier
                  :methods method
-                 :slots (append property property.array property.reference)
-                 :cim-name name))
+		 ;; FIXME: convert the property list into cim-standard-defintion-slot objects?
+                 :slots 
+		 (mapcar (lambda (slot)
+			   (destructuring-bind (slot-name slot-value slot-type) slot
+			     (declare (ignore slot-value))
+			     (make-instance 'cim-standard-effective-slot-definition 
+					    :cim-name slot-name
+					    :cim-type slot-type)))
+			 (append property property.array property.reference))
+                 :cim-name (list name)))
                  
 
 ;;<!ELEMENT INSTANCE (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*)>
@@ -271,7 +328,7 @@
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
 (deftag property (name type) (value)
-  (list name type value))
+  (list name value (decode-cim-type type)))
 			 
 ;;<!ELEMENT PROPERTY.ARRAY (QUALIFIER*,VALUE.ARRAY?)>
 ;;<!ATTLIST PROPERTY.ARRAY 
@@ -283,7 +340,9 @@
 ;;    %EmbeddedObject;
 ;;    xml:lang   NMTOKEN  #IMPLIED>
 (deftag property.array (name type) (value.array)
-  (list name type value.array))
+  (list name 
+	value.array 
+	(list 'array (decode-cim-type type))))
 
 ;;<!ELEMENT PROPERTY.REFERENCE (QUALIFIER*,VALUE.REFERENCE?)>
 ;;<!ATTLIST PROPERTY.REFERENCE
@@ -303,7 +362,7 @@
 (deftag method (name type) (qualifier* parameter* parameter.reference* parameter.array* parameter.refarray*)  
   (make-cim-method 
    :name name
-   :return-type type
+   :return-type (decode-cim-type type)
    :in-params (append parameter parameter.reference parameter.array parameter.refarray)
    :qualifiers qualifier))
 
@@ -313,7 +372,7 @@
 ;;     %CIMType;      #REQUIRED>
 (deftag parameter (name type) (qualifier*)
   (make-cim-parameter :name name
-                      :type type
+                      :type (decode-cim-type type)
                       :qualifiers qualifier))
 
 ;;<!ELEMENT PARAMETER.REFERENCE (QUALIFIER*)>
@@ -332,7 +391,7 @@
 ;;     %ArraySize;>
 (deftag parameter.array (name type) (qualifier*)
   (make-cim-parameter :name name
-                      :type type
+                      :type (list 'array (decode-cim-type type))
                       :qualifiers qualifier))
 
 ;;<!ELEMENT PARAMETER.REFARRAY (QUALIFIER*)>
@@ -379,7 +438,7 @@
 ;;     %CIMName;
 ;;     %ParamType;    #IMPLIED
 ;;     %EmbeddedObject;>
-(deftag paramvalue (name paramtype) (value value.reference value.array value.refarray)
+(deftag paramvalue (name paramtype) (value value.reference value.array value.refarray?)
   (list name (or value value.reference value.array value.refarray) paramtype))
 
 ;;<!ELEMENT IMETHODCALL (LOCALNAMESPACEPATH,IPARAMVALUE*)>
@@ -396,7 +455,10 @@
 ;;              CLASS|INSTANCE|VALUE.NAMEDINSTANCE)?>
 ;;<!ATTLIST IPARAMVALUE
 ;;     %CIMName;>
-(deftag iparamvalue (name) (value value.array value.reference classname instancename qualifier.declaration class instance value.namedinstance)
+(deftag iparamvalue (name) (value value.array value.reference
+				   classname class
+				   qualifier.declaration
+				   instance instancename value.namedinstance)
   (list name
         (or value value.array value.reference 
             classname class 
@@ -415,21 +477,23 @@
 ;;<!ATTLIST METHODRESPONSE
 ;;           %CIMName;>
 (deftag methodresponse (name) (returnvalue paramvalue* error)
-  (declare (ignore error))
-  (make-cim-response 
-   :method-name name
-   :return-value returnvalue
-   :out-parameters paramvalue))
-
+  (if error
+      error
+      (make-cim-response 
+       :method-name name
+       :return-value returnvalue
+       :out-parameters paramvalue)))
+  
 ;;<!ELEMENT IMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST IMETHODRESPONSE
 ;;           %CIMName;>
 (deftag imethodresponse (name) (ireturnvalue error)
-  (declare (ignore error))
-  (make-cim-response 
-   :method-name name
-   :intrinsic-p t
-   :return-value ireturnvalue))
+  (if error
+      error
+      (make-cim-response 
+       :method-name name
+       :intrinsic-p t
+       :return-value ireturnvalue)))
 
 ;;<!ELEMENT ERROR (INSTANCE*)
 ;;<!ATTLIST ERROR
@@ -439,7 +503,7 @@
   (declare (ignore instance))
   ;; we only want to make an error condition object,
   ;; not actually signal the error. That should be done higher up?
-  (make-cim-error code description))
+  (make-cim-error (parse-integer code) description))
 
 ;;<!ELEMENT RETURNVALUE (VALUE|VALUE.REFERENCE)>
 ;;<!ATTLIST RETURNVALUE

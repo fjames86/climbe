@@ -11,14 +11,15 @@
 "))
 
 (defun test-content2 ()
-  (let ((str    (climbe::encode-enumerate-instances "MyLittleClass" :namespace "root/cimv2")))
+  (let ((str (climbe::encode-enumerate-instances "MyLittleClass" :namespace "root/cimv2")))
     (princ str)
     (climbe::decode-cim str)))
 
 (defun test-content3 ()
-  (let ((str (climbe::encode-get-instance (climbe::make-cim-instance  :classname "MyLittleClass"
-                                                                      :slots '(("xxx" "yyy" string)))
-                                          :namespace "root/cimv2" )))
+  (let ((str (climbe::encode-get-instance 
+	      (climbe::make-cim-instance  :classname "MyLittleClass"
+					  :slots '(("xxx" "yyy" string)))
+	      :namespace "root/cimv2" )))
     (princ str)
     (climbe::decode-cim str)))
 

@@ -78,14 +78,17 @@
 (defmethod initialize-instance :after ((class cim-class) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   ;; convert the cim-name from (<name>) to <name>
-  (setf (cim-name class) (car (cim-name class)))
+  (when (listp (cim-name class))
+    (setf (cim-name class) (car (cim-name class))))
   ;; convert the qualifiers from keyword-pairs to assoc list
-  (setf (cim-qualifiers class) (make-qualifiers-list (cim-qualifiers class))))
+  (setf (cim-qualifiers class) 
+	(make-qualifiers-list (cim-qualifiers class))))
 
 (defmethod reinitialize-instance :after ((class cim-class) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   ;; convert the cim-name from (<name>) to <name>
-  (setf (cim-name class) (car (cim-name class)))
+  (when (listp (cim-name class))
+    (setf (cim-name class) (car (cim-name class))))
   ;; convert the qualifiers from keyword-pairs to assoc list
   (setf (cim-qualifiers class) (make-qualifiers-list (cim-qualifiers class))))
   
@@ -131,6 +134,15 @@
 	:test #'string-equal
 	:key #'cim-name))
 
+(defun find-cim-slot (slot-name class)
+  "Finds a slot of the class with the stringy CIM-NAME specified."
+  (declare (type string slot-name)
+	   (type cim-class class))
+  (let ((slots (cim-class-slots class)))
+    (find slot-name slots 
+	  :key #'cim-name 
+	  :test #'string-equal)))
+		     
 (defun add-class-to-namespace (class ns &key (super-classes t) children)
   "Add a class to the namespace.
 
@@ -236,6 +248,10 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 
 (defstruct cim-method
   name return-type in-params out-params qualifiers function)
+
+(defun cim-method-parameters (method)
+  (append (cim-method-in-params method)
+	  (cim-method-out-params method)))
 
 (defmethod cim-name ((method cim-method))
   (cim-method-name method))

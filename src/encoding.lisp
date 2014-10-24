@@ -514,9 +514,9 @@
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
 (defun encode-cimxml-message (message)
   (let ((request (cim-message-request message))
-		(response (cim-message-response message))
-		(exp-request (cim-message-exp-request message))
-		(exp-response (cim-message-exp-response message)))
+	(response (cim-message-response message))
+	(exp-request (cim-message-exp-request message))
+	(exp-response (cim-message-exp-response message)))
     (eformat "<MESSAGE ID=\"~A\" PROTOCOLVERSION=\"~A\">~%"
 	     (cim-message-id message)
 	     +protocol-version+)
@@ -556,13 +556,15 @@
 (defun encode-cimxml-simplereq (request)
   (declare (type cim-request request))
   (eformat "<SIMPLEREQ>~%")
-  (if (cim-request-intrinsic-p request)
-	  (encode-cimxml-imethodcall (cim-request-method-name request)
-						  (namespace-path-namespace-list (cim-request-namespace-path request))
-						  (cim-request-arguments request))
-	  (encode-cimxml-methodcall (cim-request-method-name request)
-						 (cim-request-reference request)
-						 (cim-request-arguments request)))  
+  (cond
+    ((cim-request-intrinsic-p request)
+     (encode-cimxml-imethodcall (cim-request-method-name request)
+				(namespace-path-namespace-list (cim-request-namespace-path request))
+				(cim-request-arguments request)))
+    (t 
+     (encode-cimxml-methodcall (cim-request-method-name request)
+			       (cim-request-reference request)
+			       (cim-request-arguments request))))
   (eformat "</SIMPLEREQ>~%"))
 
 ;;<!ELEMENT METHODCALL ((LOCALCLASSPATH|LOCALINSTANCEPATH),PARAMVALUE*)>
@@ -654,35 +656,49 @@ PARAM-VALUES is a list of form (name value type)."
 ;;<!ELEMENT SIMPLERSP (METHODRESPONSE|IMETHODRESPONSE)>
 (defun encode-cimxml-simplersp (response)
   (eformat "<SIMPLERSP>~%")
-  (if (cim-response-intrinsic-p response)
-	  (encode-cimxml-imethodresponse
-	   (cim-response-method-name response)
-	   (cim-response-return-type response)
-	   (cim-response-return-value response))
-	  (encode-cimxml-methodresponse
-	   (cim-response-method-name response)
-	   (cim-response-return-value response)
-	   (cim-response-out-parameters response)))
+  (cond
+    ((cim-response-intrinsic-p response)
+     (encode-cimxml-imethodresponse response))
+    (t
+     (encode-cimxml-methodresponse response)))
   (eformat "</SIMPLERSP>~%"))
 
 ;;<!ELEMENT METHODRESPONSE (ERROR|(RETURNVALUE?,PARAMVALUE*))>
 ;;<!ATTLIST METHODRESPONSE
 ;;           %CIMName;>
-(defun encode-cimxml-methodresponse (method-name value out-params)
-  (eformat "<METHODRESPONSE NAME=\"~A\">~%" method-name)
-  (encode-cimxml-returnvalue value)
-  (dolist (out-param out-params)
-	(destructuring-bind (name val type) out-param
-	  (encode-cimxml-paramvalue name val type)))
-  (eformat "</METHODNAME>~%"))
+(defun encode-cimxml-methodresponse (response)
+  (let ((method-name (cim-response-method-name response))
+	(value (cim-response-return-value response))
+	(out-params (cim-response-out-parameters response))
+	(err (cim-response-error response)))
+    (eformat "<METHODRESPONSE NAME=\"~A\">~%" method-name)
+    (cond
+      (err
+       ;; an error occured. encode that instead of a return value
+       (encode-cimxml-error err))
+      (t
+       (encode-cimxml-returnvalue value)
+       (dolist (out-param out-params)
+	 (destructuring-bind (name val type) out-param
+	   (encode-cimxml-paramvalue name val type)))))
+    (eformat "</METHODRESPONSE>~%")))
   
 ;;<!ELEMENT IMETHODRESPONSE (ERROR|IRETURNVALUE?)>
 ;;<!ATTLIST IMETHODRESPONSE
 ;;           %CIMName;>
-(defun encode-cimxml-imethodresponse (method-name return-type value)
-  (eformat "<IMETHODRESPONSE NAME=\"~A\">~%" method-name)
-  (encode-cimxml-ireturnvalue return-type value)
-  (eformat "</IMETHODRESPONSE>~%"))
+(defun encode-cimxml-imethodresponse (response)
+  (let ((method-name (cim-response-method-name response))
+	(return-type (cim-response-return-type response))
+	(value (cim-response-return-value response))
+	(err (cim-response-error response)))
+    (eformat "<IMETHODRESPONSE NAME=\"~A\">~%" method-name)
+    (cond
+      (err 
+       ;; an error occured. encode that instead 
+       (encode-cimxml-error err))
+      (t 
+       (encode-cimxml-ireturnvalue return-type value)))
+    (eformat "</IMETHODRESPONSE>~%")))
 
 ;;<!ELEMENT ERROR (INSTANCE*)
 ;;<!ATTLIST ERROR
@@ -824,8 +840,8 @@ PARAM-VALUES is a list of form (name value type)."
 ;;; --------------
 
 (defun encode-cimxml-request (method-name
-					   &key (id 1) (namespace "root") intrinsic-p
-					   arguments class-name key-slots)
+			      &key (id 1) (namespace "root") intrinsic-p
+				arguments class-name key-slots)
   "Encode a CIM request message."
   (with-output-to-string (*standard-output*)    
     (encode-cimxml-cim
@@ -1192,18 +1208,35 @@ PARAM-VALUES is a list of form (name value type)."
 
 
 
-;; ------------------
+;; ------------------ responses ----------------------
 
-(defun encode-cimxml-response (method-name return-value &key
-							   (id 1) intrinsic-p return-type
-							   out-parameters) 
-  (encode-cimxml-cim
-   (make-cim-message
-	:response
-	(make-cim-response
-	 :method-name method-name
-	 :intrinsic-p intrinsic-p
-	 :return-value return-value
-	 :return-type return-type
-	 :out-parameters out-parameters)
-	:id id)))
+(defun encode-cimxml-response (method-name return-value 
+			       &key
+				 (id 1) intrinsic-p return-type
+				 out-parameters)
+  "Encode a response."
+  (with-output-to-string (*standard-output*)
+    (encode-cimxml-cim
+     (make-cim-message
+      :id 1
+      :response
+      (make-cim-response
+       :method-name method-name
+       :intrinsic-p intrinsic-p
+       :return-value return-value
+       :return-type return-type
+       :out-parameters out-parameters)
+      :id id))))
+
+(defun encode-cimxml-error-response (method-name condition)
+  "Encode a response that contains an error message instead of a return value."
+  (with-output-to-string (*standard-output*)
+    (encode-cimxml-cim
+     (make-cim-message 
+      :id 1
+      :response
+      (make-cim-response 
+       :method-name method-name 
+       :error condition)))))
+
+

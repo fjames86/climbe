@@ -56,11 +56,15 @@
 	       (error "Qualifier ~S not found." item))))
 	((listp item)
 	 ;; (name value)
-	 (destructuring-bind (name value) item
-	   (let ((qualifier (find-qualifier name)))
-	     (if qualifier
-		 (push (cons qualifier value) alist)
-		 (error "Qualifier ~S not found." name)))))
+	 (unless (cim-qualifier-p (car item))
+	   (destructuring-bind (name value) item
+	     (let ((qualifier (find-qualifier name)))
+	       (if qualifier
+		   (push (cons qualifier value) alist)
+		   (error "Qualifier ~S not found." name))))))
+	((cim-qualifier-p item)
+	 (push (cons item (cim-qualifier-default item))
+	       alist))
 	(t (error "Malformed qualifier-item ~S" item))))))
 
 (eval-when (:compile-toplevel :load-toplevel :execute)
