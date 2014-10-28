@@ -8,7 +8,15 @@
 ;; base error type
 (define-condition cim-error (error)
   ((code :initform 0 :initarg :code :reader cim-error-code)
-   (description :initform "" :initarg :description :reader cim-error-description)))
+   (name :initform "" :initarg :name :reader cim-error-name)
+   (description :initform "" :initarg :description :reader cim-error-description))
+  (:report (lambda (condition stream)
+             (let ((desc (cim-error-description condition))
+                   (name (cim-error-name condition)))
+               (if desc
+                   (format stream "CIM error ~A: ~A" name desc)
+                   (format stream "CIM error ~A was raised" name))))))
+                                             
 
 (define-condition cim-error-failed (cim-error)
   ())
@@ -91,16 +99,6 @@
 	(:unexpected-response cim-error-unexpected-response 18)
 	(:invalid-response-destination cim-error-invalid-response-destination 19)
 	(:namespace-not-empty cim-error-namespace-not-empty 20)))
-  
-(defun cim-error (type &optional description)
-  "Raise a CIM error."
-  (destructuring-bind (kwname name code)
-	  (find-if (lambda (err-type)
-				 (or (eq (first err-type) type)
-					 (eq (third err-type) type)))
-			   *cim-error-types*)
-	(declare (ignore kwname))
-	(error name :code code :description description)))
 
 (defun make-cim-error (type &optional description)
   "Make a CIM-ERROR condition object." 
@@ -109,11 +107,14 @@
 				 (or (eq (first err-type) type)
 					 (eq (third err-type) type)))
 			   *cim-error-types*)
-	(declare (ignore kwname))
 	(make-condition name
 					:code code
+                    :name (symbol-name kwname)
 					:description description)))
-
+  
+(defun cim-error (type &optional description)
+  "Raise a CIM error."
+  (error (make-cim-error type description)))
 
 ;; ignores only cim errors
 (defmacro ignore-cim-errors (&body body)

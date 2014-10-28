@@ -2,13 +2,19 @@
 
 (in-package :climbe)
 
+;; client calls go here.
+;;
+
+
+
 (defvar *cim-uri* "http://localhost:5988/cimom")
 (defvar *cim-namespace* "root/cimv2")
 
 (defun call-cim-server (encoded &rest drakma-args)
   "Calls the server and returns the decoded result. Returns a CIM-MESSAGE structure.
 
-ENCODED is a string of the encoded message. Create it by calling one of the various ENCODE-* functions, such as ENCODE-GET-INSTANCE etc.
+ENCODED is a string of the encoded message. Create it by calling one of the 
+various ENCODE-* functions, such as ENCODE-GET-INSTANCE etc.
 
 URI is the name of the server to call.
 
@@ -17,7 +23,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
       (apply #'drakma:http-request *cim-uri*
              :method :post
              :content encoded
-;;			 :additional-headers
+;;			 :additional-headers that openpegasus demands???
 ;;			 `(("CIMOperation" . ,cim-operation)
 ;;			   ("CIMMethod" . ,cim-method)
 ;;			   ("CIMObject" . ,cim-object))
@@ -34,7 +40,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
              (error response)
              response)))
       (otherwise 
-       (error "Return ~A Reason: ~A" return-code reason)))))
+       (error "Return ~D Reason: ~A" return-code reason)))))
 
 ;; need to make the message objects
 
@@ -248,8 +254,6 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
       (declare (ignore type))
       ass)))
                 
-
-
 ;; <objectPath>*AssociatorNames ( 
 ;;         [IN] <objectName> ObjectName, 
 ;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL, 
@@ -343,4 +347,13 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 
 ;; <qualifierDecl>*EnumerateQualifiers ( 
 ;; )
+(defun call-enumerate-qualifiers (drakma-args &key (namespace *cim-namespace*))
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-enumerate-qualifiers :namespace namespace)
+                 drakma-args))))
+    (destructuring-bind (quals type) (cim-response-return-value response)
+      (declare (ignore type))
+      quals)))
 
