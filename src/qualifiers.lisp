@@ -39,6 +39,15 @@
 	    :test #'string-equal
 	    :key #'cim-name)))
 
+(defun cim-qualifier-symbol (name)
+  "Find the Lisp symbol name of the qualifer specified."
+  (maphash (lambda (key q)
+             (when (string-equal name (cim-qualifier-name q))
+               (return-from cim-qualifier-symbol key)))
+           *qualifiers*)
+  nil)
+           
+
 (defun make-qualifiers-list (list)
   "Make an alist of qualifiers from a kwlist. Boolean-type qualifiers do not take values."
   (declare (list list))

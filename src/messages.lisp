@@ -5,6 +5,16 @@
 (defstruct cim-message 
   request response id exp-request exp-response)
 
+(defmethod print-object ((cim cim-message) stream)
+  (format stream "#S(CIM-MESSAGE ")
+  (cond
+    ((cim-message-request cim)
+     (format stream ":REQUEST ~S" (cim-message-request cim)))
+    ((cim-message-response cim)
+     (format stream ":RESPONSE ~S" (cim-message-response cim))))
+  (format stream " :ID ~A" (cim-message-id cim))
+  (format stream ")"))
+    
 ;; declarations can contain qualifier declarations and class definitiosn 
 (defstruct cim-declaration 
   namespace qualifiers classes)
@@ -52,7 +62,19 @@ through the local namespace repository."
       inst)))
 
 
-		   
-    
+;; need a client-side representation of cim-classes i.e. something more abstract than the CLOS cim-class 
+;; metaclass.
+;; we use this when decoding because we don't whether what we're decoding is junk or not. often it 
+;; doesn't make sense to decode directly into the CLOS objects.
+(defstruct cim-class-declaration 
+  name slots qualifiers methods superclass)
 
+(defmethod cim-name ((cim cim-class-declaration))
+  (cim-class-declaration-name cim))
+
+(defmethod cim-qualifiers ((cim cim-class-declaration))
+  (cim-class-declaration-qualifiers cim))
+
+(defmethod print-object ((cim cim-class-declaration) stream)
+  (format stream "#S(CIM-CLASS-DECLARATION ~A)" (cim-name cim)))
 

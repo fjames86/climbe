@@ -2,10 +2,10 @@
 
 (in-package :climbe)
 
-(defparameter *cim-uri* "http://localhost:5898/cimom")
+(defvar *cim-uri* "http://localhost:5988/cimom")
+(defvar *cim-namespace* "root/cimv2")
 
-(defun call-cim-server (encoded &key
-						(uri *cim-uri*) drakma-args)
+(defun call-cim-server (encoded &rest drakma-args)
   "Calls the server and returns the decoded result. Returns a CIM-MESSAGE structure.
 
 ENCODED is a string of the encoded message. Create it by calling one of the various ENCODE-* functions, such as ENCODE-GET-INSTANCE etc.
@@ -13,9 +13,8 @@ ENCODED is a string of the encoded message. Create it by calling one of the vari
 URI is the name of the server to call.
 
 DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
-  (declare (type string encoded uri))
   (multiple-value-bind (response return-code headers puri stream must-close reason)
-      (apply #'drakma:http-request uri
+      (apply #'drakma:http-request *cim-uri*
              :method :post
              :content encoded
 ;;			 :additional-headers
@@ -27,13 +26,15 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
     (case return-code
       (200
        ;; all went well
-	   (decode-cim
-		(etypecase response
-		  (string response)
-		  (vector (babel:octets-to-string response)))))
+	   (let ((response (decode-cim
+                        (etypecase response
+                          (string response)
+                          (vector (babel:octets-to-string response))))))
+         (if (typep response 'cim-error)
+             (error response)
+             response)))
       (otherwise 
        (error "Return ~A Reason: ~A" return-code reason)))))
-      
 
 ;; need to make the message objects
 
@@ -44,6 +45,25 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun call-get-class (drakma-args class-name 
+                       &key (namespace *cim-namespace*) 
+                         (local-only t)
+                         (include-qualifiers t)
+                         include-class-origin
+                         property-list)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-get-class class-name 
+                                   :namespace namespace
+                                   :local-only local-only
+                                   :include-qualifiers include-qualifiers
+                                   :include-class-origin include-class-origin
+                                   :property-list property-list)
+                 drakma-args))))
+    (destructuring-bind (decls class) (cim-response-return-value response)
+      (assert (eq class :class))
+      (first decls))))
 
 ;; <instance>GetInstance ( 
 ;;         [IN] <instanceName> InstanceName, 
@@ -52,6 +72,20 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun call-get-instance (drakma-args instance-name &key (namespace *cim-namespace*)
+                                                      include-class-origin property-list)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-get-instance instance-name 
+                                      :namespace namespace
+                                      :include-class-origin include-class-origin
+                                      :property-list property-list)
+                 drakma-args))))
+    (destructuring-bind (instances type) (cim-response-return-value response)
+      (declare (ignore type)) ;; e.g. :value.namedinstance 
+      instances)))
+
 
 ;;void  DeleteClass ( 
 ;;        [IN] <className> ClassName 
@@ -60,6 +94,10 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;void  DeleteInstance ( 
 ;;         [IN] <instanceName> InstanceName 
 ;; )
+(defun call-delete-instance (drakma-args instance-name &key (namespace *cim-namespace*))
+  (apply #'call-cim-server
+         (encode-delete-instance instance-name :namespace namespace)
+         drakma-args))
 
 ;;void CreateClass ( 
 ;;        [IN] <class> NewClass 
@@ -69,6 +107,15 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;; <instanceName>CreateInstance ( 
 ;;        [IN] <instance> NewInstance 
 ;; )
+(defun call-create-instance (drakma-args instance &key (namespace *cim-namespace*))
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-create-instance instance :namespace namespace)
+                 drakma-args))))
+    (destructuring-bind (instance-name type) (cim-response-return-value response)
+      (declare (ignore type))
+      instance-name)))
 
 ;;void ModifyClass ( 
 ;;        [IN] <class> ModifiedClass 
@@ -79,6 +126,12 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;        [IN, OPTIONAL] boolean IncludeQualifiers = true,  (DEPRECATED)
 ;;        [IN, OPTIONAL, NULL] string propertyList[] = NULL 
 ;; )
+(defun call-modify-instance (drakma-args named-instance &key (namespace *cim-namespace*) property-list)
+  (apply #'call-cim-server 
+         (encode-modify-instance named-instance
+                                 :namespace namespace
+                                 :property-list property-list)
+         drakma-args))
 
 ;; <class>*EnumerateClasses ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName=NULL, 
@@ -87,12 +140,40 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false 
 ;; )
+(defun call-enumerate-classes (drakma-args &key (namespace *cim-namespace*) class-name
+                                             deep-inheritance (local-only t) (include-qualifiers t) include-class-origin)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-enumerate-classes :namespace namespace
+                                           :class-name class-name
+                                           :deep-inheritance deep-inheritance
+                                           :local-only local-only
+                                           :include-qualifiers include-qualifiers
+                                           :include-class-origin include-class-origin)
+                 drakma-args))))
+    (destructuring-bind (classes type) (cim-response-return-value response)
+      (declare (ignore type))
+      classes)))
+
 
 ;;<className>*EnumerateClassNames ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName = NULL, 
 ;;         [IN,OPTIONAL] boolean DeepInheritance = false 
 ;; )
-
+(defun call-enumerate-class-names (drakma-args &key (namespace *cim-namespace*) class-name deep-inheritance)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-enumerate-class-names 
+                  :namespace namespace
+                  :class-name class-name
+                  :deep-inheritance deep-inheritance)
+                 drakma-args))))
+    (destructuring-bind (class-names type) (cim-response-return-value response)
+      (declare (ignore type)) ;; :classname
+      class-names)))
+      
 ;;<namedInstance>*EnumerateInstances ( 
 ;;         [IN] <className> ClassName, 
 ;;         [IN,OPTIONAL] boolean LocalOnly = true,  (DEPRECATED)
@@ -101,11 +182,38 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun call-enumerate-instances (drakma-args class-name &key (namespace *cim-namespace*)
+                                               (deep-inheritance t)
+                                               include-class-origin
+                                               property-list)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-enumerate-instances class-name
+                                             :namespace namespace
+                                             :deep-inheritance deep-inheritance
+                                             :include-class-origin include-class-origin
+                                             :property-list property-list)
+                 drakma-args))))
+    (destructuring-bind (instances type) (cim-response-return-value response)
+      (declare (ignore type))
+      instances)))
+
 
 ;;<instanceName>*EnumerateInstanceNames ( 
 ;;         [IN] <className> ClassName 
 ;; )
-
+(defun call-enumerate-instance-names (drakma-args class-name &key (namespace *cim-namespace*))
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-enumerate-instance-names class-name 
+                                                  :namespace namespace)
+                 drakma-args))))
+    (destructuring-bind (instance-names type) (cim-response-return-value response)
+      (declare (ignore type)) ;; namedinstance
+      instance-names)))
+                                                 
 ;; <object>*ExecQuery ( 
 ;;         [IN] string QueryLanguage, 
 ;;         [IN] string Query 
@@ -121,6 +229,26 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
+(defun call-associators (drakma-args object-name &key (namespace *cim-namespace*)
+                                                   assoc-class result-class role result-role
+                                                   include-class-origin property-list)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-associators object-name
+                                     :namespace namespace
+                                     :assoc-class assoc-class
+                                     :result-class result-class
+                                     :role role
+                                     :result-role result-role
+                                     :include-class-origin include-class-origin
+                                     :property-list property-list)
+                 drakma-args))))
+    (destructuring-bind (ass type) (cim-response-return-value response)
+      (declare (ignore type))
+      ass)))
+                
+
 
 ;; <objectPath>*AssociatorNames ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -129,6 +257,22 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL,NULL] string Role = NULL, 
 ;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
 ;; )
+(defun call-associator-names (drakma-args object-name 
+                              &key 
+                                (namespace *cim-namespace*) assoc-class result-class role result-role)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-associator-names object-name
+                                          :namespace namespace 
+                                          :assoc-class assoc-class
+                                          :result-class result-class
+                                          :role role
+                                          :result-role result-role)
+                 drakma-args))))
+    (destructuring-bind (names type) (cim-response-return-value response)
+      (declare (ignore type))
+      names)))
 
 ;; <objectWithPath>*References ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -138,12 +282,41 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
-				   
+(defun call-references (drakma-args object-name 
+                        &key (namespace *cim-namespace*) result-class role include-class-origin property-list)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-references object-name
+                                    :namespace namespace
+                                    :result-class result-class
+                                    :role role
+                                    :include-class-origin include-class-origin
+                                    :property-list property-list)
+                 drakma-args))))
+    (destructuring-bind (refs type) (cim-response-return-value response)
+      (declare (ignore type))
+      refs)))
+
 ;;<objectPath>*ReferenceNames ( 
 ;;         [IN] <objectName> ObjectName, 
 ;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
 ;;         [IN,OPTIONAL,NULL] string Role = NULL 
 ;; )
+(defun call-reference-names (drakma-args object-name 
+                             &key (namespace *cim-namespace*) result-class role)
+  (let ((response 
+         (cim-message-response
+          (apply #'call-cim-server 
+                 (encode-reference-names object-name
+                                         :namespace namespace
+                                         :result-class result-class
+                                         :role role)
+                 drakma-args))))
+    (destructuring-bind (names type) (cim-response-return-value response)
+      (declare (ignore type))
+      names)))
+
 
 ;; <propertyValue>GetProperty ( 
 ;;         [IN] <instanceName> InstanceName, 

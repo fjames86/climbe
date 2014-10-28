@@ -1097,7 +1097,7 @@ PARAM-VALUES is a list of form (name value type)."
 ;; )
 (defun encode-references (object-name &key
 						  (namespace "root")
-						  result-class role result-role
+						  result-class role 
 						  include-class-origin property-list)
   (encode-cimxml-request
    "References"
@@ -1112,7 +1112,6 @@ PARAM-VALUES is a list of form (name value type)."
 								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
 	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
 	 ,@(when role `(("Role" ,role :value)))
-	 ,@(when result-role `(("ResultRole" ,result-role :value)))
 	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
 	 ("PropertyList" ,property-list :value.array))))
 

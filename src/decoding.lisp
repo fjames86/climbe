@@ -41,7 +41,9 @@
       ("uint64" uint64)
       ("char16" character)
       ("string" string)
-      ("datetime" datetime)))
+      ("datetime" datetime)
+      ("real32" real32)
+      ("real64" real64)))
 
 (defun decode-cim-type (string)
   (let ((type (second (find string +cim-type-strings+ 
@@ -264,37 +266,33 @@
 ;;     VALUETYPE    (string|boolean|numeric)  "string"
 ;;     %CIMType;    #IMPLIED>
 (deftag keyvalue (valuetype) data
-  (let ((str (first data)))
-    (list (cond
-	    ((string-equal valuetype "boolean") 
-	     (decode-boolean str))
-	    ((string-equal valuetype "numeric")
-	     ;; we cannot use read-from-string here for security reasons i.e. a #. code injection	     
-	     (parse-number:parse-number str))
-	    ((string-equal valuetype "string")
-	     str)
-	    (t (error "Invalid VALUETYPE ~S" valuetype)))
-	  valuetype)))
+  (let ((str (first data))
+        (type
+         (cond 
+           ((string-equal valuetype "boolean") 'boolean)
+           ((string-equal valuetype "numeric") 'number)
+           ((string-equal valuetype "string") 'string)
+           (t (error "Invalid VALUETYPE ~S" valuetype)))))            
+    (list (ecase type
+            (boolean (decode-boolean str))
+            (number 
+             ;; we cannot use read-from-string here for security reasons i.e. a #. code injection
+             (parse-number:parse-number str))
+            (string str))
+          type)))
 
 ;;<!ELEMENT CLASS (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*,METHOD*)>
 ;;<!ATTLIST CLASS 
 ;;    %CIMName;
 ;;    %SuperClass;>
 (deftag class (name superclass) (qualifier* property* property.array* property.reference* method*)
-  (declare (ignore superclass))
-  (make-instance 'cim-class 
-                 :qualifiers qualifier
-                 :methods method
-		 ;; FIXME: convert the property list into cim-standard-defintion-slot objects?
-                 :slots 
-		 (mapcar (lambda (slot)
-			   (destructuring-bind (slot-name slot-value slot-type) slot
-			     (declare (ignore slot-value))
-			     (make-instance 'cim-standard-effective-slot-definition 
-					    :cim-name slot-name
-					    :cim-type slot-type)))
-			 (append property property.array property.reference))
-                 :cim-name (list name)))
+  (make-cim-class-declaration 
+   :name name
+   :superclass (when (and superclass (not (string= superclass "")))
+                 superclass)
+   :qualifiers qualifier
+   :methods method
+   :slots (append property property.array property.reference)))
                  
 
 ;;<!ELEMENT INSTANCE (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*)>
@@ -327,8 +325,8 @@
 ;;     %Propagated;
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
-(deftag property (name type) (value)
-  (list name value (decode-cim-type type)))
+(deftag property (name type) (qualifier* value)
+  (list name value (decode-cim-type type) qualifier))
 			 
 ;;<!ELEMENT PROPERTY.ARRAY (QUALIFIER*,VALUE.ARRAY?)>
 ;;<!ATTLIST PROPERTY.ARRAY 
@@ -339,10 +337,11 @@
 ;;    %Propagated;
 ;;    %EmbeddedObject;
 ;;    xml:lang   NMTOKEN  #IMPLIED>
-(deftag property.array (name type) (value.array)
+(deftag property.array (name type) (qualifier* value.array)
   (list name 
 	value.array 
-	(list 'array (decode-cim-type type))))
+	(list 'array (decode-cim-type type))
+    qualifier))
 
 ;;<!ELEMENT PROPERTY.REFERENCE (QUALIFIER*,VALUE.REFERENCE?)>
 ;;<!ATTLIST PROPERTY.REFERENCE
@@ -350,8 +349,8 @@
 ;;     %ReferenceClass;
 ;;     %ClassOrigin;
 ;;     %Propagated;>
-(deftag property.reference (name referenceclass) (value.reference)
-  (list name referenceclass value.reference))
+(deftag property.reference (name referenceclass) (qualifier* value.reference)
+  (list name referenceclass value.reference qualifier))
 
 ;;<!ELEMENT METHOD (QUALIFIER*,(PARAMETER|PARAMETER.REFERENCE|PARAMETER.ARRAY|PARAMETER.REFARRAY)*)>
 ;;<!ATTLIST METHOD 
@@ -371,18 +370,20 @@
 ;;     %CIMName;
 ;;     %CIMType;      #REQUIRED>
 (deftag parameter (name type) (qualifier*)
-  (make-cim-parameter :name name
-                      :type (decode-cim-type type)
-                      :qualifiers qualifier))
+  (cons (intern (string-upcase name))
+        (make-cim-parameter :name name
+                            :type (decode-cim-type type)
+                            :qualifiers qualifier)))
 
 ;;<!ELEMENT PARAMETER.REFERENCE (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.REFERENCE
 ;;     %CIMName;
 ;;     %ReferenceClass;>
 (deftag parameter.reference (name referenceclass) (qualifier*)
-  (make-cim-parameter :name name
-                      :type referenceclass
-                      :qualifiers qualifier))
+  (cons (intern (string-upcase name))
+        (make-cim-parameter :name name
+                            :type referenceclass
+                            :qualifiers qualifier)))
 
 ;;<!ELEMENT PARAMETER.ARRAY (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.ARRAY
@@ -390,9 +391,10 @@
 ;;     %CIMType;           #REQUIRED
 ;;     %ArraySize;>
 (deftag parameter.array (name type) (qualifier*)
-  (make-cim-parameter :name name
-                      :type (list 'array (decode-cim-type type))
-                      :qualifiers qualifier))
+  (cons (intern (string-upcase name))
+        (make-cim-parameter :name name
+                            :type (list 'array (decode-cim-type type))
+                            :qualifiers qualifier)))
 
 ;;<!ELEMENT PARAMETER.REFARRAY (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.REFARRAY
@@ -400,9 +402,10 @@
 ;;     %ReferenceClass;
 ;;     %ArraySize;>
 (deftag parameter.refarray (name referenceclass) (qualifier*)
-  (make-cim-parameter :name name
-                      :type referenceclass
-                      :qualifiers qualifier))
+  (cons (intern (string-upcase name))
+        (make-cim-parameter :name name
+                            :type referenceclass
+                            :qualifiers qualifier)))
 
 ;;<!ELEMENT MESSAGE (SIMPLEREQ|MULTIREQ|SIMPLERSP|MULTIRSP|
 ;;          SIMPLEEXPREQ|MULTIEXPREQ|SIMPLEEXPRSP|MULTIEXPRSP)>
@@ -532,7 +535,7 @@
     (class (list class :class))
     (instance (list instance :instance))
     (value.namedinstance (list value.namedinstance :value.namedinstance))
-    (t (error "No Tag?"))))
+    (t (list nil :value))))
                   
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
 (deftag multiexpreq () (simpleexpreq*)

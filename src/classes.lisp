@@ -247,7 +247,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
   name type qualifiers)
 
 (defstruct cim-method
-  name return-type in-params out-params qualifiers function)
+  name return-type in-params out-params qualifiers function symbol)
 
 (defun cim-method-parameters (method)
   (append (cim-method-in-params method)
@@ -298,7 +298,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
     (unless return-type 
       (error "A :RETURN-TYPE option must be supplied."))
     `(progn       
-       ,(unless fn
+       ,(when (and (not fn) body)
           `(progn
              ;; define a Lisp function with ftype declarations
              (declaim (ftype (function ((or null ,class-name) ,@(mapcar #'cadr in-params)) ,return-type)
@@ -316,6 +316,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
        (add-method-to-class 
         (make-cim-method :name 
                          ,(cadr (assoc :cim-name options))
+                         :symbol ',name
                          :return-type 
                          ',(cadr (assoc :return-type options))
                          :qualifiers 
@@ -345,8 +346,10 @@ If SUPER-CLASSES is T all the superclasses are also removed."
                                                                            qualifiers)))))))
                                          out-params))
                          :function 
-                         ,(if fn fn `(function ,name)))
-        (find-class ',class-name) 
+                         ,(cond
+                           (fn fn)
+                           (body `(function ,name))))
+        (find-class ',class-name)
         :subclasses t)
          
        ;; for the sanity of the REPL 
