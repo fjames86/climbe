@@ -128,3 +128,13 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   (make-namespace-path :host host
 		       :namespace-list (namespace-list namespace)))
 
+
+(defun namespace-path-string (namespace-path)
+  (format nil "//~A~{/~A~}" 
+          (let ((host (namespace-path-host namespace-path)))
+            (if host host "."))
+          (mapcar #'cim-namespace-name (namespace-path-namespace-list namespace-path))))
+
+
+            
+  

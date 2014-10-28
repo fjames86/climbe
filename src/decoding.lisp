@@ -190,7 +190,7 @@
 
 ;;<!ELEMENT LOCALNAMESPACEPATH (NAMESPACE+)> 
 (deftag localnamespacepath () (namespace+)
-  namespace)
+  (make-namespace-path :namespace-list namespace))
 
 ;;<!ELEMENT HOST (#PCDATA)> 
 (deftag host () data
@@ -206,12 +206,12 @@
 ;;<!ELEMENT CLASSPATH (NAMESPACEPATH,CLASSNAME)>
 (deftag classpath () (namespacepath classname)
   (make-cim-reference :classname classname
-                      :namespace namespacepath))
+                      :namespace (namespace-path-string namespacepath)))
 
 ;;<!ELEMENT LOCALCLASSPATH (LOCALNAMESPACEPATH, CLASSNAME)>
 (deftag localclasspath () (localnamespacepath classname)
   (make-cim-reference :classname classname
-                      :namespace localnamespacepath))
+                      :namespace (namespace-path-string localnamespacepath)))
 
 ;;<!ELEMENT CLASSNAME EMPTY>
 ;;<!ATTLIST CLASSNAME
@@ -223,13 +223,13 @@
 ;;<!ELEMENT INSTANCEPATH (NAMESPACEPATH,INSTANCENAME)>
 (deftag instancepath () (namespacepath instancename)
   (setf (cim-reference-namespace instancename)
-        namespacepath)
+        (namespace-path-string namespacepath))
   instancename)
 
 ;;<!ELEMENT LOCALINSTANCEPATH (LOCALNAMESPACEPATH,INSTANCENAME)>
 (deftag localinstancepath () (localnamespacepath instancename)
   (setf (cim-reference-namespace instancename)
-        localnamespacepath)
+        (namespace-path-string localnamespacepath))
   instancename)
 
 ;;<!ELEMENT INSTANCENAME (KEYBINDING*|KEYVALUE?|VALUE.REFERENCE?)>
