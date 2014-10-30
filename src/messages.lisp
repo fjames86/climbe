@@ -42,12 +42,14 @@
 (defstruct cim-instance
   namespace classname slots)
 
-(defun convert-cim-instance (cim-instance)
+(defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
 through the local namespace repository."
   (declare (type cim-instance cim-instance))
   (let ((cl (find-cim-class (cim-instance-classname cim-instance)
-			    (find-namespace (cim-instance-namespace cim-instance)))))
+			    (if namespace
+					namespace
+					(find-namespace (cim-instance-namespace cim-instance))))))
     (unless cl 
       (error "Class ~S not found." (cim-instance-classname cim-instance)))
     (let ((inst (make-instance cl)))
