@@ -3,6 +3,241 @@
 (in-package :climbe)
 
 
+
+(defun process-request (request)
+  "Takes a CIM-REQUEST object and returns a CIM-RESPONSE object."
+  (declare (type cim-request request))
+  (let ((method (cim-request-method-name request)))
+    (cond
+      ((string-equal method-name "GetInstance")
+       (handle-get-instance 
+
+(defun handle-request (acceptor request)
+  "Takes Hunchentoot acceptor and request objects, decodes the post data from the request, passes the corresponding CIM-REQUEST object to PROCESS-REQUEST then encodes a CIM response to return."
+  nil)
+
+
+
+
+
+
+
+
+
+;; need to make the message objects
+
+;; <class>GetClass ( 
+;;         [IN] <className> ClassName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun handle-get-class (namespace class-name)
+  "Find the class in the namespace specified and return it."
+  (let ((ns (find-namespace namespace)))
+    (if ns 
+        (let ((cl (find-cim-class class-name ns)))
+          (if cl 
+              cl
+              (cim-error :not-found (format nil "Class ~S not found" class-name))))
+        (cim-error :invalid-namespace namespace))))
+
+;; <instance>GetInstance ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun handle-get-instance (instance-name)
+  "Convert a CIM-INSTANCE object into an instance of the real CLOS class, then pass it to GET-INSTANCE."
+  (get-instance (convert-cim-instance instance-name)))
+   
+;;void  DeleteClass ( 
+;;        [IN] <className> ClassName 
+;; )
+
+;;void  DeleteInstance ( 
+;;         [IN] <instanceName> InstanceName 
+;; )
+(defun handle-delete-instance (instance-name)
+  (delete-instance (convert-cim-instance instance-name)))
+
+;;void CreateClass ( 
+;;        [IN] <class> NewClass 
+;; )
+
+;;CreateInstance
+;; <instanceName>CreateInstance ( 
+;;        [IN] <instance> NewInstance 
+;; )
+(defun handle-create-instance (new-instance)
+  (create-instance (convert-cim-instance new-instance)))
+
+;;void ModifyClass ( 
+;;        [IN] <class> ModifiedClass 
+;; )
+
+;;void ModifyInstance ( 
+;;        [IN] <namedInstance> ModifiedInstance, 
+;;        [IN, OPTIONAL] boolean IncludeQualifiers = true,  (DEPRECATED)
+;;        [IN, OPTIONAL, NULL] string propertyList[] = NULL 
+;; )
+(defun handle-modify-instance (modified-instance)
+  (modify-instance (convert-cim-instance modified-instance)))
+
+;; <class>*EnumerateClasses ( 
+;;         [IN,OPTIONAL,NULL] <className> ClassName=NULL, 
+;;         [IN,OPTIONAL] boolean DeepInheritance = false,
+;;         [IN,OPTIONAL] boolean LocalOnly = true, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = true, 
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false 
+;; )
+(defun handle-enumerate-classes (namespace)
+  (let ((ns (find-namespace namespace)))
+    (if ns
+        (cim-namespace-classes ns)
+        (cim-error :invalid-namespace namespace))))
+
+;;<className>*EnumerateClassNames ( 
+;;         [IN,OPTIONAL,NULL] <className> ClassName = NULL, 
+;;         [IN,OPTIONAL] boolean DeepInheritance = false 
+;; )
+(defun handle-enumerate-class-names (namespace)
+  (let ((ns (find-namespace namespace)))
+    (if ns
+        (mapcar #'cim-name (cim-namespace-classes ns))
+        (cim-error :invalid-namespace namespace))))
+
+      
+;;<namedInstance>*EnumerateInstances ( 
+;;         [IN] <className> ClassName, 
+;;         [IN,OPTIONAL] boolean LocalOnly = true,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean DeepInheritance = true, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun handle-enumerate-instances (class-name namespace)
+  (let ((ns (find-namespace namespace)))
+    (if ns
+        (let ((cl (find-cim-class class-name ns)))
+          (if cl
+              (enumerate-instances (class-name cl))
+              (cim-error :invalid-class class-name)))
+        (cim-error :invalid-namespace namespace))))
+
+;;<instanceName>*EnumerateInstanceNames ( 
+;;         [IN] <className> ClassName 
+;; )
+(defun handle-enumerate-instance-names (class-name namespace)
+  (let ((instances (handle-enumerate-instances class-name namespace)))
+    (mapcar #'instance-to-cim-instance instances)))
+
+
+;; <object>*ExecQuery ( 
+;;         [IN] string QueryLanguage, 
+;;         [IN] string Query 
+;; )
+
+;; <objectWithPath>*Associators ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL,
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL,NULL] string ResultRole = NULL, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false, (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+
+;; FIXME!!!!
+(defun handle-associators (object)
+  (if (cim-class-declaration-p object)
+      ;; is a class. find its associated classes
+      nil
+      ;; is an instance. call the provider method 
+      (association-instances object nil)))
+
+;; <objectPath>*AssociatorNames ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> AssocClass = NULL, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
+;; )
+(defun handle-associator-names (object)
+  nil)
+
+;; <objectWithPath>*References ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL,
+;;         [IN,OPTIONAL,NULL] string Role = NULL, 
+;;         [IN,OPTIONAL] boolean IncludeQualifiers = false,  (DEPRECATED)
+;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
+;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
+;; )
+(defun handle-references (object)
+  nil)
+
+;;<objectPath>*ReferenceNames ( 
+;;         [IN] <objectName> ObjectName, 
+;;         [IN,OPTIONAL,NULL] <className> ResultClass = NULL, 
+;;         [IN,OPTIONAL,NULL] string Role = NULL 
+;; )
+(defun handle-reference-names (object)
+  nil)
+
+;; <propertyValue>GetProperty ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN] string PropertyName 
+;; )
+
+;; void SetProperty ( 
+;;         [IN] <instanceName> InstanceName, 
+;;         [IN] string PropertyName, 
+;;         [IN,OPTIONAL,NULL] <propertyValue> NewValue = NULL 
+;; )
+
+;; <qualifierDecl>GetQualifier ( 
+;;         [IN] string QualifierName 
+;; )
+
+;; void SetQualifier ( 
+;;         [IN] <qualifierDecl> QualifierDeclaration 
+;; )
+
+;; void DeleteQualifier ( 
+;;         [IN] string QualifierName 
+;; )
+
+;; <qualifierDecl>*EnumerateQualifiers ( 
+;; )
+
+
+(defun handle-invoke (method-name class-name namespace)
+  (let ((meth (find-cim-method method-name (find-cim-class class-name (find-namespace namespace)))))
+    (apply (cim-method-function meth)
+           (cim-method-in-params meth))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 (defvar *cim-acceptor* nil)
 
 

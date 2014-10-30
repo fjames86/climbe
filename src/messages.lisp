@@ -61,6 +61,16 @@ through the local namespace repository."
 		(error "Slot ~S not found." slot-name)))))
       inst)))
 
+(defun instance-to-cim-instance (instance)
+  "Convert a CLOS instance to a CIM-INSTANCE."
+  (let ((cl (class-of instance)))
+    (make-cim-instance :classname (cim-name cl)
+                       :slots 
+                       (mapcar (lambda (slot)
+                                 (list (cim-name slot)
+                                       (slot-value instance (closer-mop:slot-definition-name slot))
+                                       (cim-slot-type slot)))
+                               (cim-class-slots cl)))))
 
 ;; need a client-side representation of cim-classes i.e. something more abstract than the CLOS cim-class 
 ;; metaclass.

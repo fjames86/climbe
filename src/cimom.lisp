@@ -134,19 +134,26 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 (defgeneric provider-association-instances (instance assoc-class &key role result-role)
   (:documentation "Returns all concrete instances which are associated with the input instance.
 
-If ASSOC-CLASS is non-nil, it should be a symbol designating a class-name of the CIM Association class, mandating that each returned instance MUST be associated to the source instance via an instance of this Class or one of its subclasses.
+If ASSOC-CLASS is non-nil, it should be a symbol designating a class-name of the CIM Association class, 
+mandating that each returned instance MUST be associated to the source instance via an instance of this 
+Class or one of its subclasses.
 
-The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be associated to the source Object via an Association in which the source Object plays the specified role (i.e. the name of the Property in the Association Class that refers to the source Object MUST match the value of this parameter).
+The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned 
+set of Objects by mandating that each returned Object MUST be associated to the source Object via an 
+Association in which the source Object plays the specified role (i.e. the name of the Property in the 
+Association Class that refers to the source Object MUST match the value of this parameter).
 
-The RESULT-ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be associated to the source Object via an Association in which the returned Object plays the specified role (i.e. the name of the Property in the Association Class that refers to the returned Object MUST match the value of this parameter)."))
+The RESULT-ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the
+ returned set of Objects by mandating that each returned Object MUST be associated to the source Object 
+via an Association in which the returned Object plays the specified role (i.e. the name of the Property 
+in the Association Class that refers to the returned Object MUST match the value of this parameter)."))
 
 (defun association-instances (instance assoc-class &key result-class role result-role property-list)
   "Find all concrete instances associated with the given instance.
 
 If RESULT-CLASS is non-nil, it should be a symbol designating a CIM Class name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be either an Instance of this class (or one of its subclasses).
 "
-  (declare (ignore property-list) 
-           (cim-class instance))
+  (declare (ignore property-list) )
   ;; if result-class is provided then filter the resulting instances for those of this class
   (let ((insts (provider-association-instances instance 
                                                assoc-class

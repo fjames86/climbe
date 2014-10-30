@@ -64,13 +64,10 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 				   (some (lambda (child)
 						   (find-ns child (cdr name-list)))
 						 (cim-namespace-children ns))))))
-	(let ((ns (find-ns *namespaces*
-					   (if (listp namespace)
-						   namespace
-						   (parse-namespace namespace)))))
-	  (if ns
-		  ns
-		  (error "Namespace ~S not found" namespace)))))
+    (find-ns *namespaces*
+             (if (listp namespace)
+                 namespace
+                 (parse-namespace namespace)))))
 		  
 (defun ensure-namespace (name)
   "Ensure the namespace exists, creating it and its nodes if they don't yet exist."
