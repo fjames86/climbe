@@ -2,16 +2,20 @@
 
 (in-package :climbe)
 
+(defun decode-xml-octets (octets)
+  (cxml:parse-octets octets
+		     (cxml-xmls:make-xmls-builder)))
+
 (defun decode-xml (string)
   "Decode a CIMXML encoded string into nested lists. Note that because we need to already have the entire xml in the string this doesn't scale well to large content. "
   (declare (type string string))
-  (cxml:parse-octets 
+  (decode-xml-octets
    (babel:string-to-octets 
     (remove-if (lambda (char)
                  (member char '(#\newline #\return) 
                          :test #'char=))
-               string))
-   (cxml-xmls:make-xmls-builder)))
+               string))))
+
 
 (defun decode-xml-file (path)
   "Parse an entire xml file. Because it has to load the whole file first this does not scale well - do not use it to load large schema definitions. "
@@ -413,7 +417,7 @@
 ;;         ID             CDATA     #REQUIRED
 ;;         PROTOCOLVERSION CDATA     #REQUIRED>
 (deftag message (id) (simplereq multireq simplersp multirsp simpleexpreq multiexpreq simpleexprsp multiexprsp)
-  (make-cim-message :id (parse-integer id)
+  (make-cim-message :id id ;; message ID is not necessarily an integer
                     :request (or simplereq multireq)
                     :response (or simplersp multirsp)
                     :exp-request (or simpleexpreq multiexpreq)

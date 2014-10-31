@@ -73,7 +73,8 @@ of the intrinsic CIM methods has a CALL-* function.
 Server
 ------
 
-Not yet written.
+Not yet complete. 
+TODO: need to add the CIM http codes.
 
 Indications
 -----------

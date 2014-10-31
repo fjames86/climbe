@@ -121,9 +121,17 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   host namespace-list)
 
 (defun namespace-path (namespace &optional host)
-  (declare (type string namespace))
-  (make-namespace-path :host host
-		       :namespace-list (namespace-list namespace)))
+  (declare (type (or string cim-namespace) namespace))
+  (etypecase namespace
+    (string 
+     (multiple-value-bind (ns-list server) (parse-namespace namespace)
+       (make-namespace-path :host (or host server)
+			    :namespace-list (mapcar (lambda (ns)
+						      (make-cim-namespace :name ns))
+						    ns-list))))
+    (cim-namespace 
+     (make-namespace-path :host host
+			  :namespace-list (namespace-list namespace)))))
 
 
 (defun namespace-path-string (namespace-path)

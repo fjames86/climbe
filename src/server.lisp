@@ -23,51 +23,189 @@
 (defun process-request (request)
   "Takes a CIM-REQUEST object and returns a CIM-RESPONSE object."
   (declare (type cim-request request))
-  (if (cim-request-intrinsic-p request)
-	  (let ((method-name (cim-request-method-name request)))
-		(cond
-		  ((string-equal method-name "GetClass")
-		   (handle-get-class request))
-		  ((string-equal method-name "GetInstance")
-		   (handle-get-instance request))
-		  ((string-equal method-name "DeleteInstance")
-		   (handle-get-instance request))
-		  ((string-equal method-name "CreateInstance")
-		   (handle-get-instance request))
-		  ((string-equal method-name "ModifyInstance")
-		   (handle-get-instance request))
-		  ((string-equal method-name "EnumerateClasses")
-		   (handle-get-instance request))
-		  ((string-equal method-name "EnumerateClassNames")
-		   (handle-get-instance request))
-		  ((string-equal method-name "EnumerateInstances")
-		   (handle-get-instance request))
-		  ((string-equal method-name "EnumerateInstanceNames")
-		   (handle-get-instance request))
-		  ((string-equal method-name "Associators")
-		   (handle-get-instance request))
-		  ((string-equal method-name "AssociatorNames")
-		   (handle-get-instance request))
-		  ((string-equal method-name "References")
-		   (handle-get-instance request))
-		  ((string-equal method-name "ReferenceNames")
-		   (handle-get-instance request))
-		  (t (cim-error :not-supported method-name))))
-	  (cim-error :not-supported "extrinsic methods not supported")))
+  (let ((method-name (cim-request-method-name request)))
+    (handler-case 
+	(if (cim-request-intrinsic-p request)
+	    (multiple-value-bind (return-value return-type) (process-intrinsic-request request)
+	      (make-cim-response :method-name method-name
+				 :intrinsic-p t
+				 :return-value return-value 
+				 :return-type return-type))
+	    (multiple-value-bind (return-value out-params) (process-extrinsic-request request)
+	      (make-cim-response :method-name method-name
+				 :return-value return-value
+				 :out-parameters out-params)))
+      (cim-error (err) 
+	(make-cim-response :method-name method-name 
+			   :intrinsic-p t
+			   :error err))
+      (error (err) 
+	(make-cim-response :method-name method-name
+			   :intrinsic-p t
+			   :error (make-cim-error :failed (format nil "~A" err)))))))
 	
-
+(defun process-intrinsic-request (request)
+  "Returns (VALUES return-value return-type). RETURN-TYPE should be a keyword indicating
+the encoding element type, as listed in ENCODE-CIMXML-IRETURNVALUE."
+  (let ((method-name (cim-request-method-name request)))
+    (cond
+      ((string-equal method-name "GetClass")
+       (handle-get-class request))
+      ((string-equal method-name "GetInstance")
+       (handle-get-instance request))
+      ((string-equal method-name "DeleteInstance")
+       (handle-delete-instance request))
+      ((string-equal method-name "CreateInstance")
+       (handle-create-instance request))
+      ((string-equal method-name "ModifyInstance")
+       (handle-modify-instance request))
+      ((string-equal method-name "EnumerateClasses")
+       (handle-enumerate-classes request))
+      ((string-equal method-name "EnumerateClassNames")
+       (handle-enumerate-class-names request))
+      ((string-equal method-name "EnumerateInstances")
+       (handle-enumerate-instances request))
+      ((string-equal method-name "EnumerateInstanceNames")
+       (handle-enumerate-instance-names request))
+      ((string-equal method-name "Associators")
+       (handle-associators request))
+      ((string-equal method-name "AssociatorNames")
+       (handle-associator-names request))
+      ((string-equal method-name "References")
+       (handle-references request))
+      ((string-equal method-name "ReferenceNames")
+       (handle-reference-names request))
+      (t (cim-error :not-supported method-name)))))
+  
+(defun process-extrinsic-request (request)
+  "Returns (VALUES return-value out-params). OUT-PARAMS should be a list of (param-name value type)."
+  (declare (ignore request))
+  (cim-error :not-supported "Extrinsic methods not supported"))
 	  
 (defun handle-request (acceptor request)
-  "Takes Hunchentoot acceptor and request objects, decodes the post data from the request, passes the corresponding CIM-REQUEST object to PROCESS-REQUEST then encodes a CIM response to return."
-  nil)
+  "Takes Hunchentoot acceptor and request objects, decodes the post data from the request, passes the 
+corresponding CIM-REQUEST object to PROCESS-REQUEST then encodes a CIM response to return."
+  (declare (ignore acceptor request))
+  (let ((content (hunchentoot:raw-post-data :force-binary t)))
+    (handler-case 
+	(let ((message (decode-cimxml-cim (decode-xml-octets content))))
+	  (setf (hunchentoot:content-type*) "text/xml"
+		(hunchentoot:header-out :cimoperation) "MethodResponse")
+	  (let ((request (cim-message-request message)))
+	    (encode-cimxml-response 
+	     (if (consp request)
+		 (mapcar #'process-request request)
+		 (let ((response (process-request request)))
+		   ;; set the CIM headers
+		   (when (cim-response-error response)
+		     (setf (hunchentoot:header-out :cimstatuscode) 
+			   (cim-error-code (cim-response-error response))))
+		   response))
+	     :id (cim-message-id message))))
+      (error (err)
+	(hunchentoot:log-message* :error "~A" err)
+	(setf (hunchentoot:content-type*) "text/xml"
+	      (hunchentoot:header-out :cimerror) "request-not-valid"
+	      (hunchentoot:header-out :cimoperation) "MethodResponse"
+	      (hunchentoot:return-code*) hunchentoot:+http-bad-request+)
+	""))))
+
+
+
+;; ---------- hunchentoot server ------------------
+
+(defvar *cim-acceptors* nil
+  "List of hunchentoot acceptors for the CIM server.")
+
+
+;; subclass the hunchentoot acceptor
+(defclass cim-acceptor (hunchentoot:acceptor)
+  ())
+
+(defclass cim-ssl-acceptor (hunchentoot:ssl-acceptor)
+  ())
+
+
+;; specialize the dispatch methods 
+(defmethod hunchentoot:acceptor-dispatch-request ((acceptor cim-acceptor) request)
+  (handle-request acceptor request))
+
+(defmethod hunchentoot:acceptor-dispatch-request ((acceptor cim-ssl-acceptor) request)
+  (handle-request acceptor request))
+
+
+;; default ports
+(defparameter *default-port* 5988
+  "Default HTTP port for CIM server.")
+(defparameter *default-ssl-port* 5989
+  "Default HTTPS port for CIM server.")
+
+
+;; start the server
+(defun start-cim-server (&key port
+			   ssl-certificate-file ssl-privatekey-file
+			   ssl-privatekey-password
+			   auth-handler)
+  "Start the CIM server on PORT. It will serve any url, not just /CIMOM etc.
+
+If both SSL-CERTIFICATE-FILE and SSL-PRIVATEKEY-FILE are provided, starts
+an ssl server. See the hunchentoot documentation for the meaning of these parameters.
+
+If basic authentication is required, AUTH-HANDLER must be set to a function
+accepting 2 parameters, the username and password provided by the request. It
+should return non-nil on successful authentication.
+"
+
+  ;; set the port if not specified
+  (unless port
+    (if (and ssl-certificate-file ssl-privatekey-file)
+	(setf port *default-ssl-port*)
+	(setf port *default-port*)))
+  
+  (if (assoc port *cim-acceptors*)
+      ;; already have a server on this port, error
+      (error "Server already running. Stop it first"))
+
+  ;; start the server 
+  (let ((acceptor
+	 (if (and ssl-certificate-file ssl-privatekey-file)
+	     ;; ssl
+	     (make-instance
+	      'cim-ssl-acceptor
+	      :port port
+	      :ssl-certificate-file ssl-certificate-file
+	      :ssl-privatekey-file ssl-privatekey-file
+	      :ssl-privatekey-password ssl-privatekey-password
+	      :auth-handler auth-handler)
+	     
+	     (make-instance
+	      'cim-acceptor
+	      :port port
+	      :auth-handler auth-handler))))
+    
+    (hunchentoot:start acceptor)
+    (push (cons port acceptor) *cim-acceptors*)
+    acceptor))
+
+;; stop the server 
+
+(defun stop-cim-server (&optional port)
+  "Stop the CIM server"
+  (cond
+    ((null *cim-acceptors*) (error "No server running"))
+    ((null port) (hunchentoot:stop (cdr (pop *cim-acceptors*))))
+    (t (let ((acc (assoc port *cim-acceptors*)))
+	 (if acc
+	     (hunchentoot:stop (cdr acc))
+	     (error "No acceptor on that port"))
+	 (setf *cim-acceptors*
+	       (remove port *cim-acceptors* :key #'car))
+	 port))))
 
 
 
 
-
-
-
-
+;; -------------------- various intrinsic method handlers follow -----------------
 
 ;; need to make the message objects
 
@@ -81,13 +219,13 @@
 (defun handle-get-class (request)
   "Find the class in the namespace specified and return it."
   (destructuring-request (request namespace)
-	  (classname localonly includequalifiers includeclassorigin propertylist)
-	(declare (ignore localonly includequalifiers includeclassorigin propertylist))
-	(let ((cl (find-cim-class classname namespace)))
-	  (if cl 
-		  cl
-		  (cim-error :not-found
-					 (format nil "Class ~S not found" classname))))))
+      (classname localonly includequalifiers includeclassorigin propertylist)
+    (declare (ignore localonly includequalifiers includeclassorigin propertylist))
+    (let ((cl (find-cim-class classname namespace)))
+      (if cl 
+	  (values cl :class)
+	  (cim-error :not-found
+		     (format nil "Class ~S not found" classname))))))
 
 ;; <instance>GetInstance ( 
 ;;         [IN] <instanceName> InstanceName, 
@@ -99,9 +237,10 @@
 (defun handle-get-instance (request)
   "Convert a CIM-INSTANCE object into an instance of the real CLOS class, then pass it to GET-INSTANCE."
   (destructuring-request (request namespace)
-	  (instancename includeclassorigin propertylist)
-	(declare (ignore includeclassorigin propertylist))
-	(get-instance (convert-cim-instance instancename namespace))))
+      (instancename includeclassorigin propertylist)
+    (declare (ignore includeclassorigin propertylist))
+    (values (get-instance (convert-cim-instance instancename namespace))
+	    :instance)))
    
 ;;void  DeleteClass ( 
 ;;        [IN] <className> ClassName 
@@ -112,7 +251,8 @@
 ;; )
 (defun handle-delete-instance (request)
   (destructuring-request (request namespace) (instancename)
-	(delete-instance (convert-cim-instance instancename namespace))))
+    (delete-instance (convert-cim-instance instancename namespace)))
+  nil)
 
 ;;void CreateClass ( 
 ;;        [IN] <class> NewClass 
@@ -124,7 +264,8 @@
 ;; )
 (defun handle-create-instance (request)
   (destructuring-request (request namespace) (newinstance)
-	(create-instance (convert-cim-instance newinstance namespace))))
+    (values (create-instance (convert-cim-instance newinstance namespace))
+	    :instancename)))
 
 ;;void ModifyClass ( 
 ;;        [IN] <class> ModifiedClass 
@@ -137,8 +278,9 @@
 ;; )
 (defun handle-modify-instance (request)
   (destructuring-request (request namespace) (modifiedinstance propertylist)
-	(declare (ignore propertylist))
-	(modify-instance (convert-cim-instance modifiedinstance namespace))))
+    (declare (ignore propertylist))
+    (modify-instance (convert-cim-instance modifiedinstance namespace)))
+  nil)
 
 ;; <class>*EnumerateClasses ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName=NULL, 
@@ -149,7 +291,8 @@
 ;; )
 (defun handle-enumerate-classes (request)
   (destructuring-request (request namespace) ()
-	(cim-namespace-classes namespace)))
+    (values (cim-namespace-classes namespace)
+	    :class)))
   
 ;;<className>*EnumerateClassNames ( 
 ;;         [IN,OPTIONAL,NULL] <className> ClassName = NULL, 
@@ -157,7 +300,8 @@
 ;; )
 (defun handle-enumerate-class-names (request)
   (destructuring-request (request namespace) ()
-	(mapcar #'cim-name (cim-namespace-classes namespace))))
+    (values (mapcar #'cim-name (cim-namespace-classes namespace))
+	    :classname)))
 
       
 ;;<namedInstance>*EnumerateInstances ( 
@@ -170,18 +314,19 @@
 ;; )
 (defun handle-enumerate-instances (request)
   (destructuring-request (request namespace) (classname)
-	(let ((cl (find-cim-class classname namespace)))
-	  (if cl
-		  (enumerate-instances (class-name cl))
-		  (cim-error :invalid-class classname)))))
+    (let ((cl (find-cim-class classname namespace)))
+      (if cl
+	  (values (enumerate-instances (class-name cl))
+		  :value.namedinstance)
+	  (cim-error :invalid-class classname)))))
 
 ;;<instanceName>*EnumerateInstanceNames ( 
 ;;         [IN] <className> ClassName 
 ;; )
 (defun handle-enumerate-instance-names (request)  
   (let ((instances (handle-enumerate-instances request)))
-    (mapcar #'instance-to-cim-instance instances)))
-
+    (values (mapcar #'instance-to-cim-instance instances)
+	    :instancename)))
 
 ;; <object>*ExecQuery ( 
 ;;         [IN] string QueryLanguage, 
@@ -202,17 +347,22 @@
 ;; FIXME!!!!
 (defun handle-associators (request)
   (destructuring-request (request namespace) (objectname assocclass resultclass role resultrole propertylist)
-	(if (cim-class-declaration-p objectname)
-		;; is a class. find its associated classes
-		nil
-		;; is an instance. call the provider method 
-		(association-instances objectname
-							   (when assocclass
-								 (find-cim-class assocclass namespace))
-							   :result-class resultclass
-							   :role role
-							   :result-role resultrole
-							   :property-list propertylist))))
+    (if (cim-class-declaration-p objectname)
+	;; is a class. find its associated classes
+	nil
+	;; is an instance. call the provider method 
+	(values 
+	 (let ((path (namespace-path namespace)))
+	   (mapcar (lambda (inst)
+		     (list inst path))
+		   (association-instances objectname
+					  (when assocclass
+					    (find-cim-class assocclass namespace))
+					  :result-class resultclass
+					  :role role
+					  :result-role resultrole
+					  :property-list propertylist)))
+	 :value.objectwithpath))))
 
 ;; <objectPath>*AssociatorNames ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -222,12 +372,15 @@
 ;;         [IN,OPTIONAL,NULL] string ResultRole = NULL 
 ;; )
 (defun handle-associator-names (request)
-  (let ((insts (handle-associators request)))
-	(mapcar (lambda (obj)
-			  (if (typep obj 'cim-class)
-				  obj
-				  (instance-to-cim-instance obj)))
-			insts)))
+  (let ((insts (car (handle-associators request))))
+    (values 
+     (mapcar (lambda (obj-path)
+	       (destructuring-bind (obj path) obj-path
+		 (if (typep obj 'cim-class)
+		     (list obj path)
+		     (list (instance-to-cim-instance obj) path))))
+	     insts)
+     :value.objectwithpath)))
 
 ;; <objectWithPath>*References ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -239,14 +392,21 @@
 ;; )
 (defun handle-references (request)
   (destructuring-request (request namespace) (objectname resultclass role propertylist)
-	(if (cim-class-declaration-p objectname)
-		;; find all the referenced classes of this class
-		(let ((cl (find-class (cim-class-declaration-name namespace))))
-		  nil)
-		(reference-instances objectname
-							 :result-class resultclass
-							 :role role
-							 :property-list propertylist))))
+    (if (cim-class-declaration-p objectname)
+	;; find all the referenced classes of this class
+	(let ((cl (find-class (cim-class-declaration-name namespace))))
+	  (declare (ignore cl))
+	  nil)
+	(let ((insts 
+	       (reference-instances objectname
+				    :result-class resultclass
+				    :role role
+				    :property-list propertylist)))
+	  (values (let ((path (namespace-path namespace)))
+		    (mapcar (lambda (inst)
+			      (list inst path))
+			      insts))
+		  :value.objectwithpath)))))
 
 ;;<objectPath>*ReferenceNames ( 
 ;;         [IN] <objectName> ObjectName, 
@@ -254,12 +414,16 @@
 ;;         [IN,OPTIONAL,NULL] string Role = NULL 
 ;; )
 (defun handle-reference-names (request)
-  (let ((insts (handle-references request)))
-	(mapcar (lambda (obj)
-			  (if (typep obj 'cim-class)
-				  obj
-				  (instance-to-cim-instance obj)))
-			insts)))
+  (let ((insts (car (handle-references request))))
+    (values 
+     (mapcar (lambda (obj-path)
+	       (destructuring-bind (obj path) obj-path
+		 (if (typep obj 'cim-class)
+		     (list obj path)
+		     (list (instance-to-cim-instance obj)
+			   path))))
+	     insts)
+     :value.objectwithpath)))
 
 ;; <propertyValue>GetProperty ( 
 ;;         [IN] <instanceName> InstanceName, 
@@ -302,95 +466,3 @@
 
 
 
-
-(defvar *cim-acceptors* nil)
-
-
-;; subclass the hunchentoot acceptor
-(defclass cim-acceptor (hunchentoot:acceptor)
-  ())
-
-(defclass cim-ssl-acceptor (hunchentoot:ssl-acceptor)
-  ())
-
-
-;; specialize the dispatch methods 
-(defmethod hunchentoot:acceptor-dispatch-request ((acceptor cim-acceptor) request)
-  (handle-request acceptor request))
-
-(defmethod hunchentoot:acceptor-dispatch-request ((acceptor cim-ssl-acceptor) request)
-  (handle-request acceptor request))
-
-
-
-(defparameter *default-port* 5988)
-(defparameter *default-ssl-port* 5989)
-
-
-;; start the server
-(defun start-cim-server (&key port (encoding :cimxml)
-			   ssl-certificate-file ssl-privatekey-file
-			   ssl-privatekey-password
-			   auth-handler)
-  "Start the CIM server on PORT. It will serve any url, not just /CIMOM etc.
-
-If both SSL-CERTIFICATE-FILE and SSL-PRIVATEKEY-FILE are provided, starts
-an ssl server. See the hunchentoot documentation for the meaning of these parameters.
-
-If basic authentication is required, AUTH-HANDLER must be set to a function
-accepting 2 parameters, the username and password provided by the request. It
-should return non-nil on successful authentication.
-
-Encoding must be either :CIMXML or :WSMAN. WS-Man encoding is not currently supported.
-"
-
-  (unless port
-    (if (and ssl-certificate-file ssl-privatekey-file)
-	(setf port *default-ssl-port*)
-	(setf port *default-port*)))
-  
-  (if (assoc port *cim-acceptors*)
-      ;; already have a server on this port, error
-      (error "Server already running. Stop it first"))
-
-  (ecase encoding
-    (:cimxml nil)
-    (:wsman (error "WS-Man encoding is not currently supported")))
-  
-  ;; start the server 
-  (let ((acceptor
-		 (if (and ssl-certificate-file ssl-privatekey-file)
-			 ;; ssl
-			 (make-instance
-			  'cim-ssl-acceptor
-			  :encoding encoding
-			  :port port
-			  :ssl-certificate-file ssl-certificate-file
-			  :ssl-privatekey-file ssl-privatekey-file
-			  :ssl-privatekey-password ssl-privatekey-password
-			  :auth-handler auth-handler)
-			 
-			 (make-instance
-			  'cim-acceptor
-			  :encoding encoding
-			  :port port
-			  :auth-handler auth-handler))))
-
-    (hunchentoot:start acceptor)
-    (push (cons port acceptor) *cim-acceptors*)
-    acceptor))
-
-;; stop the server 
-
-(defun stop-cim-server (&optional port)
-  "Stop the CIM server"
-  (cond
-    ((null *cim-acceptors*) (error "No server running"))
-    ((null port) (hunchentoot:stop (cdr (pop *cim-acceptors*))))
-    (t (let ((acc (assoc port *cim-acceptors*)))
-		 (if acc
-			 (hunchentoot:stop (cdr acc))
-			 (error "No acceptor on that port"))
-		 (setf *cim-acceptors*
-			   (remove port *cim-acceptors* :key #'car))
-		 port))))

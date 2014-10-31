@@ -706,12 +706,12 @@ PARAM-VALUES is a list of form (name value type)."
 ;;              DESCRIPTION CDATA   #IMPLIED>
 (defun encode-cimxml-error (condition &optional instances)
   (eformat "<ERROR CODE=\"~A\" DESCRIPTION=\"~A\">~%"
-		   (cim-error-code condition)
-		   (let ((desc (cim-error-description condition)))
-			 (if desc desc "")))
+	   (cim-error-code condition)
+	   (let ((desc (cim-error-description condition)))
+	     (if desc desc "")))
   (when instances
-	(dolist (instance instances)
-	  (encode-cimxml-instance instance)))
+    (dolist (instance instances)
+      (encode-cimxml-instance instance)))
   (eformat "</ERROR>~%"))
 
 
@@ -732,53 +732,56 @@ PARAM-VALUES is a list of form (name value type)."
 (defun encode-cimxml-ireturnvalue (return-type value)
   (eformat "<IRETURNVALUE>~%")
   (ecase return-type
-	(:classname
-	 (if (consp value)
-		 (dolist (class-name value)
-		   (encode-cimxml-classname class-name))
-		 (encode-cimxml-classname value)))
-	(:instancename
-	 (if (consp value)
-		 (dolist (instance value)
-		   (encode-cimxml-instancename (cim-name (class-of instance))
-									   (instance-key-slots instance)))
-		 (encode-cimxml-instancename (cim-name (class-of value))
-									 (instance-key-slots value))))
-	(:value
-	 (if (consp value)
-		 (dolist (v value)
-		   (encode-cimxml-value v))
-		 (encode-cimxml-value value)))
-	(:value.objectwithpath
-	 (destructuring-bind (object path) value
-	   (encode-cimxml-value.objectwithpath object path)))
-	(:value.objectwithlocalpath
-	 (destructuring-bind (object path) value
-	   (encode-cimxml-value.objectwithlocalpath object path)))
-	(:value.object
-	 (if (consp value)
-		 (dolist (object value)
-		   (encode-cimxml-value.object object))
-		 (encode-cimxml-value.object value)))
-	((:objectpath)
-	 (destructuring-bind (path class-name &optional key-slots) value
-	   (encode-cimxml-objectpath path class-name key-slots)))
-	(:value.array
-	 (encode-cimxml-value.array value))
-	(:value.reference
-	 (encode-cimxml-value.reference value))
-	(:class
-	 (if (consp value)
-		 (dolist (class value)
-		   (encode-cimxml-class class))
-		 (encode-cimxml-class value)))
-	(:instance
-	 (if (consp value)
-		 (dolist (instance value)
-		   (encode-cimxml-instance instance))
-		 (encode-cimxml-instance value)))
-	(:value.namedinstance
-	 (encode-cimxml-value.namedinstance value)))
+    (:classname
+     (if (consp value)
+	 (dolist (class-name value)
+	   (encode-cimxml-classname class-name))
+	 (encode-cimxml-classname value)))
+    (:instancename
+     (if (consp value)
+	 (dolist (instance value)
+	   (encode-cimxml-instancename (cim-name (class-of instance))
+				       (instance-key-slots instance)))
+	 (encode-cimxml-instancename (cim-name (class-of value))
+				     (instance-key-slots value))))
+    (:value
+     (if (consp value)
+	 (dolist (v value)
+	   (encode-cimxml-value v))
+	 (encode-cimxml-value value)))
+    (:value.objectwithpath
+     (destructuring-bind (object path) value
+       (if (namespace-path-host path)
+	   (encode-cimxml-value.objectwithpath object path)
+	   (encode-cimxml-value.objectwithlocalpath object (namespace-path-namespace-list path)))))
+    (:value.objectwithlocalpath
+     (destructuring-bind (object path) value
+       (encode-cimxml-value.objectwithlocalpath object 
+						(namespace-path-namespace-list path))))
+    (:value.object
+     (if (consp value)
+	 (dolist (object value)
+	   (encode-cimxml-value.object object))
+	 (encode-cimxml-value.object value)))
+    ((:objectpath)
+     (destructuring-bind (path class-name &optional key-slots) value
+       (encode-cimxml-objectpath path class-name key-slots)))
+    (:value.array
+     (encode-cimxml-value.array value))
+    (:value.reference
+     (encode-cimxml-value.reference value))
+    (:class
+     (if (consp value)
+	 (dolist (class value)
+	   (encode-cimxml-class class))
+	 (encode-cimxml-class value)))
+    (:instance
+     (if (consp value)
+	 (dolist (instance value)
+	   (encode-cimxml-instance instance))
+	 (encode-cimxml-instance value)))
+    (:value.namedinstance
+     (encode-cimxml-value.namedinstance value)))
   (eformat "</IRETURNVALUE>~%"))
 
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
@@ -1209,33 +1212,12 @@ PARAM-VALUES is a list of form (name value type)."
 
 ;; ------------------ responses ----------------------
 
-(defun encode-cimxml-response (method-name return-value 
-			       &key
-				 (id 1) intrinsic-p return-type
-				 out-parameters)
+(defun encode-cimxml-response (response &key (id 1))
   "Encode a response."
   (with-output-to-string (*standard-output*)
     (encode-cimxml-cim
      (make-cim-message
       :id 1
-      :response
-      (make-cim-response
-       :method-name method-name
-       :intrinsic-p intrinsic-p
-       :return-value return-value
-       :return-type return-type
-       :out-parameters out-parameters)
+      :response response
       :id id))))
-
-(defun encode-cimxml-error-response (method-name condition)
-  "Encode a response that contains an error message instead of a return value."
-  (with-output-to-string (*standard-output*)
-    (encode-cimxml-cim
-     (make-cim-message 
-      :id 1
-      :response
-      (make-cim-response 
-       :method-name method-name 
-       :error condition)))))
-
 
