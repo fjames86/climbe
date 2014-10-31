@@ -29,7 +29,7 @@
     `(,(make-lisp-name slot-name)
        ,slot-type 
        :cim-name ,slot-name 
-       :qualifiers (list ,@(encode-lisp-qualifiers qualifiers))
+       :qualifiers (,@(encode-lisp-qualifiers qualifiers))
        :initform ,slot-value)))
        
 
@@ -99,11 +99,18 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
         
         ;; add the classes
         (dolist (class (cim-declaration-classes declaration))
-          (pprint (encode-lisp-class class) f)
+	  (when (cim-class-declaration-p class)
+	    (pprint (encode-lisp-class class) f)
         
-          ;; encode the methods of the class
-          (dolist (method (cim-class-declaration-methods class))
-            (pprint (encode-lisp-method method (make-lisp-name (cim-name class)))
-                    f))))))
+	    ;; encode the methods of the class
+	    (dolist (method (cim-class-declaration-methods class))
+	      (pprint (encode-lisp-method method (make-lisp-name (cim-name class)))
+		      f)))))))
 
   nil)
+
+(defun compile-schema* (pathspec)
+  (dolist (xml-file (directory pathspec))    
+    (print xml-file)
+    (compile-schema xml-file)))
+
