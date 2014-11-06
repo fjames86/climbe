@@ -124,7 +124,7 @@
 ;;<!ELEMENT VALUE.OBJECT (CLASS|INSTANCE)>
 (defun encode-cimxml-value.object (object)
   (eformat "<VALUE.OBJECT>~%")
-  (if (typep object 'cim-class)
+  (if (cim-class-declaration-p object)
 	  (encode-cimxml-class object)
 	  (encode-cimxml-instance object))
   (eformat "</VALUE.OBJECT>~%"))
@@ -145,7 +145,7 @@
 (defun encode-cimxml-value.namedobject (object)
   (eformat "<VALUE.NAMEDOBJECT>~%")
   (cond
-	((typep object 'cim-class)
+	((cim-class-declaration-p object)
 	 (encode-cimxml-class object))
 	(t
 	 (let ((class (class-of object)))
@@ -157,7 +157,7 @@
 (defun encode-cimxml-value.objectwithpath (object namespace-path)
   (eformat "<VALUE.OBJECTWITHPATH>~%")
   (cond
-	((typep object 'cim-class)
+	((cim-class-declaration-p object)
 	 (encode-cimxml-classpath namespace-path (cim-name object))
 	 (encode-cimxml-class object))
 	(t
@@ -170,7 +170,7 @@
 (defun encode-cimxml-value.objectwithlocalpath (object namespace-list)
   (eformat "<VALUE.OBJECTWITHLOCALPATH>~%")
   (cond
-	((typep object 'cim-class)
+	((cim-class-declaration-p object)
 	 (encode-cimxml-localclasspath namespace-list (cim-name object))
 	 (encode-cimxml-class object))
 	(t
@@ -291,7 +291,7 @@
 ;;    %CIMName;
 ;;    %SuperClass;>
 (defun encode-cimxml-class (class)
-  (declare (type cim-class class))
+  (declare (type cim-class-declaration class))
   (let ((super-class (cim-class-superclasses class)))
 	(if super-class
 		(eformat "<CLASS NAME=\"~A\" SuperClass=\"~A\">~%"
@@ -301,9 +301,10 @@
   (dolist (qualifier (cim-qualifiers class))
 	(destructuring-bind (q . v) qualifier
 	  (encode-cimxml-qualifier q v)))
-  (dolist (slot (cim-class-slots class))
-	(encode-cimxml-slot slot))
-  (dolist (method (cim-class-methods class))
+  (dolist (slot (cim-class-declaration-slots class))
+    (destructuring-bind (slot-name slot-value slot-type) slot
+      (encode-cimxml-slot* slot-name slot-value slot-type)))
+  (dolist (method (cim-class-declaration-methods class))
 	(encode-cimxml-method method))
   (eformat "</CLASS>~%"))
 
@@ -407,15 +408,18 @@
 
 ;; Lisp function to encode a Slot. It wraps the above 3 property calls
 (defun encode-cimxml-slot (slot &optional value)
-  (let ((type (cim-slot-type slot)))
-	(cond
-	  ((and (listp type) (eq (car type) 'array))
-	   (encode-cimxml-property.array slot value))
-	  ((subtypep type 'cim-primitive)
-	   (encode-cimxml-property slot value))
-	  (t
-	   ;; another type, must be a reference
-	   (encode-cimxml-property.reference slot value)))))
+  (if (listp slot)
+      (destructuring-bind (slot-name slot-value slot-type) slot
+        (encode-cimxml-slot* slot-name slot-value slot-type))
+      (let ((type (cim-slot-type slot)))
+        (cond
+          ((and (listp type) (eq (car type) 'array))
+           (encode-cimxml-property.array slot value))
+          ((subtypep type 'cim-primitive)
+           (encode-cimxml-property slot value))
+          (t
+           ;; another type, must be a reference
+           (encode-cimxml-property.reference slot value))))))
 
 (defun encode-cimxml-slot* (slot-name slot-value slot-type)
   (encode-cimxml-slot (make-instance 'cim-standard-effective-slot-definition
@@ -1054,6 +1058,8 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
+                                  ((cim-class-declaration-p object-name)
+                                   :class)
 								  ((typep object-name 'cim-class)
 								   :class)
 								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
