@@ -117,7 +117,25 @@
    :cim-reference-namespace
    :cim-reference-classname
    :cim-reference-keyslots
-   
+
+   ;; client
+   :*cim-uri*
+   :*cim-namespace*
+   :call-cim-server
+   :call-get-class
+   :call-get-instance
+   :call-delete-instance
+   :call-modify-instance
+   :call-enumerate-classes
+   :call-enumerate-class-names
+   :call-enumerate-instances
+   :call-enumerate-instance-names
+   :call-associators
+   :call-associator-names
+   :call-references
+   :call-reference-names
+   :call-enumerate-qualifiers
+
    ))
 
 
