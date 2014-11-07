@@ -292,11 +292,7 @@
 ;;    %SuperClass;>
 (defun encode-cimxml-class (class)
   (declare (type cim-class-declaration class))
-<<<<<<< HEAD
   (let ((super-class (cim-class-declaration-superclass class)))
-=======
-  (let ((super-class (cim-class-superclasses class)))
->>>>>>> 02939a2ceb4aa21517ae0cea0123d09fc62ece59
 	(if super-class
 	    (eformat "<CLASS NAME=\"~A\" SUPERCLASS=\"~A\">~%"
 		     (cim-name class)
@@ -306,12 +302,7 @@
 	(destructuring-bind (q . v) qualifier
 	  (encode-cimxml-qualifier q v)))
   (dolist (slot (cim-class-declaration-slots class))
-<<<<<<< HEAD
 	(encode-cimxml-slot slot))
-=======
-    (destructuring-bind (slot-name slot-value slot-type) slot
-      (encode-cimxml-slot* slot-name slot-value slot-type)))
->>>>>>> 02939a2ceb4aa21517ae0cea0123d09fc62ece59
   (dolist (method (cim-class-declaration-methods class))
 	(encode-cimxml-method method))
   (eformat "</CLASS>~%"))
@@ -418,7 +409,6 @@
 (defun encode-cimxml-slot (slot &optional value)
   (if (listp slot)
       (destructuring-bind (slot-name slot-value slot-type) slot
-<<<<<<< HEAD
 	(encode-cimxml-slot* slot-name slot-value slot-type))
       (let ((type (cim-slot-type slot)))
 	(cond
@@ -429,18 +419,6 @@
 	  (t
 	   ;; another type, must be a reference
 	   (encode-cimxml-property.reference slot value))))))
-=======
-        (encode-cimxml-slot* slot-name slot-value slot-type))
-      (let ((type (cim-slot-type slot)))
-        (cond
-          ((and (listp type) (eq (car type) 'array))
-           (encode-cimxml-property.array slot value))
-          ((subtypep type 'cim-primitive)
-           (encode-cimxml-property slot value))
-          (t
-           ;; another type, must be a reference
-           (encode-cimxml-property.reference slot value))))))
->>>>>>> 02939a2ceb4aa21517ae0cea0123d09fc62ece59
 
 (defun encode-cimxml-slot* (slot-name slot-value slot-type)
   (encode-cimxml-slot (make-instance 'cim-standard-effective-slot-definition
@@ -1079,13 +1057,7 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
-<<<<<<< HEAD
 								  ((cim-class-declaration-p object-name)
-=======
-                                  ((cim-class-declaration-p object-name)
-                                   :class)
-								  ((typep object-name 'cim-class)
->>>>>>> 02939a2ceb4aa21517ae0cea0123d09fc62ece59
 								   :class)
 								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS-DECLARATION"))))
 	 ,@(when assoc-class `(("AssocClass" ,assoc-class :classname)))
