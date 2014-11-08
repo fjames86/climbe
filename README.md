@@ -1,11 +1,14 @@
 Climbe
 ======
 
-Climbe is a CIM engine, comprising both CIMOM/server and client. Currently supports the CIMXML encoding protocol, 
-but support for WS-Management (WS-Man) is intended. 
-This should make it possible to interact with Windows WMI via the WinRM protocol (which is basically WS-Man). 
+Climbe is a CIM engine, comprising both CIMOM/server and client. It currently supports the CIMXML encoding protocol, 
 
-At present the Climbe client is capable of talking to OpenPegasus and SFCB servers. 
+At present the client is working and capable of talking to OpenPegasus and SFCB servers.
+
+The CIMOM/server component is not yet complete and has much more work to do yet before it's stable.
+
+Support for WS-Management (WS-Man) is intended at some point, this should make it possible to
+interact with Windows WMI via the WinRM protocol (which is basically WS-Man). 
 
 CIMOM
 -------
@@ -49,7 +52,8 @@ schema definitions to the equivalent Lisp with the COMPILE-SCHEMA function. This
 a Lisp skeleton for the CIM classes required.
 
 For schema which are only distributed in MOF (e.g. SMI-S schema) you can either convert it to XML using some 
-other tool (e.g. OpenPegasus) or type the Lisp in by hand. 
+other tool (e.g. OpenPegasus) or type the Lisp in by hand. Because of this there is no MOF compiler.
+All CIM classes must be added to Lisp using DEFCIM-CLASS.
 
 Client
 -------
@@ -68,18 +72,69 @@ of the intrinsic CIM methods has a CALL-* function.
                           "Person"
                           :namespace "root/cimv2")
 
+
+;; Supported client calls:
+;;   call-get-class
+;;   call-get-instance
+;;   call-delete-instance
+;;   call-modify-instance
+;;   call-enumerate-classes
+;;   call-enumerate-class-names
+;;   call-enumerate-instances
+;;   call-enumerate-instance-names
+;;   call-associators
+;;   call-associator-names
+;;   call-references
+;;   call-reference-names
+;;   call-enumerate-qualifiers
+
+
+
 ```
+
+TODO: need to support more of the CIM HTTP header codes.
+
+
+
 
 Server
 ------
 
-Not yet complete. 
-TODO: need to add the CIM http codes.
+Partially complete. The server runs but the handlers are still very buggy.
+
+```
+
+;; define some classes
+(in-namespace "root/cimv2")
+
+(defcim-class MyClass ()
+  ((x string :cim-name "x"))
+  (:cim-name "MyClass"))
+
+;; start the server 
+(start-cim-server)
+
+;; stop the server
+(stop-cim-server)
+
+```
+
+
+
+TODO: need to add support for the various CIM http codes.
+
+Associations
+-------------
+
+Sort of working but still very buggy. Still a work in progress.
+
 
 Indications
 -----------
 
-Not yet supported.
+CIM export messages supported by the client and server but it's still
+a work in progress. 
+
 
 
 Frank James 2014.
