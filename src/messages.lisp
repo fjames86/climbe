@@ -90,3 +90,18 @@ through the local namespace repository."
 (defmethod print-object ((cim cim-class-declaration) stream)
   (format stream "#S(CIM-CLASS-DECLARATION ~A)" (cim-name cim)))
 
+
+(defun class-to-declaration (class)
+  "Converts a CIM-CLASS Object into a CIM-CLASS-DECLARATION"
+  (make-cim-class-declaration
+   :name (cim-name class)
+   :slots (mapcar (lambda (slot)
+					(list (cim-name slot)
+						  nil ;; value???
+						  (cim-slot-type slot)))
+				  (cim-class-slots class))
+   :qualifiers (cim-qualifiers class)
+   :methods (cim-class-methods class)
+   :superclass nil ;;; superclass??
+   ))
+							 

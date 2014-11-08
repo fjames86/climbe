@@ -49,13 +49,14 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
     (case return-code
       (200
        ;; all went well
-	   (let ((response (decode-cim
+;;	   (format t "ENCODED: ~A~%" response)
+	   (let ((message (decode-cim
                         (etypecase response
                           (string response)
                           (vector (babel:octets-to-string response))))))
-         (if (typep response 'cim-error)
-             (error response)
-             response)))
+         (if (cim-response-p (cim-message-response message))
+			 message
+             (error (cim-message-response message)))))
       (otherwise 
        (error "Return ~D Reason: ~A" return-code reason)))))
 

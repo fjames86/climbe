@@ -736,10 +736,10 @@ PARAM-VALUES is a list of form (name value type)."
   (eformat "<IRETURNVALUE>~%")
   (ecase return-type
     (:classname
-     (if (consp value)
-	 (dolist (class-name value)
-	   (encode-cimxml-classname class-name))
-	 (encode-cimxml-classname value)))
+     (if (listp value)
+		 (dolist (class-name value)
+		   (encode-cimxml-classname class-name))
+		 (encode-cimxml-classname value)))
     (:instancename
      (if (consp value)
 	 (dolist (instance value)
@@ -775,9 +775,9 @@ PARAM-VALUES is a list of form (name value type)."
      (encode-cimxml-value.reference value))
     (:class
      (if (consp value)
-	 (dolist (class value)
-	   (encode-cimxml-class class))
-	 (encode-cimxml-class value)))
+		 (dolist (class value)
+		   (encode-cimxml-class class))
+		 (encode-cimxml-class value)))
     (:instance
      (if (consp value)
 	 (dolist (instance value)

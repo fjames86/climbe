@@ -47,8 +47,9 @@
 (defun process-intrinsic-request (request)
   "Returns (VALUES return-value return-type). RETURN-TYPE should be a keyword indicating
 the encoding element type, as listed in ENCODE-CIMXML-IRETURNVALUE."
+  ;; FIXME: intern to a keyword? shouldn't really be doing all these strcmps
   (let ((method-name (cim-request-method-name request)))
-    (cond
+    (case method-name 
       ((string-equal method-name "GetClass")
        (handle-get-class request))
       ((string-equal method-name "GetInstance")
@@ -144,16 +145,11 @@ corresponding CIM-REQUEST object to PROCESS-REQUEST then encodes a CIM response 
 ;; start the server
 (defun start-cim-server (&key port
 			   ssl-certificate-file ssl-privatekey-file
-			   ssl-privatekey-password
-			   auth-handler)
+			   ssl-privatekey-password)
   "Start the CIM server on PORT. It will serve any url, not just /CIMOM etc.
 
 If both SSL-CERTIFICATE-FILE and SSL-PRIVATEKEY-FILE are provided, starts
 an ssl server. See the hunchentoot documentation for the meaning of these parameters.
-
-If basic authentication is required, AUTH-HANDLER must be set to a function
-accepting 2 parameters, the username and password provided by the request. It
-should return non-nil on successful authentication.
 "
 
   ;; set the port if not specified
@@ -162,10 +158,6 @@ should return non-nil on successful authentication.
 	(setf port *default-ssl-port*)
 	(setf port *default-port*)))
   
-  (if (assoc port *cim-acceptors*)
-      ;; already have a server on this port, error
-      (error "Server already running. Stop it first"))
-
   ;; start the server 
   (let ((acceptor
 	 (if (and ssl-certificate-file ssl-privatekey-file)
@@ -175,17 +167,22 @@ should return non-nil on successful authentication.
 	      :port port
 	      :ssl-certificate-file ssl-certificate-file
 	      :ssl-privatekey-file ssl-privatekey-file
-	      :ssl-privatekey-password ssl-privatekey-password
-	      :auth-handler auth-handler)
+	      :ssl-privatekey-password ssl-privatekey-password)
 	     
 	     (make-instance
 	      'cim-acceptor
-	      :port port
-	      :auth-handler auth-handler))))
-    
-    (hunchentoot:start acceptor)
-    (push (cons port acceptor) *cim-acceptors*)
-    acceptor))
+	      :port port))))
+
+    (start-cim-server* acceptor)))
+
+(defun start-cim-server* (acceptor)
+  (when (assoc (hunchentoot:acceptor-port acceptor) *cim-acceptors*)
+	;; already have a server on this port, error
+	(error "Server already running. Stop it first"))
+  (hunchentoot:start acceptor)
+  (push (cons (hunchentoot:acceptor-port acceptor) acceptor)
+		*cim-acceptors*)
+  acceptor)
 
 ;; stop the server 
 
@@ -201,8 +198,6 @@ should return non-nil on successful authentication.
 	 (setf *cim-acceptors*
 	       (remove port *cim-acceptors* :key #'car))
 	 port))))
-
-
 
 
 ;; -------------------- various intrinsic method handlers follow -----------------
@@ -291,7 +286,7 @@ should return non-nil on successful authentication.
 ;; )
 (defun handle-enumerate-classes (request)
   (destructuring-request (request namespace) ()
-    (values (cim-namespace-classes namespace)
+    (values (mapcar #'class-to-declaration (cim-namespace-classes namespace))
 	    :class)))
   
 ;;<className>*EnumerateClassNames ( 
