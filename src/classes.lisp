@@ -5,6 +5,7 @@
 
 ;; ---------- classes ----------
 
+;; FIXME: rename to cim-standard-class ???
 (defclass cim-class (closer-mop:standard-class)
   ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
@@ -358,7 +359,8 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 
 (defun find-cim-method (cim-name class)
   "Find a CIM method on a class."
-  (declare (string cim-name) (cim-class class))
+  (declare (type string cim-name)
+		   (type cim-class class))
   (find cim-name (cim-class-methods class)
         :key #'cim-name 
         :test #'string-equal))
