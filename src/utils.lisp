@@ -45,3 +45,22 @@
   `(defconstant ,name (if (boundp ',name) (symbol-value ',name) ,value)
      ,@(when doc (list doc))))
 
+;; copied from s-xml
+(defun encode-xml-string (string &key (start 0) end)
+  "Write the characters of string to stream using basic XML conventions"
+  (with-output-to-string (stream)
+	(loop for offset upfrom start below (or end (length string))
+	   for char = (char string offset)
+	   do (case char
+			(#\& (write-string "&amp;" stream))
+			(#\< (write-string "&lt;" stream))
+			(#\> (write-string "&gt;" stream))
+			(#\" (write-string "&quot;" stream))
+			((#\newline #\return #\tab) (write-char char stream))
+			(t (if (and (<= 32 (char-code char))
+						(<= (char-code char) 126))
+				   (write-char char stream)
+				   (progn
+					 (write-string "&#x" stream)
+					 (write (char-code char) :stream stream :base 16)
+					 (write-char #\; stream))))))))

@@ -4,15 +4,19 @@
 
 (defmacro destructuring-request ((request namespace-var) arg-list &body body)
   (let ((gargs (gensym "ARGS"))
-		(grequest (gensym "REQUEST")))
+		(grequest (gensym "REQUEST"))
+		(gns (gensym "NS")))
 	`(let* ((,grequest ,request)
+			(,gns (namespace-path-string (cim-request-namespace-path ,grequest)))
 			(,namespace-var
-			 (let ((ns (find-namespace (namespace-path-string (cim-request-namespace-path ,grequest)))))
-			   (if ns ns (cim-error :invalid-namespace)))))
+			 (let ((ns (find-namespace ,gns)))
+			   (if ns
+				   ns
+				   (cim-error :invalid-namespace ,gns)))))
 	   (destructuring-bind ,arg-list
 		   (let ((,gargs (cim-request-arguments ,grequest)))
 			 (labels ((find-arg (name)
-						(find name ,gargs :key #'car :test #'string-equal)))
+						(cadr (find name ,gargs :key #'car :test #'string-equal))))
 			   (list ,@(mapcar (lambda (var)
 								 `(find-arg ,(symbol-name var)))
 							   arg-list))))
@@ -49,7 +53,8 @@
 the encoding element type, as listed in ENCODE-CIMXML-IRETURNVALUE."
   ;; FIXME: intern to a keyword? shouldn't really be doing all these strcmps
   (let ((method-name (cim-request-method-name request)))
-    (case method-name 
+	(hunchentoot:log-message* :info "~A" method-name)
+    (cond 
       ((string-equal method-name "GetClass")
        (handle-get-class request))
       ((string-equal method-name "GetInstance")

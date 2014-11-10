@@ -84,7 +84,9 @@
 
 ;;<!ELEMENT VALUE (#PCDATA)>
 (defun encode-cimxml-value (value)
-  (eformat "<VALUE>~A</VALUE>~%" value))
+  (eformat "<VALUE>~A</VALUE>~%"
+		   (let ((str (format nil "~A" value)))
+			 (encode-xml-string str))))
 
 ;;<!ELEMENT VALUE.ARRAY (VALUE*)>
 (defun encode-cimxml-value.array (value-list)
@@ -291,7 +293,9 @@
 ;;    %CIMName;
 ;;    %SuperClass;>
 (defun encode-cimxml-class (class)
-  (declare (type cim-class-declaration class))
+  (when (typep class 'cim-class)
+	(return-from encode-cimxml-class
+	  (encode-cimxml-class (class-to-declaration class))))
   (let ((super-class (cim-class-declaration-superclass class)))
 	(if super-class
 	    (eformat "<CLASS NAME=\"~A\" SUPERCLASS=\"~A\">~%"
@@ -711,7 +715,9 @@ PARAM-VALUES is a list of form (name value type)."
   (eformat "<ERROR CODE=\"~A\" DESCRIPTION=\"~A\">~%"
 	   (cim-error-code condition)
 	   (let ((desc (cim-error-description condition)))
-	     (if desc desc "")))
+	     (if desc
+			 (encode-xml-string desc)
+			 "")))
   (when instances
     (dolist (instance instances)
       (encode-cimxml-instance instance)))
