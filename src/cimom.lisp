@@ -192,9 +192,8 @@ The RESULT-CLASS input parameter, if not NULL, MUST be a valid CIM Class name. I
 The ROLE input parameter, if not NULL, MUST be a valid Property name. It acts as a filter on the returned set of Objects by mandating that each returned Objects MUST refer to the target Object via a Property whose name matches the value of this parameter.
 
 If the PROPERTY-LIST input parameter is not NULL, the members of the array define one or more Property names.  Each returned Object MUST NOT include elements for any Properties missing from this list.  If the PropertyList input parameter is an empty array this signifies that no Properties are included in each returned Object. If the PropertyList input parameter is NULL this specifies that all Properties (subject to the conditions expressed by the other parameters) are included in each returned Object."
-  (declare (ignore property-list)
-           (cim-class instance))
-  (let ((insts (provider-reference-instances instance result-class :role role)))
+  (declare (ignore property-list))
+  (let ((insts (provider-reference-instances instance :role role)))
     (if result-class
         (mapcan (lambda (inst)
                   (when (typep inst result-class)

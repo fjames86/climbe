@@ -43,10 +43,16 @@
 	(make-cim-response :method-name method-name 
 			   :intrinsic-p t
 			   :error err))
-      (error (err) 
+      (simple-error (err)
+	(hunchentoot:log-message* :error "~A" err)
 	(make-cim-response :method-name method-name
 			   :intrinsic-p t
-			   :error (make-cim-error :failed (format nil "~A" err)))))))
+			   :error (make-cim-error :not-supported)))
+      (error (err) 
+	(hunchentoot:log-message* :error "~A" err)
+	(make-cim-response :method-name method-name
+			   :intrinsic-p t
+			   :error (make-cim-error :failed)))))) ;; (format nil "~A" err)))))))
 	
 (defun process-intrinsic-request (request)
   "Returns (VALUES return-value return-type). RETURN-TYPE should be a keyword indicating
@@ -349,13 +355,13 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
   (destructuring-request (request namespace) (objectname assocclass resultclass role resultrole propertylist)
     (if (cim-class-declaration-p objectname)
 	;; is a class. find its associated classes
-	nil
+	(cim-error :not-supported "Class associations not yet implemented!!!")
 	;; is an instance. call the provider method 
 	(values 
 	 (let ((path (namespace-path namespace)))
 	   (mapcar (lambda (inst)
 		     (list inst path))
-		   (association-instances objectname
+		   (association-instances (convert-cim-instance objectname namespace)
 					  (when assocclass
 					    (find-cim-class assocclass namespace))
 					  :result-class resultclass
@@ -396,9 +402,9 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
 	;; find all the referenced classes of this class
 	(let ((cl (find-class (cim-class-declaration-name namespace))))
 	  (declare (ignore cl))
-	  nil)
+	  (cim-error :not-supported (format nil "references")))
 	(let ((insts 
-	       (reference-instances objectname
+	       (reference-instances (convert-cim-instance objectname namespace)
 				    :result-class resultclass
 				    :role role
 				    :property-list propertylist)))

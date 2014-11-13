@@ -412,7 +412,8 @@
 ;; Lisp function to encode a Slot. It wraps the above 3 property calls
 (defun encode-cimxml-slot (slot &optional value)
   (if (listp slot)
-      (destructuring-bind (slot-name slot-value slot-type) slot
+      (destructuring-bind (slot-name slot-value slot-type &optional qualifiers) slot
+	(declare (ignore qualifiers))
 	(encode-cimxml-slot* slot-name slot-value slot-type))
       (let ((type (cim-slot-type slot)))
 	(cond
@@ -747,7 +748,7 @@ PARAM-VALUES is a list of form (name value type)."
 		   (encode-cimxml-classname class-name))
 		 (encode-cimxml-classname value)))
     (:instancename
-     (if (consp value)
+     (if (listp value)
 	 (dolist (instance value)
 	   (encode-cimxml-instancename (cim-name (class-of instance))
 				       (instance-key-slots instance)))
@@ -790,7 +791,8 @@ PARAM-VALUES is a list of form (name value type)."
 	   (encode-cimxml-instance instance))
 	 (encode-cimxml-instance value)))
     (:value.namedinstance
-     (encode-cimxml-value.namedinstance value)))
+     (dolist (instance value)
+       (encode-cimxml-value.namedinstance instance))))
   (eformat "</IRETURNVALUE>~%"))
 
 ;;<!ELEMENT MULTIEXPREQ (SIMPLEEXPREQ,SIMPLEEXPREQ+)>
