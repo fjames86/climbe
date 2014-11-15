@@ -316,9 +316,11 @@
 ;;     %QualifierFlavor;
 ;;     xml:lang  NMTOKEN  #IMPLIED>
 (deftag qualifier (name type) (value value.array)
+  (declare (ignore type))
   (cons
-   (make-cim-qualifier :name name
-                       :type type)
+   (or (find-qualifier name)
+	   (make-cim-qualifier :name name
+						   :type type))
    (or value value.array)))
                       
 ;;<!ELEMENT PROPERTY (QUALIFIER*,VALUE?)>
