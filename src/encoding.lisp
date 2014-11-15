@@ -51,7 +51,7 @@
 (defun encode-cimxml-qualifier.declaration (qualifier)
   (declare (type cim-qualifier qualifier))
   (let ((type (cim-qualifier-type qualifier)))
-    (eformat "<QUALIFIER.DECLARATION NAME=\"~A\" Type=\"~A\"/>~%"
+    (eformat "<QUALIFIER.DECLARATION NAME=\"~A\" Type=\"~A\">~%"
 	     (cim-name qualifier)
 	     type)
     (encode-cimxml-scope (cim-qualifier-scope qualifier))
@@ -340,7 +340,7 @@
 (defun encode-cimxml-qualifier (qualifier value)
   (declare (type cim-qualifier qualifier))
   (let ((type (cim-qualifier-type qualifier)))
-    (eformat "<QUALIFIER NAME=\"~A\" Type=\"~A\"/>~%"
+    (eformat "<QUALIFIER NAME=\"~A\" Type=\"~A\">~%"
 	     (cim-name qualifier)
 	     type)
     (encode-cimxml-scope (cim-qualifier-scope qualifier))
