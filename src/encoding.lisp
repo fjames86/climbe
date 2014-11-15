@@ -53,7 +53,7 @@
   (let ((type (cim-qualifier-type qualifier)))
     (eformat "<QUALIFIER.DECLARATION NAME=\"~A\" Type=\"~A\">~%"
 	     (cim-name qualifier)
-	     type)
+	     (encode-cimxml-type type))
     (encode-cimxml-scope (cim-qualifier-scope qualifier))
     (let ((default (cim-qualifier-default qualifier)))
       (when default
@@ -342,7 +342,7 @@
   (let ((type (cim-qualifier-type qualifier)))
     (eformat "<QUALIFIER NAME=\"~A\" Type=\"~A\">~%"
 	     (cim-name qualifier)
-	     type)
+	     (encode-cimxml-type type))
     (encode-cimxml-scope (cim-qualifier-scope qualifier))
     (cond
       ((and (listp type) (eq (car type) 'array))
