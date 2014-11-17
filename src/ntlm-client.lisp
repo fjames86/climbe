@@ -112,7 +112,7 @@
 ")
 
 
-(defun call-identity (&optional (host "127.0.0.1"))
+(defun call-identity (password &key (username "administrator") (host "127.0.0.1"))
   "NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
 
 Do this by running: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
@@ -123,8 +123,8 @@ WinRM is by default setup in a non-functioning state: it has only an HTTP listen
                       (list :method :post 
                             :content (wsman-identity) 
                             :content-type "application/soap+xml; charset=UTF-8")
-                      :username "administrator" 
-                      :password-md4 "EL1psan" 
+                      :username username 
+                      :password-md4 password
                       :version (ntlm:make-ntlm-version 1 1 1))))
 
 
