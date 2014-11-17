@@ -85,16 +85,16 @@
                                                                        :workstation workstation
                                                                        :domain domain
                                                                        :version version)))
-                                     (packet:hd msg)
-                                     (format t "NEGOTIATE: ~S~%" (ntlm:unpack-negotiate-message msg))
+;;                                     (packet:hd msg)
+;;                                     (format t "NEGOTIATE: ~S~%" (ntlm:unpack-negotiate-message msg))
                                      msg))))
 
              keyword-args)
-    (declare (ignore ruri must-close reason))
-    (format t "[~D] headers: ~S~%" status-code headers)
-    (packet:hd content)
+    (declare (ignore content status-code ruri must-close reason))
+;;    (format t "[~D] headers: ~S~%" status-code headers)
+;;    (packet:hd content)
     (let ((msg (authorization-msg (cdr (assoc :www-authenticate headers)))))
-      (packet:hd msg)
+;;      (packet:hd msg)
       (if msg
           (apply #'drakma:http-request 
                  uri 
@@ -110,4 +110,22 @@
   "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
  <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsmid=\"http://schemas.dmtf.org/wbem/wsman/identity/1/wsmanidentity.xsd\"><s:Header/><s:Body><wsmid:Identify/></s:Body></s:Envelope>
 ")
+
+
+(defun call-identity (&optional (host "127.0.0.1"))
+  "NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
+
+Do this by running: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
+
+WinRM is by default setup in a non-functioning state: it has only an HTTP listener but has AllowUnencrypted=false"
+  (babel:octets-to-string 
+   (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
+                      (list :method :post 
+                            :content (wsman-identity) 
+                            :content-type "application/soap+xml; charset=UTF-8")
+                      :username "administrator" 
+                      :password-md4 "EL1psan" 
+                      :version (ntlm:make-ntlm-version 1 1 1))))
+
+
 
