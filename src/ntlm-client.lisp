@@ -111,8 +111,36 @@
  <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsmid=\"http://schemas.dmtf.org/wbem/wsman/identity/1/wsmanidentity.xsd\"><s:Header/><s:Body><wsmid:Identify/></s:Body></s:Envelope>
 ")
 
+(defun wsman-logicaldisk ()
+  "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" 
+            xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" 
+            xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\">
+  <s:Header>
+    <a:To>http://RemoteComputer:80/wsman</a:To> 
+    <w:ResourceURI s:mustUnderstand=\"true\">
+      http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/Win32_logicaldisk
+    </w:ResourceURI> 
+    <a:ReplyTo>
+    <a:Address s:mustUnderstand=\"true\">
+      http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous
+    </a:Address> 
+    </a:ReplyTo>
+    <a:Action s:mustUnderstand=\"true\">
+      http://schemas.xmlsoap.org/ws/2004/09/transfer/Get
+    </a:Action> 
+    <w:MaxEnvelopeSize s:mustUnderstand=\"true\">153600</w:MaxEnvelopeSize> 
+    <a:MessageID>uuid:4ED2993C-4339-4E99-81FC-C2FD3812781A</a:MessageID> 
+    <w:Locale xml:lang=\"en-US\" s:mustUnderstand=\"false\"/> 
+    <w:SelectorSet>
+    <w:Selector Name=\"DeviceId\">c:</w:Selector> 
+    </w:SelectorSet>
+    <w:OperationTimeout>PT60.000S</w:OperationTimeout> 
+  </s:Header>
+  <s:Body/> 
+</s:Envelope>")
 
-(defun call-identity (password &key (username "administrator") (host "127.0.0.1"))
+(defun call-wsman (password content &key (username "administrator") (host "127.0.0.1"))
   "NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
 
 Do this by running: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
@@ -121,7 +149,7 @@ WinRM is by default setup in a non-functioning state: it has only an HTTP listen
   (babel:octets-to-string 
    (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
                       (list :method :post 
-                            :content (wsman-identity) 
+                            :content content
                             :content-type "application/soap+xml; charset=UTF-8")
                       :username username 
                       :password-md4 password
