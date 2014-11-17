@@ -49,7 +49,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
     (case return-code
       (200
        ;; all went well
-;;	   (format t "ENCODED: ~A~%" response)
+	   (format t "ENCODED: ~A~%" response)
 	   (let ((message (decode-cim
                         (etypecase response
                           (string response)

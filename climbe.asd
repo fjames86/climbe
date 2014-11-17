@@ -34,8 +34,9 @@
      (:file "encoding" :depends-on ("messages"))
      (:file "tags" :depends-on ("packages"))
      (:file "decoding" :depends-on ("tags"))
-     (:file "client" :depends-on ("encoding"))
+     (:file "ntlm-client" :depends-on ("packages"))
+     (:file "client" :depends-on ("encoding" "ntlm-client"))
      (:file "schema" :depends-on ("decoding"))
 	 (:file "server" :depends-on ("decoding")))))	
-  :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number))
+  :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm))
 
