@@ -1,10 +1,22 @@
 
 (in-package #:climbe.core)
 
-;; methods/parameters
+;; methods/parameters: parameters are rather similar to qualfieirs??? except they don't have 
+;; values? 
 (defstruct cim-parameter 
   name type qualifiers)
 
+(defmethod cim-name ((parameter cim-parameter))
+  (cim-parameter-name parameter))
+
+(defmethod cim-qualifiers ((parameter cim-parameter))
+  (cim-parameter-qualifiers parameter))
+
+(defmethod cim-type ((param cim-parameter))
+  (cim-parameter-type param))
+
+
+;; representation of a CIM method 
 (defstruct cim-method
   name return-type in-params out-params qualifiers function symbol)
 
@@ -14,12 +26,6 @@
 
 (defmethod cim-name ((method cim-method))
   (cim-method-name method))
-
-(defmethod cim-name ((parameter cim-parameter))
-  (cim-parameter-name parameter))
-
-(defmethod cim-qualifiers ((parameter cim-parameter))
-  (cim-parameter-qualifiers parameter))
 
 
 
@@ -58,68 +64,13 @@
 (defstruct cim-reference
   namespace classname keyslots)
 
-
-
-
 ;; a CIM-INSTANCE is used as a client-side object to represent an instance of a class. 
 ;; On the server-side we can directly use CLOS instances.
 (defstruct cim-instance
   namespace classname slots)
 
-
-;; FIXME: move these to the cimom module 
-(defun convert-cim-instance (cim-instance &optional namespace)
-  "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
-through the local namespace repository."
-  (declare (type cim-instance cim-instance))
-  (let ((cl (find-cim-class (cim-instance-classname cim-instance)
-			    (if namespace
-					namespace
-					(find-namespace (cim-instance-namespace cim-instance))))))
-    (unless cl 
-      (error "Class ~S not found." (cim-instance-classname cim-instance)))
-    (let ((inst (make-instance cl)))
-      (dolist (slot (cim-instance-slots cim-instance))
-	(destructuring-bind (slot-name slot-value slot-type) slot
-	  (declare (ignore slot-type))
-	  (let ((slot-definition (find-cim-slot slot-name cl)))
-	    (if slot-definition
-		(setf (slot-value inst (closer-mop:slot-definition-name slot-definition))
-		      slot-value)
-		(error "Slot ~S not found." slot-name)))))
-      inst)))
-
-(defun instance-to-cim-instance (instance)
-  "Convert a CLOS instance to a CIM-INSTANCE."
-  (let ((cl (class-of instance)))
-    (make-cim-instance :classname (cim-name cl)
-                       :slots 
-                       (mapcar (lambda (slot)
-                                 (list (cim-name slot)
-                                       (slot-value instance (closer-mop:slot-definition-name slot))
-                                       (cim-slot-type slot)))
-                               (cim-class-slots cl)))))
-
-(defun class-to-declaration (class)
-  "Converts a CIM-CLASS Object into a CIM-CLASS-DECLARATION"
-  (make-cim-class-declaration
-   :name (cim-name class)
-   :slots (mapcar (lambda (slot)
-					(list (cim-name slot)
-						  nil ;; value???
-						  (cim-slot-type slot)))
-				  (cim-class-slots class))
-   :qualifiers (cim-qualifiers class)
-   :methods (cim-class-methods class)
-   :superclass nil ;;; superclass??
-   ))
-							 
-
-
-;; need a client-side representation of cim-classes i.e. something more abstract than the CLOS cim-class 
-;; metaclass.
-;; we use this when decoding because we don't whether what we're decoding is junk or not. often it 
-;; doesn't make sense to decode directly into the CLOS objects.
+;; CIM-CLASS is a client-side representation of a CIM class definition. 
+;; It should be used everywhere outside the cimom module (where we use real CLOS meta-class instances).
 (defstruct cim-class
   name slots qualifiers methods superclass)
 
@@ -143,4 +94,6 @@ through the local namespace repository."
 (defmethod cim-qualifiers ((cim cim-slot))
   (cim-slot-qualifiers cim))
 
+(defmethod cim-type ((cim cim-slot))
+  (cim-slot-type cim))
 

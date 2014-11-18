@@ -353,3 +353,56 @@ If SUPER-CLASSES is T all the superclasses are also removed."
     (if method
         (apply (cim-method-function method) args)
         (error "Method ~S not found" cim-name))))
+
+
+
+
+
+
+;; FIXME: move these to the cimom module 
+(defun convert-cim-instance (cim-instance &optional namespace)
+  "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
+through the local namespace repository."
+  (declare (type cim-instance cim-instance))
+  (let ((cl (find-cim-class (cim-instance-classname cim-instance)
+			    (if namespace
+					namespace
+					(find-namespace (cim-instance-namespace cim-instance))))))
+    (unless cl 
+      (error "Class ~S not found." (cim-instance-classname cim-instance)))
+    (let ((inst (make-instance cl)))
+      (dolist (slot (cim-instance-slots cim-instance))
+	(destructuring-bind (slot-name slot-value slot-type) slot
+	  (declare (ignore slot-type))
+	  (let ((slot-definition (find-cim-slot slot-name cl)))
+	    (if slot-definition
+		(setf (slot-value inst (closer-mop:slot-definition-name slot-definition))
+		      slot-value)
+		(error "Slot ~S not found." slot-name)))))
+      inst)))
+
+(defun instance-to-cim-instance (instance)
+  "Convert a CLOS instance to a CIM-INSTANCE."
+  (let ((cl (class-of instance)))
+    (make-cim-instance :classname (cim-name cl)
+                       :slots 
+                       (mapcar (lambda (slot)
+                                 (list (cim-name slot)
+                                       (slot-value instance (closer-mop:slot-definition-name slot))
+                                       (cim-slot-type slot)))
+                               (cim-class-slots cl)))))
+
+(defun class-to-declaration (class)
+  "Converts a CIM-CLASS Object into a CIM-CLASS-DECLARATION"
+  (make-cim-class-declaration
+   :name (cim-name class)
+   :slots (mapcar (lambda (slot)
+					(list (cim-name slot)
+						  nil ;; value???
+						  (cim-slot-type slot)))
+				  (cim-class-slots class))
+   :qualifiers (cim-qualifiers class)
+   :methods (cim-class-methods class)
+   :superclass nil ;;; superclass??
+   ))
+							 
