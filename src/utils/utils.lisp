@@ -1,5 +1,7 @@
 
-(in-package :climbe)
+(in-package #:cl-user)
+
+(in-package #:climbe.utils)
 
 ;; general utilities we need
 

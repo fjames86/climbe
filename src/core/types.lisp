@@ -1,6 +1,6 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.core)
 
 
 

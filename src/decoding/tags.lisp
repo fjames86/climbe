@@ -1,6 +1,6 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.decoding)
 
 ;; these functions are used in the deftag macro so lets define them all in 
 ;; a seperate file so they are available when we actually use the macro.

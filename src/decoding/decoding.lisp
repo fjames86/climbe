@@ -1,6 +1,6 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.decoding)
 
 (defun decode-xml-octets (octets)
   (cxml:parse-octets octets

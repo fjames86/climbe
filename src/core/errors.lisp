@@ -1,6 +1,6 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.core)
 
 ;; ------------ errors -----------
 ;; need to add codes and descriptions to the errors

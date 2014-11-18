@@ -1,34 +1,33 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.cimom)
 
 
 ;; ---------- classes ----------
 
-;; FIXME: rename to cim-standard-class ???
-(defclass cim-class (closer-mop:standard-class)
+(defclass cim-standard-class (closer-mop:standard-class)
   ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
-   (methods :initarg :methods :initform nil :accessor cim-class-methods))
+   (methods :initarg :methods :initform nil :accessor cim-methods))
   (:documentation "Metaclass used to represent CIM classes."))
 
-(defclass cim-association (cim-class)
+(defclass cim-association (cim-standard-class)
   ((associations :initarg :associations :initform nil :accessor cim-class-associations))
   (:documentation "Metaclass used to represent CIM association classes."))
 
-(defclass cim-indication (cim-class)
+(defclass cim-indication (cim-standard-class)
   ()
   (:documentation "Metaclass used to represent CIM indication classes."))
 
 ;; slots
 (defclass cim-standard-direct-slot-definition (closer-mop:standard-direct-slot-definition)
   ((cim-name :initarg :cim-name :initarg nil :accessor cim-name)
-   (cim-type :initarg :cim-type :initform nil :accessor cim-slot-type)
+   (cim-type :initarg :cim-type :initform nil :accessor cim-type)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
 
 (defclass cim-standard-effective-slot-definition (closer-mop:standard-effective-slot-definition)
   ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
-   (cim-type :initarg :cim-type :initform nil :accessor cim-slot-type)
+   (cim-type :initarg :cim-type :initform nil :accessor cim-type)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)))
 
 (defmethod print-object ((slot cim-standard-direct-slot-definition) stream)
@@ -40,23 +39,23 @@
     (format stream "~A" (cim-name slot))))
 
 
-(defmethod closer-mop:direct-slot-definition-class ((class cim-class) &rest initargs)
+(defmethod closer-mop:direct-slot-definition-class ((class cim-standard-class) &rest initargs)
   (declare (ignore initargs))
   (find-class 'cim-standard-direct-slot-definition))
 
-(defmethod closer-mop:effective-slot-definition-class ((class cim-class) &rest initargs)
+(defmethod closer-mop:effective-slot-definition-class ((class cim-standard-class) &rest initargs)
   (declare (ignore initargs))
   (find-class 'cim-standard-effective-slot-definition))
 
 
 (defun cim-class-slots (class)
   "Get the slots of a class."
-  (declare (cim-class class))
+  (declare (type cim-standard-class class))
   (closer-mop:class-direct-slots class))
 
 (defun cim-class-superclasses (class)
   "Get all CIM superclasses."
-  (declare (cim-class class))
+  (declare (type cim-standard-class class))
   (let ((super (car (closer-mop:class-direct-superclasses class))))
     (cond
       ((null super) nil)
@@ -67,16 +66,16 @@
 
 (defun cim-class-subclasses (class)
   "Get all subclasses of the class."
-  (declare (cim-class class))
+  (declare (type cim-standard-class class))
   (let ((subs (closer-mop:class-direct-subclasses class)))
     (mapcan (lambda (sub)
               (cons sub (cim-class-subclasses sub)))
             subs)))
 
-(defmethod closer-mop:validate-superclass ((class cim-class) (super standard-class))
+(defmethod closer-mop:validate-superclass ((class cim-standard-class) (super standard-class))
   t)
 
-(defmethod initialize-instance :after ((class cim-class) &rest initargs &key &allow-other-keys)
+(defmethod initialize-instance :after ((class cim-standard-class) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   ;; convert the cim-name from (<name>) to <name>
   (when (listp (cim-name class))
@@ -85,7 +84,7 @@
   (setf (cim-qualifiers class) 
 	(make-qualifiers-list (cim-qualifiers class))))
 
-(defmethod reinitialize-instance :after ((class cim-class) &rest initargs &key &allow-other-keys)
+(defmethod reinitialize-instance :after ((class cim-standard-class) &rest initargs &key &allow-other-keys)
   (declare (ignore initargs))
   ;; convert the cim-name from (<name>) to <name>
   (when (listp (cim-name class))
@@ -113,18 +112,18 @@
 
 
 
-(defmethod print-object ((class cim-class) stream)
+(defmethod print-object ((class cim-standard-class) stream)
   (print-unreadable-object (class stream :type t)
     (format stream "~A" (cim-name class))))
 
 
 (defmethod print-object ((slot cim-standard-direct-slot-definition) stream)
   (print-unreadable-object (slot stream :type t)
-    (format stream "~A :TYPE ~A" (cim-name slot) (cim-slot-type slot))))
+    (format stream "~A :TYPE ~A" (cim-name slot) (cim-type slot))))
 
 (defmethod print-object ((slot cim-standard-effective-slot-definition) stream)
   (print-unreadable-object (slot stream :type t)
-    (format stream "~A :TYPE ~A" (cim-name slot) (cim-slot-type slot))))
+    (format stream "~A :TYPE ~A" (cim-name slot) (cim-type slot))))
 
 
 (defun find-cim-class (class-name &optional (namespace *namespace*))
@@ -138,7 +137,7 @@
 (defun find-cim-slot (slot-name class)
   "Finds a slot of the class with the stringy CIM-NAME specified."
   (declare (type string slot-name)
-	   (type cim-class class))
+	   (type cim-standard-class class))
   (let ((slots (cim-class-slots class)))
     (find slot-name slots 
 	  :key #'cim-name 
@@ -189,14 +188,14 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 (defun cim-key-slots (object)
   "Find the slots marked with the KEY qualifier."
   (flet ((cim-class-key-slots (class)
-           (declare (cim-class class))
+           (declare (type cim-standard-class class))
            (let ((slots (closer-mop:class-slots class)))
              (mapcan (lambda (slot)
                        (let ((key (qualifier-p :key (cim-qualifiers slot))))
                          (when (and key (cdr key))
                            (list slot))))
                      slots))))
-    (if (typep object 'cim-class)
+    (if (typep object 'cim-standard-class)
         (cim-class-key-slots object)
         (cim-class-key-slots (class-of object)))))
 
@@ -205,7 +204,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 	(mapcar (lambda (slot)
 			  (list (cim-name slot)
 					(slot-value instance (class-name slot))
-					(cim-slot-type slot)))
+					(cim-type slot)))
 			slots)))
 
 (defun instance-key-slots (instance)
@@ -213,7 +212,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 	(mapcar (lambda (slot)
 			  (list (cim-name slot)
 					(slot-value instance (class-name slot))
-					(cim-slot-type slot)))
+					(cim-type slot)))
 			slots)))
 
 (defmacro defcim-class (name direct-superclasses slots &rest options)
@@ -230,7 +229,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 	      (cond          
 		((find :association quals) 'cim-association)
 		((find :indication quals) 'cim-indication)
-		(t 'cim-class))))
+		(t 'cim-standard-class))))
        ;; other class options
        ,@options)
 
@@ -244,31 +243,12 @@ If SUPER-CLASSES is T all the superclasses are also removed."
   
 ;; -------------- extrinsic methods --------
 
-(defstruct cim-parameter 
-  name type qualifiers)
-
-(defstruct cim-method
-  name return-type in-params out-params qualifiers function symbol)
-
-(defun cim-method-parameters (method)
-  (append (cim-method-in-params method)
-	  (cim-method-out-params method)))
-
-(defmethod cim-name ((method cim-method))
-  (cim-method-name method))
-
-(defmethod cim-name ((parameter cim-parameter))
-  (cim-parameter-name parameter))
-
-(defmethod cim-qualifiers ((parameter cim-parameter))
-  (cim-parameter-qualifiers parameter))
-
 (defun add-method-to-class (method class &key (subclasses t))
   "Add a method to a CIM class and all of its subclasses."
-  (declare (cim-method method)
-           (cim-class class))
+  (declare (type cim-method method)
+           (type cim-standard-class class))
   ;; start by adding it to the class
-  (pushnew* method (cim-class-methods class)
+  (pushnew* method (cim-methods class)
             :test (lambda (meth new-meth)
                     (string-equal (cim-name meth)
                                   (cim-name new-meth))))
@@ -360,8 +340,8 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 (defun find-cim-method (cim-name class)
   "Find a CIM method on a class."
   (declare (type string cim-name)
-		   (type cim-class class))
-  (find cim-name (cim-class-methods class)
+		   (type cim-standard-class class))
+  (find cim-name (cim-methods class)
         :key #'cim-name 
         :test #'string-equal))
 

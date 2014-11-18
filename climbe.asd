@@ -13,30 +13,64 @@
 ;;;; as governed by the terms of the Lisp Lesser General Public License
 ;;;; (http://opensource.franz.com/preamble.html), also known as the LLGPL.
 
-
 (asdf:defsystem :climbe
   :name "CLIMBE"
   :author "Frank James <frank.a.james@gmail.com>"
   :licence "BSD"
   :description "Common Lisp Common Information Model Web Based Enterprise Management"
   :components
-  ((:module "src"
-    :components
-    ((:file "packages")
-     (:file "utils" :depends-on ("packages"))
-     (:file "errors" :depends-on ("utils"))
-     (:file "namespaces" :depends-on ("errors"))
-     (:file "types" :depends-on ("namespaces"))
-     (:file "qualifiers" :depends-on ("types"))
-     (:file "classes" :depends-on ("qualifiers"))     
-     (:file "cimom" :depends-on ("classes"))
-     (:file "messages" :depends-on ("classes"))
-     (:file "encoding" :depends-on ("messages"))
-     (:file "tags" :depends-on ("packages"))
-     (:file "decoding" :depends-on ("tags"))
-     (:file "ntlm-client" :depends-on ("packages"))
-     (:file "client" :depends-on ("encoding" "ntlm-client"))
-     (:file "schema" :depends-on ("decoding"))
-	 (:file "server" :depends-on ("decoding")))))	
+  ((:module :src
+            :pathname "src"
+            :components
+            ((:module :utils
+                      :pathname "utils"
+                      :components 
+                      ((:file "package")
+                       (:file "utils" :depends-on ("package"))))
+             (:module :core
+                      :pathname "core"
+                      :components
+                      ((:file "package")
+                       (:file "errors" :depends-on ("package"))
+                       (:file "namespaces" :depends-on ("errors"))
+                       (:file "types" :depends-on ("namespaces"))
+                       (:file "qualifiers" :depends-on ("types"))
+                       (:file "structures" :depends-on ("qualifiers")))                       
+                      :depends-on (:utils))
+             (:module :encoding
+                      :pathname "encoding"
+                      :components 
+                      ((:file "package")
+                       (:file "encoding" :depends-on ("package")))
+                      :depends-on (:core))
+             (:module :decoding
+                      :pathname "decoding"
+                      :components
+                      ((:file "package")
+                       (:file "tags" :depends-on ("package"))
+                       (:file "decoding" :depends-on ("tags")))
+                      :depends-on (:core))
+             (:module :cimom
+                      :pathname "cimom"
+                      :components
+                      ((:file "package")
+                       (:file "classes" :depends-on ("package"))
+                       (:file "cimom" :depends-on ("classes")))
+                      :depends-on (:core))
+             (:module :client
+                      :pathname "client"
+                      :components
+                      ((:file "package")
+                       (:file "client" :depends-on ("package"))
+                       (:file "ntlm-client" :depends-on ("client")))
+                      :depends-on (:core :encoding :decoding))
+             (:module :server
+                      :pathname "server"
+                      :components
+                      ((:file "package")
+                       (:file "server" :depends-on ("package")))
+                      :depends-on (:core :encoding :decoding))
+             (:file "package" :depends-on (:core :cimom :client :server))
+             )))
   :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm))
 

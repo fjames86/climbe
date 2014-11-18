@@ -1,7 +1,13 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.core)
 
+
+(defgeneric cim-name (object))
+
+(defgeneric cim-qualifiers (object))
+
+(defgeneric cim-type (object))
 
 ;; ----- namespaces ------
 

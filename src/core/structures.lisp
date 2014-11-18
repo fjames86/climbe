@@ -1,5 +1,29 @@
 
-(in-package :climbe)
+(in-package #:climbe.core)
+
+;; methods/parameters
+(defstruct cim-parameter 
+  name type qualifiers)
+
+(defstruct cim-method
+  name return-type in-params out-params qualifiers function symbol)
+
+(defun cim-method-parameters (method)
+  (append (cim-method-in-params method)
+	  (cim-method-out-params method)))
+
+(defmethod cim-name ((method cim-method))
+  (cim-method-name method))
+
+(defmethod cim-name ((parameter cim-parameter))
+  (cim-parameter-name parameter))
+
+(defmethod cim-qualifiers ((parameter cim-parameter))
+  (cim-parameter-qualifiers parameter))
+
+
+
+;; ###################################################################
 
 ;; structure for holding CIM messages in
 (defstruct cim-message 
@@ -42,6 +66,8 @@
 (defstruct cim-instance
   namespace classname slots)
 
+
+;; FIXME: move these to the cimom module 
 (defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
 through the local namespace repository."
@@ -74,23 +100,6 @@ through the local namespace repository."
                                        (cim-slot-type slot)))
                                (cim-class-slots cl)))))
 
-;; need a client-side representation of cim-classes i.e. something more abstract than the CLOS cim-class 
-;; metaclass.
-;; we use this when decoding because we don't whether what we're decoding is junk or not. often it 
-;; doesn't make sense to decode directly into the CLOS objects.
-(defstruct cim-class-declaration 
-  name slots qualifiers methods superclass)
-
-(defmethod cim-name ((cim cim-class-declaration))
-  (cim-class-declaration-name cim))
-
-(defmethod cim-qualifiers ((cim cim-class-declaration))
-  (cim-class-declaration-qualifiers cim))
-
-(defmethod print-object ((cim cim-class-declaration) stream)
-  (format stream "#S(CIM-CLASS-DECLARATION ~A)" (cim-name cim)))
-
-
 (defun class-to-declaration (class)
   "Converts a CIM-CLASS Object into a CIM-CLASS-DECLARATION"
   (make-cim-class-declaration
@@ -105,3 +114,33 @@ through the local namespace repository."
    :superclass nil ;;; superclass??
    ))
 							 
+
+
+;; need a client-side representation of cim-classes i.e. something more abstract than the CLOS cim-class 
+;; metaclass.
+;; we use this when decoding because we don't whether what we're decoding is junk or not. often it 
+;; doesn't make sense to decode directly into the CLOS objects.
+(defstruct cim-class
+  name slots qualifiers methods superclass)
+
+(defmethod cim-name ((cim cim-class))
+  (cim-class-name cim))
+
+(defmethod cim-qualifiers ((cim cim-class))
+  (cim-class-qualifiers cim))
+
+(defmethod print-object ((cim cim-class) stream)
+  (format stream "#S(CIM-CLASS ~A)" (cim-name cim)))
+
+
+;; slots
+(defstruct cim-slot 
+  name type default qualifiers)
+
+(defmethod cim-name ((cim cim-slot))
+  (cim-slot-name cim))
+
+(defmethod cim-qualifiers ((cim cim-slot))
+  (cim-slot-qualifiers cim))
+
+

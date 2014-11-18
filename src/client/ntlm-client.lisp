@@ -1,10 +1,5 @@
 
-
-(defpackage :climbe.ntlm
-  (:use :cl :climbe)
-  (:export :ntlm-http-request))
-
-(in-package :climbe.ntlm)
+(in-package #:climbe.client)
 
 ;; In order to talk to WinRM we need a http client that supports at least Negotiate authentication
 ;; (Prefereably we'd have kerberos but at the moment we don't).

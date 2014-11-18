@@ -1,5 +1,5 @@
 
-(in-package :climbe)
+(in-package #:climbe.encoding)
 
 ;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0200_1.4.0.pdf
 ;; http://www.dmtf.org/sites/default/files/standards/documents/DSP200.html

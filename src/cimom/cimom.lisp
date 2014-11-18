@@ -1,5 +1,5 @@
 
-(in-package :climbe)
+(in-package #:climbe.cimom)
 
 ;; this file contains the genereric functions that providers should specialize for their classes
 
@@ -17,8 +17,8 @@
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false,
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL
 ;; )
-(defgeneric provider-enumerate-instances (class-name)
-  (:documentation "Provider generic eql-specialized on the class-name."))
+(defgeneric provider-enumerate-instances (instance)
+  (:documentation "Provider generic specialized on the class."))
 
 (defun enumerate-instances (class &key (local-only t) (deep-inheritance t) property-list)
   "Call PROVIDER-ENUMERATE-INSTANCES on the class specified and each of its subclasses.
@@ -33,15 +33,15 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
   (when (symbolp class)
     (setf class (find-class class)))
   ;; call the generic on each of the classes, least-specific first
-  (do ((insts (ignore-cim-errors (provider-enumerate-instances (class-name class)))
+  (do ((insts (ignore-cim-errors (provider-enumerate-instances class))
               (nconc insts 
-                     (ignore-cim-errors (provider-enumerate-instances (class-name (car classes))))))
+                     (ignore-cim-errors (provider-enumerate-instances (car classes)))))
        (classes (when deep-inheritance (cim-class-subclasses class))
                 (cdr classes)))
       ((null classes) insts)))
 
 ;; default method that errors
-(defmethod provider-enumerate-instances ((class-name t))
+(defmethod provider-enumerate-instances ((class t))
   (cim-error :not-supported))
 
 
@@ -66,7 +66,7 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
             (cim-class-subclasses (class-of instance)))
       (cim-error :not-found)))
 
-(defmethod provider-get-instance ((instance cim-class))
+(defmethod provider-get-instance ((instance cim-standard-class))
   (cim-error :not-supported))
 
 
@@ -79,10 +79,10 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun create-instance (instance)
   "Create an instance of this class."
-  (declare (cim-class instance))
+  (declare (type cim-standard-class instance))
   (provider-create-instance instance))
 
-(defmethod provider-create-instance ((instance cim-class))
+(defmethod provider-create-instance ((instance cim-standard-class))
   (cim-error :not-supported))
 
 
@@ -96,10 +96,10 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun modify-instance (instance)
   "Modify the instance named by the KEY slots."
-  (declare (cim-class instance))
+  (declare (type cim-standard-class instance))
   (provider-modify-instance instance))
 
-(defmethod provider-modify-instance ((instance cim-class))
+(defmethod provider-modify-instance ((instance cim-standard-class))
   (cim-error :not-supported))
 
 ;; DeleteInstance
@@ -111,10 +111,10 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun delete-instance (instance)
   "Delete the instance named by the KEY slots of the input instance."
-  (declare (cim-class instance))
+  (declare (type cim-standard-class instance))
   (provider-delete-instance instance))
 
-(defmethod provider-delete-instance ((instance cim-class))
+(defmethod provider-delete-instance ((instance cim-standard-class))
   (cim-error :not-supported))
 
 
@@ -166,7 +166,7 @@ If RESULT-CLASS is non-nil, it should be a symbol designating a CIM Class name. 
                 insts)
         insts)))
 
-(defmethod provider-association-instances ((instance cim-class) assoc-class &key &allow-other-keys)
+(defmethod provider-association-instances ((instance cim-standard-class) assoc-class &key &allow-other-keys)
   (cim-error :not-supported))
 
 

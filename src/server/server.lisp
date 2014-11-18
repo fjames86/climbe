@@ -1,6 +1,6 @@
 
 
-(in-package :climbe)
+(in-package #:climbe.server)
 
 (defmacro destructuring-request ((request namespace-var) arg-list &body body)
   (let ((gargs (gensym "ARGS"))
