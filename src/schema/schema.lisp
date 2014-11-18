@@ -1,5 +1,5 @@
 
-(in-package :climbe)
+(in-package #:climbe.schema)
 
 ;; start by encoding the climbe objects into Lisp forms 
 
@@ -11,14 +11,14 @@
 
 (defun encode-lisp-class (cim-class)
   "Generate the DEFCIM-CLASS form needed to generate this class."
-  (declare (type cim-class-declaration cim-class))
+  (declare (type cim-class cim-class))
   `(defcim-class ,(make-lisp-name (cim-name cim-class))
-       (,@(let ((sc (cim-class-declaration-superclass cim-class)))
+       (,@(let ((sc (cim-class-superclass cim-class)))
             (when sc 
               `(,(make-lisp-name sc)))))
      ,(mapcar (lambda (slot)
                 (encode-lisp-slot slot))
-              (cim-class-declaration-slots cim-class))
+              (cim-class-slots cim-class))
      ;; options
      (:cim-name ,(cim-name cim-class))
      (:qualifiers ,@(encode-lisp-qualifiers (cim-qualifiers cim-class)))))
@@ -99,11 +99,11 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
         
         ;; add the classes
         (dolist (class (cim-declaration-classes declaration))
-	  (when (cim-class-declaration-p class)
+	  (when (cim-class-p class)
 	    (pprint (encode-lisp-class class) f)
         
 	    ;; encode the methods of the class
-	    (dolist (method (cim-class-declaration-methods class))
+	    (dolist (method (cim-class-methods class))
 	      (pprint (encode-lisp-method method (make-lisp-name (cim-name class)))
 		      f)))))))
 

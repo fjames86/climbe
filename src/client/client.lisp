@@ -296,8 +296,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                      :property-list property-list)
 		 "Associators"
 		 (cim-object-string namespace 
-				    (if (cim-class-declaration-p object-name)
-					(cim-class-declaration-name object-name)
+				    (if (cim-class-p object-name)
+					(cim-class-name object-name)
 					(cim-instance-classname object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
@@ -327,8 +327,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                           :result-role result-role)
 		 "AssociatorNames"
 		 (cim-object-string namespace 
-				    (if (cim-class-declaration-p object-name)
-					(cim-class-declaration-name object-name)
+				    (if (cim-class-p object-name)
+					(cim-class-name object-name)
 					(cim-instance-classname object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
@@ -358,8 +358,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                     :property-list property-list)
 		 "References"
 		 (cim-object-string namespace 
-				    (if (cim-class-declaration-p object-name)
-					(cim-class-declaration-name object-name)
+				    (if (cim-class-p object-name)
+					(cim-class-name object-name)
 					(cim-instance-classname object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
@@ -384,8 +384,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                          :role role)
 		 "ReferenceNames"
 		 (cim-object-string namespace 
-				    (if (cim-class-declaration-p object-name)
-					(cim-class-declaration-name object-name)
+				    (if (cim-class-p object-name)
+					(cim-class-name object-name)
 					(cim-instance-classname object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))

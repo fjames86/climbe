@@ -290,7 +290,7 @@
 ;;    %CIMName;
 ;;    %SuperClass;>
 (deftag class (name superclass) (qualifier* property* property.array* property.reference* method*)
-  (make-cim-class-declaration 
+  (make-cim-class
    :name name
    :superclass (when (and superclass (not (string= superclass "")))
                  superclass)

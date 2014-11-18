@@ -15,8 +15,13 @@
 				   (cim-error :invalid-namespace ,gns)))))
 	   (destructuring-bind ,arg-list
 		   (let ((,gargs (cim-request-arguments ,grequest)))
-			 (labels ((find-arg (name)
-						(cadr (find name ,gargs :key #'car :test #'string-equal))))
+			 ,(unless arg-list
+					  `(declare (ignore ,gargs)))
+			 (flet ,(when arg-list
+					  `((find-arg (name)
+						  (cadr (find name ,gargs
+									  :key #'car
+									  :test #'string-equal)))))
 			   (list ,@(mapcar (lambda (var)
 								 `(find-arg ,(symbol-name var)))
 							   arg-list))))
@@ -353,7 +358,7 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
 ;; FIXME!!!!
 (defun handle-associators (request)
   (destructuring-request (request namespace) (objectname assocclass resultclass role resultrole propertylist)
-    (if (cim-class-declaration-p objectname)
+    (if (cim-class-p objectname)
 	;; is a class. find its associated classes
 	(cim-error :not-supported "Class associations not yet implemented!!!")
 	;; is an instance. call the provider method 
@@ -398,9 +403,9 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
 ;; )
 (defun handle-references (request)
   (destructuring-request (request namespace) (objectname resultclass role propertylist)
-    (if (cim-class-declaration-p objectname)
+    (if (cim-class-p objectname)
 	;; find all the referenced classes of this class
-	(let ((cl (find-class (cim-class-declaration-name namespace))))
+	(let ((cl (find-class (cim-class-name namespace))))
 	  (declare (ignore cl))
 	  (cim-error :not-supported (format nil "references")))
 	(let ((insts 

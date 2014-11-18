@@ -48,7 +48,7 @@
   (find-class 'cim-standard-effective-slot-definition))
 
 
-(defun cim-class-slots (class)
+(defun cim-class-direct-slots (class)
   "Get the slots of a class."
   (declare (type cim-standard-class class))
   (closer-mop:class-direct-slots class))
@@ -138,7 +138,7 @@
   "Finds a slot of the class with the stringy CIM-NAME specified."
   (declare (type string slot-name)
 	   (type cim-standard-class class))
-  (let ((slots (cim-class-slots class)))
+  (let ((slots (cim-class-direct-slots class)))
     (find slot-name slots 
 	  :key #'cim-name 
 	  :test #'string-equal)))
@@ -200,7 +200,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
         (cim-class-key-slots (class-of object)))))
 
 (defun instance-slots (instance)
-  (let ((slots (cim-class-slots (class-of instance))))
+  (let ((slots (cim-class-direct-slots (class-of instance))))
 	(mapcar (lambda (slot)
 			  (list (cim-name slot)
 					(slot-value instance (class-name slot))
@@ -357,9 +357,6 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 
 
 
-
-
-;; FIXME: move these to the cimom module 
 (defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
 through the local namespace repository."
@@ -390,19 +387,20 @@ through the local namespace repository."
                                  (list (cim-name slot)
                                        (slot-value instance (closer-mop:slot-definition-name slot))
                                        (cim-slot-type slot)))
-                               (cim-class-slots cl)))))
+                               (cim-class-direct-slots cl)))))
 
 (defun class-to-declaration (class)
-  "Converts a CIM-CLASS Object into a CIM-CLASS-DECLARATION"
-  (make-cim-class-declaration
+  "Converts a CIM-STANDARD-CLASS instance into a CIM-CLASS structure"
+  (make-cim-class
    :name (cim-name class)
    :slots (mapcar (lambda (slot)
 					(list (cim-name slot)
 						  nil ;; value???
 						  (cim-slot-type slot)))
-				  (cim-class-slots class))
+				  (cim-class-direct-slots class))
    :qualifiers (cim-qualifiers class)
-   :methods (cim-class-methods class)
-   :superclass nil ;;; superclass??
-   ))
+   :methods (cim-methods class)
+   :superclass (let ((scs (cim-class-superclasses class)))
+				 (when scs
+				   (cim-name (car scs))))))
 							 

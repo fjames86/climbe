@@ -126,59 +126,57 @@
 ;;<!ELEMENT VALUE.OBJECT (CLASS|INSTANCE)>
 (defun encode-cimxml-value.object (object)
   (eformat "<VALUE.OBJECT>~%")
-  (if (cim-class-declaration-p object)
+  (if (cim-class-p object)
 	  (encode-cimxml-class object)
 	  (encode-cimxml-instance object))
   (eformat "</VALUE.OBJECT>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDINSTANCE (INSTANCENAME,INSTANCE)>
 (defun encode-cimxml-value.namedinstance (instance)
+  (declare (type cim-instance instance))
   (eformat "<VALUE.NAMEDINSTANCE>~%")
-  (if (cim-instance-p instance)
-	  (encode-cimxml-instancename (cim-instance-classname instance)
-								  (cim-instance-slots instance))
-	  (let ((class (class-of instance)))
-		(encode-cimxml-instancename (cim-name class)
-									(instance-key-slots instance))))
+  (encode-cimxml-instancename (cim-instance-classname instance)
+							  (cim-instance-slots instance))
   (encode-cimxml-instance instance)
   (eformat "</VALUE.NAMEDINSTANCE>~%"))
 
 ;;<!ELEMENT VALUE.NAMEDOBJECT (CLASS|(INSTANCENAME,INSTANCE))>
 (defun encode-cimxml-value.namedobject (object)
   (eformat "<VALUE.NAMEDOBJECT>~%")
-  (cond
-	((cim-class-declaration-p object)
+  (etypecase object
+	(cim-class
 	 (encode-cimxml-class object))
-	(t
-	 (let ((class (class-of object)))
-	   (encode-cimxml-instancename (cim-name class) (instance-slots object))
-	   (encode-cimxml-instance object))))
+	(cim-instance
+	 (encode-cimxml-instancename (cim-name object) (cim-instance-slots object))
+	 (encode-cimxml-instance object)))
   (eformat "</VALUE.NAMEDOBJECT>~%"))
 
 ;;<!ELEMENT VALUE.OBJECTWITHPATH ((CLASSPATH,CLASS)|(INSTANCEPATH,INSTANCE))>
 (defun encode-cimxml-value.objectwithpath (object namespace-path)
   (eformat "<VALUE.OBJECTWITHPATH>~%")
-  (cond
-	((cim-class-declaration-p object)
+  (etypecase object 
+	(cim-class
 	 (encode-cimxml-classpath namespace-path (cim-name object))
 	 (encode-cimxml-class object))
-	(t
-	 (let ((class (class-of object)))
-	   (encode-cimxml-instancepath namespace-path (cim-name class) (instance-slots object))
-	   (encode-cimxml-instance object))))
+	(cim-instance
+	 (encode-cimxml-instancepath namespace-path
+								 (cim-name object)
+								 (cim-instance-slots object))
+	 (encode-cimxml-instance object)))
   (eformat "</VALUE.OBJECTWITHPATH>~%"))
   
 ;;<!ELEMENT VALUE.OBJECTWITHLOCALPATH ((LOCALCLASSPATH,CLASS)|(LOCALINSTANCEPATH,INSTANCE))>
 (defun encode-cimxml-value.objectwithlocalpath (object namespace-list)
   (eformat "<VALUE.OBJECTWITHLOCALPATH>~%")
-  (cond
-	((cim-class-declaration-p object)
+  (etypecase object 
+	(cim-class
 	 (encode-cimxml-localclasspath namespace-list (cim-name object))
 	 (encode-cimxml-class object))
-	(t
-	 (let ((class (class-of object)))
-	   (encode-cimxml-localinstancepath namespace-list (cim-name class) (instance-slots object))
-	   (encode-cimxml-instance object))))
+	(cim-instance
+	 (encode-cimxml-localinstancepath namespace-list
+									  (cim-name object)
+									  (cim-instance-slots object))
+	 (encode-cimxml-instance object)))
   (eformat "</VALUE.OBJECTWITHLOCALPATH>~%"))
 
 ;;<!ELEMENT VALUE.NULL EMPTY>
@@ -293,10 +291,8 @@
 ;;    %CIMName;
 ;;    %SuperClass;>
 (defun encode-cimxml-class (class)
-  (when (typep class 'cim-class)
-	(return-from encode-cimxml-class
-	  (encode-cimxml-class (class-to-declaration class))))
-  (let ((super-class (cim-class-declaration-superclass class)))
+  (declare (type cim-class class))
+  (let ((super-class (cim-class-superclass class)))
 	(if super-class
 	    (eformat "<CLASS NAME=\"~A\" SUPERCLASS=\"~A\">~%"
 		     (cim-name class)
@@ -305,9 +301,9 @@
   (dolist (qualifier (cim-qualifiers class))
 	(destructuring-bind (q . v) qualifier
 	  (encode-cimxml-qualifier q v)))
-  (dolist (slot (cim-class-declaration-slots class))
+  (dolist (slot (cim-class-slots class))
 	(encode-cimxml-slot slot))
-  (dolist (method (cim-class-declaration-methods class))
+  (dolist (method (cim-class-methods class))
 	(encode-cimxml-method method))
   (eformat "</CLASS>~%"))
 
@@ -749,30 +745,30 @@ PARAM-VALUES is a list of form (name value type)."
 		 (encode-cimxml-classname value)))
     (:instancename
      (if (listp value)
-	 (dolist (instance value)
-	   (encode-cimxml-instancename (cim-name (class-of instance))
-				       (instance-key-slots instance)))
-	 (encode-cimxml-instancename (cim-name (class-of value))
-				     (instance-key-slots value))))
+		 (dolist (instance value)
+		   (encode-cimxml-instancename (cim-name instance)
+									   (cim-instance-slots instance)))
+		 (encode-cimxml-instancename (cim-name value)
+									 (cim-instance-slots value))))
     (:value
      (if (consp value)
-	 (dolist (v value)
-	   (encode-cimxml-value v))
-	 (encode-cimxml-value value)))
+		 (dolist (v value)
+		   (encode-cimxml-value v))
+		 (encode-cimxml-value value)))
     (:value.objectwithpath
      (destructuring-bind (object path) value
        (if (namespace-path-host path)
-	   (encode-cimxml-value.objectwithpath object path)
-	   (encode-cimxml-value.objectwithlocalpath object (namespace-path-namespace-list path)))))
+		   (encode-cimxml-value.objectwithpath object path)
+		   (encode-cimxml-value.objectwithlocalpath object (namespace-path-namespace-list path)))))
     (:value.objectwithlocalpath
      (destructuring-bind (object path) value
        (encode-cimxml-value.objectwithlocalpath object 
-						(namespace-path-namespace-list path))))
+												(namespace-path-namespace-list path))))
     (:value.object
-     (if (consp value)
-	 (dolist (object value)
-	   (encode-cimxml-value.object object))
-	 (encode-cimxml-value.object value)))
+     (if (listp value)
+		 (dolist (object value)
+		   (encode-cimxml-value.object object))
+		 (encode-cimxml-value.object value)))
     ((:objectpath)
      (destructuring-bind (path class-name &optional key-slots) value
        (encode-cimxml-objectpath path class-name key-slots)))
@@ -787,9 +783,9 @@ PARAM-VALUES is a list of form (name value type)."
 		 (encode-cimxml-class value)))
     (:instance
      (if (consp value)
-	 (dolist (instance value)
-	   (encode-cimxml-instance instance))
-	 (encode-cimxml-instance value)))
+		 (dolist (instance value)
+		   (encode-cimxml-instance instance))
+		 (encode-cimxml-instance value)))
     (:value.namedinstance
      (dolist (instance value)
        (encode-cimxml-value.namedinstance instance))))
@@ -1065,9 +1061,9 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
-								  ((cim-class-declaration-p object-name)
+								  ((cim-class-p object-name)
 								   :class)
-								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS-DECLARATION"))))
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
 	 ,@(when assoc-class `(("AssocClass" ,assoc-class :classname)))
 	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
 	 ,@(when role `(("Role" ,role :value)))
@@ -1093,9 +1089,9 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
-								  ((cim-class-declaration-p object-name)
+								  ((cim-class-p object-name)
 								   :class)
-								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS-DECLARATION"))))
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
 	 ,@(when assoc-class `(("AssocClass" ,assoc-class :classname)))
 	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
 	 ,@(when role `(("Role" ,role :value)))
@@ -1121,9 +1117,9 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
-								  ((cim-class-declaration-p object-name)
+								  ((cim-class-p object-name)
 								   :class)
-								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS-DECLARATION"))))
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
 	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
 	 ,@(when role `(("Role" ,role :value)))
 	 ("IncludeClassOrigin" ,(encode-cimxml-boolean include-class-origin) :value)
@@ -1146,9 +1142,9 @@ PARAM-VALUES is a list of form (name value type)."
    `(("ObjectName" ,object-name ,(cond
 								  ((cim-instance-p object-name)
 								   :value.namedinstance)
-								  ((cim-class-declaration-p object-name)
+								  ((cim-class-p object-name)
 								   :class)
-								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS-DECLARATION"))))
+								  (t (error "OBJECT-NAME must be a CIM-INSTANCE or a CIM-CLASS"))))
 	 ,@(when result-class `(("ResultClass" ,result-class :classname)))
 	 ,@(when role `(("Role" ,role :value))))))
 

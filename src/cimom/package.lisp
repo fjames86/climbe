@@ -10,7 +10,7 @@
            #:cim-indication
            #:cim-standard-direct-slot-definition
            #:cim-standard-effective-slot-definition
-           #:cim-class-slots
+           #:cim-class-direct-slots
            #:cim-class-superclasses
            #:cim-class-subclasses
            #:find-cim-class
@@ -24,7 +24,10 @@
            #:defcim-method
            #:find-cim-method
            #:invoke-method
-
+		   #:convert-cim-instance
+		   #:instance-to-cim-instance
+		   #:class-to-declaration
+		   
            #:provider-enumerate-instances
            #:enumerate-instances
            #:provider-get-instance

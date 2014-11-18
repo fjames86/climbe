@@ -7,7 +7,9 @@
   (:export #:cim-error
            #:make-cim-error
            #:ignore-cim-errors
-
+		   #:cim-error-code
+		   #:cim-error-description
+		   
            #:cim-name
            #:cim-qualifiers
            #:cim-type
@@ -88,10 +90,12 @@
            #:cim-qualifier-flavour
            #:cim-qualifier-default 
            #:cim-qualifier-qualifiers
-           
+           #:cim-qualifier-name
+		   
            #:find-qualifier
            #:cim-qualifier-symbol
-           #:make-qualifiers-list 
+           #:make-qualifiers-list
+		   #:qualifiers-list-helper
            #:defqualifier
            #:qualifier-p
 
@@ -141,7 +145,7 @@
 
            #:cim-response
            #:make-cim-response
-           #:cim-resonse-method-name
+           #:cim-response-method-name
            #:cim-response-intrinsic-p
            #:cim-response-return-value
            #:cim-response-return-type

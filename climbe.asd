@@ -63,14 +63,20 @@
                       ((:file "package")
                        (:file "client" :depends-on ("package"))
                        (:file "ntlm-client" :depends-on ("client")))
-                      :depends-on (:core :encoding :decoding))
+                      :depends-on (:core :cimom :encoding :decoding))
              (:module :server
                       :pathname "server"
                       :components
                       ((:file "package")
                        (:file "server" :depends-on ("package")))
-                      :depends-on (:core :encoding :decoding))
-             (:file "package" :depends-on (:core :cimom :client :server))
+                      :depends-on (:core :cimom :encoding :decoding))
+			 (:module :schema
+					  :pathname "schema"
+					  :components
+					  ((:file "package")
+					   (:file "schema" :depends-on ("package")))
+					  :depends-on (:core :cimom :encoding :decoding))
+             (:file "package" :depends-on (:core :cimom :client :server :schema))
              )))
   :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm))
 
