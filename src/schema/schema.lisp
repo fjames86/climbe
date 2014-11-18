@@ -76,38 +76,44 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
                    
 (defun compile-schema (xml-file &optional lisp-file)
   "Load a definition from a CIMXML encoded file and generate the equalivalent Lisp forms"
-  (declare (type pathname xml-file))
+  (let ((path (merge-pathnames xml-file)))
+	;; if a lisp-file is not specified then make a default one
+	(unless lisp-file
+	  (setf lisp-file 
+			(make-pathname :type "lisp" 
+						   :name (pathname-name path) 
+						   :directory (pathname-directory path))))
+	
+	(let ((declarations
+		   (decode-cimxml-cim (decode-xml-file path))))
+	  
+	  (with-open-file (f lisp-file :direction :output :if-exists :supersede)
+		;; print a header
+		(format f "~%")
+		(format f ";; Compiled from ~S~%" path)
+		(format f "~%")
+		(format f "(in-package #:climbe)~%")
+		(format f "~%")		  
 
-  ;; if a lisp-file is not specified then make a default one
-  (unless lisp-file
-    (setf lisp-file 
-          (make-pathname :type "lisp" 
-                         :name (pathname-name xml-file) 
-                         :directory (pathname-directory xml-file))))
+		(dolist (declaration declarations)
+		  (assert (cim-declaration-p declaration))
 
-  (let ((declarations
-         (decode-cimxml-cim (decode-xml-file xml-file))))
-
-    (with-open-file (f lisp-file :direction :output :if-exists :supersede)
-      (dolist (declaration declarations)
-        (assert (cim-declaration-p declaration))
-
-        ;; add the qualifiers 
-        (dolist (q (cim-declaration-qualifiers declaration))
-          ;; encode the lisp file as a Lisp form
-          (pprint (encode-lisp-qualifier q) f))
-        
-        ;; add the classes
-        (dolist (class (cim-declaration-classes declaration))
-	  (when (cim-class-p class)
-	    (pprint (encode-lisp-class class) f)
-        
-	    ;; encode the methods of the class
-	    (dolist (method (cim-class-methods class))
-	      (pprint (encode-lisp-method method (make-lisp-name (cim-name class)))
-		      f)))))))
-
-  nil)
+		  ;; add the qualifiers 
+		  (dolist (q (cim-declaration-qualifiers declaration))
+			;; encode the lisp file as a Lisp form
+			(pprint (encode-lisp-qualifier q) f))
+		  
+		  ;; add the classes
+		  (dolist (class (cim-declaration-classes declaration))
+			(when (cim-class-p class)
+			  (pprint (encode-lisp-class class) f)
+			  
+			  ;; encode the methods of the class
+			  (dolist (method (cim-class-methods class))
+				(pprint (encode-lisp-method method
+											(make-lisp-name (cim-name class)))
+						f)))))))
+	path))
 
 (defun compile-schema* (pathspec)
   (dolist (xml-file (directory pathspec))    
