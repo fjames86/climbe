@@ -117,6 +117,8 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
 
 (defun compile-schema* (pathspec)
   (dolist (xml-file (directory pathspec))    
-    (print xml-file)
-    (compile-schema xml-file)))
+    (format t "[~A] Compiling...~%" (pathname-name xml-file))
+	(handler-case (compile-schema xml-file)
+	  (error (err)
+		(format t "[~A] FAILED: ~A~%" (pathname-name xml-file) err)))))
 

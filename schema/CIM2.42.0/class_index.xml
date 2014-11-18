@@ -1,0 +1,1440 @@
+<?xml version="1.0"?>
+<CLASSES><CLASS NAME="CIM_ManagedElement" />
+<CLASS NAME="CIM_ManagedSystemElement" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_MethodParameters" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_ParametersForMethod" ASSOCIATION="true" />
+<CLASS NAME="CIM_ParameterValueSources" ASSOCIATION="true" />
+<CLASS NAME="CIM_PhysicalElement" SUPERCLASS="CIM_ManagedSystemElement" />
+<CLASS NAME="CIM_Product" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_ProductParentChild" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductPhysicalElements" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductProductDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SettingData" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SettingsDefineState" ASSOCIATION="true" />
+<CLASS NAME="CIM_StatisticalData" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_StatisticalInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_StatisticalSetting" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_SupportAccess" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_Synchronized" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemConfiguration" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SystemStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_View" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_CommonDatabaseSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_CommonDatabaseStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_DatabaseResourceStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_DatabaseServiceStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_BlockStatisticsManifest" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_BlockStorageStatisticalData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_DeviceErrorCounts" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_DeviceErrorData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_FCPortRateStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_FCSwitchSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_LabelReaderStatData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_LogicalPortSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_MediaAccessStatData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_NetworkPortStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_PickerStatData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_SCSIMultipathSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_StorageError" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_StorageSetting" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_StorageSettingWithHints" SUPERCLASS="CIM_StorageSetting" />
+<CLASS NAME="CIM_StorageSynchronized" SUPERCLASS="CIM_Synchronized" ASSOCIATION="true" />
+<CLASS NAME="CIM_TokenRingPortStatistics" SUPERCLASS="CIM_NetworkPortStatistics" />
+<CLASS NAME="CIM_VideoHeadResolution" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_Indication" />
+<CLASS NAME="CIM_IndicationFilter" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_IndicationServiceSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_InstIndication" SUPERCLASS="CIM_Indication" />
+<CLASS NAME="CIM_InstMethodCall" SUPERCLASS="CIM_InstIndication" />
+<CLASS NAME="CIM_InstModification" SUPERCLASS="CIM_InstIndication" />
+<CLASS NAME="CIM_InstRead" SUPERCLASS="CIM_InstIndication" />
+<CLASS NAME="CIM_ListenerDestination" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_ListenerDestinationCIMXML" SUPERCLASS="CIM_ListenerDestination" />
+<CLASS NAME="CIM_ListenerDestinationWSManagement" SUPERCLASS="CIM_ListenerDestination" />
+<CLASS NAME="CIM_ProcessIndication" SUPERCLASS="CIM_Indication" />
+<CLASS NAME="CIM_SNMPTrapIndication" SUPERCLASS="CIM_ProcessIndication" />
+<CLASS NAME="CIM_CIMOMStatisticalData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_Error" />
+<CLASS NAME="CIM_GenericOperationCapabilitiesStructure" />
+<CLASS NAME="CIM_Namespace" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_RegisteredSpecification" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SchemaInformationStructure" />
+<CLASS NAME="CIM_SystemIdentification" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SystemInNamespace" ASSOCIATION="true" />
+<CLASS NAME="CIM_WBEMServerNamespace" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_BaseMetricDefinition" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_BaseMetricValue" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_MetricDefinition" SUPERCLASS="CIM_BaseMetricDefinition" />
+<CLASS NAME="CIM_TraceLevelType" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_UnitOfWork" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_BGPEndpointStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_CLPSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_ConnectivityMembershipSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_IEEE8021xSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_IPAssignmentSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_IPVersionSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_iSCSIConnectionSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_iSCSILoginStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_iSCSISessionFailures" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_iSCSISessionSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_NextHopRoute" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SAEndpointConnectionStatistics" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_SAEndpointRefreshSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_SchedulingElement" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SSHSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_StaticIPAssignmentSettingData" SUPERCLASS="CIM_IPAssignmentSettingData" />
+<CLASS NAME="CIM_TelnetSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_VLANEndpointSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_WiFiEndpointSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_WiFiNetworkDetectionSettings" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_WRRSchedulingElement" SUPERCLASS="CIM_SchedulingElement" />
+<CLASS NAME="CIM_MediaPhysicalStatData" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_PhysicalCapacity" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_PhysicalComponent" SUPERCLASS="CIM_PhysicalElement" />
+<CLASS NAME="CIM_PhysicalConnector" SUPERCLASS="CIM_PhysicalElement" />
+<CLASS NAME="CIM_PhysicalLink" SUPERCLASS="CIM_PhysicalElement" />
+<CLASS NAME="CIM_PhysicalMedia" SUPERCLASS="CIM_PhysicalComponent" />
+<CLASS NAME="CIM_PhysicalPackage" SUPERCLASS="CIM_PhysicalElement" />
+<CLASS NAME="CIM_PhysicalTape" SUPERCLASS="CIM_PhysicalMedia" />
+<CLASS NAME="CIM_Slot" SUPERCLASS="CIM_PhysicalConnector" />
+<CLASS NAME="CIM_Policy" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_PolicyAction" SUPERCLASS="CIM_Policy" />
+<CLASS NAME="CIM_PolicyCondition" SUPERCLASS="CIM_Policy" />
+<CLASS NAME="CIM_PolicySet" SUPERCLASS="CIM_Policy" />
+<CLASS NAME="CIM_PolicySetAppliesToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyTimePeriodCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="CIM_QueryCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="CIM_RejectConnectionAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_VendorPolicyAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_VendorPolicyCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="PRS_ExchangeElement" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="PRS_ExpressionElement" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Feature" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Location" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Product" SUPERCLASS="PRS_ExpressionElement" />
+<CLASS NAME="PRS_Resource" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Revision" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_ServiceIncident" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Solution" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_SolutionElement" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Statement" SUPERCLASS="PRS_ExpressionElement" />
+<CLASS NAME="PRS_Transaction" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="CIM_BIOSAttribute" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_BIOSEnumeration" SUPERCLASS="CIM_BIOSAttribute" />
+<CLASS NAME="CIM_BIOSInteger" SUPERCLASS="CIM_BIOSAttribute" />
+<CLASS NAME="CIM_BIOSPassword" SUPERCLASS="CIM_BIOSAttribute" />
+<CLASS NAME="CIM_BIOSString" SUPERCLASS="CIM_BIOSAttribute" />
+<CLASS NAME="CIM_BootSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_BootSourceSetting" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_DiagnosticResult" />
+<CLASS NAME="CIM_DiagnosticResultForMSE" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticResultInPackage" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_JobSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_MethodResult" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_RecordForLog" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_UnixProcessStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_VirtualSystemMigrationSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_VirtualSystemSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_AccountSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_AssociatedPrivilege" ASSOCIATION="true" />
+<CLASS NAME="CIM_Credential" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_CredentialContext" ASSOCIATION="true" />
+<CLASS NAME="CIM_Identity" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_IdentityContext" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPNetworkIdentity" SUPERCLASS="CIM_Identity" />
+<CLASS NAME="CIM_KerberosCredential" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_KerberosTicket" SUPERCLASS="CIM_KerberosCredential" />
+<CLASS NAME="CIM_NamedCredential" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_NamedSharedIKESecret" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_OpaqueManagementDataOwner" SUPERCLASS="CIM_AssociatedPrivilege" ASSOCIATION="true" />
+<CLASS NAME="CIM_OrganizationalEntity" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_OrgStructure" ASSOCIATION="true" />
+<CLASS NAME="CIM_OrgUnit" SUPERCLASS="CIM_OrganizationalEntity" />
+<CLASS NAME="CIM_OtherGroupInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_OtherOrganizationInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_OtherOrgUnitInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_OtherPersonInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_OtherRoleInformation" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_Privilege" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SecuritySensitivity" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SharedCredential" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_SharedSecret" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_SignedCredential" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_StorageClientSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_StorageHardwareID" SUPERCLASS="CIM_Identity" />
+<CLASS NAME="CIM_UnsignedCredential" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_UnsignedPublicKey" SUPERCLASS="CIM_Credential" />
+<CLASS NAME="CIM_UserEntity" SUPERCLASS="CIM_OrganizationalEntity" />
+<CLASS NAME="CIM_UsersAccess" SUPERCLASS="CIM_UserEntity" />
+<CLASS NAME="CIM_X509Infrastructure" SUPERCLASS="CIM_SignedCredential" />
+<CLASS NAME="CIM_J2eeNotification" SUPERCLASS="CIM_ProcessIndication" />
+<CLASS NAME="CIM_J2eeStatistic" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_J2eeURLStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_StatisticalRuntimeOverview" SUPERCLASS="CIM_StatisticalData" />
+<CLASS NAME="CIM_Capabilities" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_Collection" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_CollectionOfMSEs" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_CompatibleProduct" ASSOCIATION="true" />
+<CLASS NAME="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConcreteCollection" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_ConcreteComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_Configuration" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_ConfigurationComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DependencyContext" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_ElementCapabilities" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementConfiguration" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementSettingData" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementView" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EnabledLogicalElementCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_FRU" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_FRUIncludesProduct" ASSOCIATION="true" />
+<CLASS NAME="CIM_FRUPhysicalElements" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LaunchInContextCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_LocalizationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_Location" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_LogicalElement" SUPERCLASS="CIM_ManagedSystemElement" />
+<CLASS NAME="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_OpaqueManagementDataCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_OrderedComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_OrderedDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_OrderedMemberOfCollection" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_OwningCollectionElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_PhysicalStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_PhysicalStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_PowerManagementCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_ProductComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductElementComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductFRU" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductPhysicalComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductSupport" ASSOCIATION="true" />
+<CLASS NAME="CIM_Profile" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_RedundancyGroup" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_RelatedStatistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReplaceableProductFRU" ASSOCIATION="true" />
+<CLASS NAME="CIM_ResourceAllocationSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_ResourcePool" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_ResourcePoolConfigurationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_SAPStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_ScopedSettingData" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_ServiceStatisticalInformation" SUPERCLASS="CIM_StatisticalInformation" />
+<CLASS NAME="CIM_Setting" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_SettingContext" ASSOCIATION="true" />
+<CLASS NAME="CIM_SettingsDefineCapabilities" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareIdentity" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_SoftwareInstallationServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_Spared" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SpareGroup" SUPERCLASS="CIM_RedundancyGroup" />
+<CLASS NAME="CIM_StorageAllocationSettingData" SUPERCLASS="CIM_ResourceAllocationSettingData" />
+<CLASS NAME="CIM_StorageRedundancyGroup" SUPERCLASS="CIM_RedundancyGroup" />
+<CLASS NAME="CIM_SystemSetting" SUPERCLASS="CIM_Setting" />
+<CLASS NAME="CIM_SystemSettingContext" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemSpecificCollection" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_VirtualEthernetSwitchSettingData" SUPERCLASS="CIM_VirtualSystemSettingData" />
+<CLASS NAME="CIM_VirtualSystemManagementCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_VirtualSystemSnapshotCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_VirtualSystemSnapshotServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_CommonDatabaseCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_DatabaseParameter" SUPERCLASS="CIM_ScopedSettingData" />
+<CLASS NAME="CIM_DatabaseSegmentSettingData" SUPERCLASS="CIM_ScopedSettingData" />
+<CLASS NAME="CIM_SNMPDatabaseParameter" SUPERCLASS="CIM_DatabaseParameter" />
+<CLASS NAME="CIM_AlarmDeviceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_BlockStatisticsManifestCollection" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_DeviceSharingCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_DiskGroup" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_EthernetPortStatistics" SUPERCLASS="CIM_NetworkPortStatistics" />
+<CLASS NAME="CIM_FCAdapterEventCounters" SUPERCLASS="CIM_DeviceStatisticalInformation" />
+<CLASS NAME="CIM_FCPortStatistics" SUPERCLASS="CIM_NetworkPortStatistics" />
+<CLASS NAME="CIM_FCSwitchCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_FibrePortEventCounters" SUPERCLASS="CIM_DeviceStatisticalInformation" />
+<CLASS NAME="CIM_IndicatorLEDCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_LabelReaderStatInfo" SUPERCLASS="CIM_DeviceStatisticalInformation" />
+<CLASS NAME="CIM_LLDPEthernetPortStatistics" SUPERCLASS="CIM_EthernetPortStatistics" />
+<CLASS NAME="CIM_LogicalPortCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_LogicalPortGroup" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_MediaAccessStatInfo" SUPERCLASS="CIM_DeviceStatisticalInformation" />
+<CLASS NAME="CIM_MemoryError" SUPERCLASS="CIM_StorageError" />
+<CLASS NAME="CIM_MonitorResolution" SUPERCLASS="CIM_Setting" />
+<CLASS NAME="CIM_NetworkPortCapabilities" SUPERCLASS="CIM_LogicalPortCapabilities" />
+<CLASS NAME="CIM_PCIPortGroup" SUPERCLASS="CIM_LogicalPortGroup" />
+<CLASS NAME="CIM_PickerStatInfo" SUPERCLASS="CIM_DeviceStatisticalInformation" />
+<CLASS NAME="CIM_PowerAllocationSettingData" SUPERCLASS="CIM_ResourceAllocationSettingData" />
+<CLASS NAME="CIM_PowerUtilizationManagementCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_PrinterElement" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_PrintInputTray" SUPERCLASS="CIM_PrinterElement" />
+<CLASS NAME="CIM_PrintInterpreter" SUPERCLASS="CIM_PrinterElement" />
+<CLASS NAME="CIM_PrintMarker" SUPERCLASS="CIM_PrinterElement" />
+<CLASS NAME="CIM_PrintSupply" SUPERCLASS="CIM_PrinterElement" />
+<CLASS NAME="CIM_ProcessorCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_ProtocolControllerMaskingCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_SCSIMultipathConfigurationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_SCSITargetPortGroup" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_StatisticsCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_StorageCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_StorageConfigurationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_StorageReplicationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_VideoControllerResolution" SUPERCLASS="CIM_Setting" />
+<CLASS NAME="CIM_WiFiPortCapabilities" SUPERCLASS="CIM_NetworkPortCapabilities" />
+<CLASS NAME="CIM_ZoneCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_ZoneMembershipSettingData" SUPERCLASS="CIM_ConnectivityMembershipSettingData" />
+<CLASS NAME="CIM_AbstractIndicationSubscription" ASSOCIATION="true" />
+<CLASS NAME="CIM_AlertIndication" SUPERCLASS="CIM_ProcessIndication" />
+<CLASS NAME="CIM_AlertInstIndication" SUPERCLASS="CIM_AlertIndication" />
+<CLASS NAME="CIM_ClassIndication" SUPERCLASS="CIM_Indication" />
+<CLASS NAME="CIM_ClassModification" SUPERCLASS="CIM_ClassIndication" />
+<CLASS NAME="CIM_FilterCollection" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_FilterCollectionSubscription" SUPERCLASS="CIM_AbstractIndicationSubscription" ASSOCIATION="true" />
+<CLASS NAME="CIM_IndicationHandler" SUPERCLASS="CIM_ListenerDestination" />
+<CLASS NAME="CIM_IndicationHandlerCIMXML" SUPERCLASS="CIM_IndicationHandler" />
+<CLASS NAME="CIM_IndicationServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_IndicationSubscription" SUPERCLASS="CIM_AbstractIndicationSubscription" ASSOCIATION="true" />
+<CLASS NAME="CIM_InstCreation" SUPERCLASS="CIM_InstIndication" />
+<CLASS NAME="CIM_InstDeletion" SUPERCLASS="CIM_InstIndication" />
+<CLASS NAME="CIM_ThresholdIndication" SUPERCLASS="CIM_AlertIndication" />
+<CLASS NAME="CIM_QueryCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_ReferencedSpecification" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RegisteredProfile" SUPERCLASS="CIM_RegisteredSpecification" />
+<CLASS NAME="CIM_RegisteredSubProfile" SUPERCLASS="CIM_RegisteredProfile" />
+<CLASS NAME="CIM_WBEMServerCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_SAAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_SANegotiationAction" SUPERCLASS="CIM_SAAction" />
+<CLASS NAME="CIM_SAProposal" SUPERCLASS="CIM_ScopedSettingData" />
+<CLASS NAME="CIM_SAStaticAction" SUPERCLASS="CIM_SAAction" />
+<CLASS NAME="CIM_AggregationMetricDefinition" SUPERCLASS="CIM_BaseMetricDefinition" />
+<CLASS NAME="CIM_AggregationMetricValue" SUPERCLASS="CIM_BaseMetricValue" />
+<CLASS NAME="CIM_LogicalElementPerformsUoW" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MetricDefForME" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MetricForME" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MetricInstance" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MetricServiceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_SubUoW" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_UnitOfWorkDefinition" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_UoWDefTraceLevelType" ASSOCIATION="true" />
+<CLASS NAME="CIM_UoWMetric" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_UoWMetricDefinition" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AdministrativeDistance" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_AllocationSchedulingElement" SUPERCLASS="CIM_SchedulingElement" />
+<CLASS NAME="CIM_BGPAttributes" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_BGPCluster" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_BGPPathAttributes" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_BGPPeerGroup" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_BGPRouteMap" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_BGPStatistics" SUPERCLASS="CIM_ServiceStatisticalInformation" />
+<CLASS NAME="CIM_BufferPool" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_CollectedBufferPool" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConnectivityCollection" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_DHCPCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_DHCPSettingData" SUPERCLASS="CIM_IPAssignmentSettingData" />
+<CLASS NAME="CIM_DNSGeneralSettingData" SUPERCLASS="CIM_IPAssignmentSettingData" />
+<CLASS NAME="CIM_DNSSettingData" SUPERCLASS="CIM_IPAssignmentSettingData" />
+<CLASS NAME="CIM_DynamicForwardingEntry" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_ExtendedStaticIPAssignmentSettingData" SUPERCLASS="CIM_IPAssignmentSettingData" />
+<CLASS NAME="CIM_FilterEntryBase" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_FilterList" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_FilterListsInBGPRouteMap" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Hdr8021Filter" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_IEEE8021xCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_IPAddressRange" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_IPConnectivitySubnet" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_IPHeadersFilter" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_IPSOFilterEntry" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_IPXConnectivityNetwork" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_iSCSICapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_LANConnectivitySegment" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_LogicalNetwork" SUPERCLASS="CIM_CollectionOfMSEs" />
+<CLASS NAME="CIM_NamedAddressCollection" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_NetworkVLAN" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_NextHopIPRoute" SUPERCLASS="CIM_NextHopRoute" />
+<CLASS NAME="CIM_NextHopRouting" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_OSPFAreaConfiguration" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_OSPFLink" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_OSPFServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_PeerIDPayloadFilterEntry" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_PreambleFilter" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_PrioritySchedulingElement" SUPERCLASS="CIM_SchedulingElement" />
+<CLASS NAME="CIM_ProtocolServiceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_RangeOfIPAddresses" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_RangesOfConfiguration" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RedirectionServiceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_RoutingPolicy" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_SATransform" SUPERCLASS="CIM_ScopedSettingData" />
+<CLASS NAME="CIM_SpanningTreeStatistics" SUPERCLASS="CIM_ServiceStatisticalInformation" />
+<CLASS NAME="CIM_SSHCapabilities" SUPERCLASS="CIM_ProtocolServiceCapabilities" />
+<CLASS NAME="CIM_StaticForwardingEntry" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_SwitchPortSourceRoutingStatistics" SUPERCLASS="CIM_SAPStatisticalInformation" />
+<CLASS NAME="CIM_SwitchPortSpanningTreeStatistics" SUPERCLASS="CIM_SAPStatisticalInformation" />
+<CLASS NAME="CIM_SwitchPortStatistics" SUPERCLASS="CIM_SAPStatisticalInformation" />
+<CLASS NAME="CIM_SwitchPortTransparentBridgingStatistics" SUPERCLASS="CIM_SAPStatisticalInformation" />
+<CLASS NAME="CIM_TelnetCapabilities" SUPERCLASS="CIM_ProtocolServiceCapabilities" />
+<CLASS NAME="CIM_TransparentBridgingStatistics" SUPERCLASS="CIM_ServiceStatisticalInformation" />
+<CLASS NAME="CIM_USBRedirectionCapabilities" SUPERCLASS="CIM_RedirectionServiceCapabilities" />
+<CLASS NAME="CIM_VLANEndpointCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_WiFiEndpointCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_X509CredentialFilterEntry" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_AdjacentSlots" ASSOCIATION="true" />
+<CLASS NAME="CIM_Card" SUPERCLASS="CIM_PhysicalPackage" />
+<CLASS NAME="CIM_Chip" SUPERCLASS="CIM_PhysicalComponent" />
+<CLASS NAME="CIM_ConfigurationCapacity" SUPERCLASS="CIM_PhysicalCapacity" />
+<CLASS NAME="CIM_ConnectedTo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Container" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementCapacity" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementInConnector" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementsLinked" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LinkHasConnector" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_MediaPhysicalStatInfo" SUPERCLASS="CIM_PhysicalStatisticalInformation" />
+<CLASS NAME="CIM_MemoryCapacity" SUPERCLASS="CIM_PhysicalCapacity" />
+<CLASS NAME="CIM_PackagedComponent" SUPERCLASS="CIM_Container" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageInConnector" SUPERCLASS="CIM_ElementInConnector" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageInSlot" SUPERCLASS="CIM_PackageInConnector" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageLocation" SUPERCLASS="CIM_PhysicalPackage" />
+<CLASS NAME="CIM_PhysicalAssetCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_PhysicalFrame" SUPERCLASS="CIM_PhysicalPackage" />
+<CLASS NAME="CIM_PhysicalMemory" SUPERCLASS="CIM_Chip" />
+<CLASS NAME="CIM_Rack" SUPERCLASS="CIM_PhysicalFrame" />
+<CLASS NAME="CIM_ReplacementSet" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_SlotInSlot" SUPERCLASS="CIM_ConnectedTo" ASSOCIATION="true" />
+<CLASS NAME="CIM_StorageMediaLocation" SUPERCLASS="CIM_PackageLocation" />
+<CLASS NAME="CIM_SystemBusCard" SUPERCLASS="CIM_Card" />
+<CLASS NAME="CIM_AuthenticationCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="CIM_BiometricAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_CompoundPolicyAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_CompoundPolicyCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="CIM_DocumentAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_KerberosAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_MethodAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_NetworkingIDAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_NetworkPacketAction" SUPERCLASS="CIM_PolicyAction" />
+<CLASS NAME="CIM_PacketFilterCondition" SUPERCLASS="CIM_PolicyCondition" />
+<CLASS NAME="CIM_PhysicalCredentialAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_PolicyComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyConditionStructure" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyGroup" SUPERCLASS="CIM_PolicySet" />
+<CLASS NAME="CIM_PolicyGroupInPolicyGroup" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyRoleCollection" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_PolicyRule" SUPERCLASS="CIM_PolicySet" />
+<CLASS NAME="CIM_PolicyRuleInPolicyGroup" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyRuleValidityPeriod" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicySetComponent" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicySetInRoleCollection" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicySetValidityPeriod" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PublicPrivateKeyAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_SharedSecretAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="PRS_Activity" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_ActivityResource" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ActivityTransaction" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Address" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_AddressLocation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Administrative" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_AdministrativeRevision" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Agreement" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Attachment" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_Category" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_CategoryParentChild" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Contact" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_ContactItem" SUPERCLASS="PRS_ExchangeElement" />
+<CLASS NAME="PRS_ContactItemAddress" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Expression" SUPERCLASS="PRS_ExpressionElement" />
+<CLASS NAME="PRS_ExpressionLink" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_FeatureResource" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Organization" SUPERCLASS="PRS_ContactItem" />
+<CLASS NAME="PRS_Person" SUPERCLASS="PRS_ContactItem" />
+<CLASS NAME="PRS_Problem" SUPERCLASS="PRS_SolutionElement" />
+<CLASS NAME="PRS_ProductAsset" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ProductComponent" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ProductParentChild" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Reference" SUPERCLASS="PRS_SolutionElement" />
+<CLASS NAME="PRS_Resolution" SUPERCLASS="PRS_SolutionElement" />
+<CLASS NAME="PRS_ResolutionResource" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_RevisionContact" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceActivity" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceAgreement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceProblem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceProvider" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceRequester" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ServiceResolutionSolution" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionCategory" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionExpression" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionHasElement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionProblem" SUPERCLASS="PRS_SolutionHasElement" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionReference" SUPERCLASS="PRS_SolutionHasElement" ASSOCIATION="true" />
+<CLASS NAME="PRS_SolutionResolution" SUPERCLASS="PRS_SolutionHasElement" ASSOCIATION="true" />
+<CLASS NAME="PRS_StatementFeature" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BIOSServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_BootServiceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_ComputerSystemNodeCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_DiagnosticRecord" SUPERCLASS="CIM_RecordForLog" />
+<CLASS NAME="CIM_DiagnosticServiceCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_DiagnosticServiceRecord" SUPERCLASS="CIM_DiagnosticRecord" />
+<CLASS NAME="CIM_DiagnosticSetting" SUPERCLASS="CIM_Setting" />
+<CLASS NAME="CIM_DiagnosticSettingDataRecord" SUPERCLASS="CIM_DiagnosticRecord" />
+<CLASS NAME="CIM_DiagnosticSettingRecord" SUPERCLASS="CIM_DiagnosticRecord" />
+<CLASS NAME="CIM_FileSystemCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_FileSystemSettingData" SUPERCLASS="CIM_ScopedSettingData" />
+<CLASS NAME="CIM_LogEntry" SUPERCLASS="CIM_RecordForLog" />
+<CLASS NAME="CIM_LogicalFile" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_LogRecord" SUPERCLASS="CIM_RecordForLog" />
+<CLASS NAME="CIM_OperatingSystemCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_PlatformWatchdogServiceCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_RecordAppliesToElement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RecordLogCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_ResourceAllocationFromPool" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SettingAssociatedToCapabilities" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SymbolicLink" SUPERCLASS="CIM_LogicalFile" />
+<CLASS NAME="CIM_TimeZone" SUPERCLASS="CIM_Setting" />
+<CLASS NAME="CIM_UnixFile" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_VirtualSystemSettingDataComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccessControlInformation" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_AccountManagementCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_AssignedIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthenticationRequirement" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_AuthenticationTarget" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthorizationSubject" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthorizationTarget" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthorizedPrivilege" SUPERCLASS="CIM_Privilege" />
+<CLASS NAME="CIM_AuthorizedSubject" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthorizedTarget" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectionInOrganization" ASSOCIATION="true" />
+<CLASS NAME="CIM_CredentialManagementCapabilities" SUPERCLASS="CIM_EnabledLogicalElementCapabilities" />
+<CLASS NAME="CIM_CredentialStore" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_ElementAsUser" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementSecuritySensitivity" ASSOCIATION="true" />
+<CLASS NAME="CIM_GatewayPathID" SUPERCLASS="CIM_StorageHardwareID" />
+<CLASS NAME="CIM_Group" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_Keystore" SUPERCLASS="CIM_CredentialStore" />
+<CLASS NAME="CIM_MemberPrincipal" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_MoreGroupInfo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MoreOrgUnitInfo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Organization" SUPERCLASS="CIM_OrganizationalEntity" />
+<CLASS NAME="CIM_PrivilegeManagementCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_PublicKeyCertificate" SUPERCLASS="CIM_SignedCredential" />
+<CLASS NAME="CIM_Role" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_RoleBasedManagementCapabilities" SUPERCLASS="CIM_PrivilegeManagementCapabilities" />
+<CLASS NAME="CIM_RoleLimitedToTarget" ASSOCIATION="true" />
+<CLASS NAME="CIM_UserContact" SUPERCLASS="CIM_UserEntity" />
+<CLASS NAME="CIM_UsersCredential" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_X509Certificate" SUPERCLASS="CIM_X509Infrastructure" />
+<CLASS NAME="CIM_X509CRL" SUPERCLASS="CIM_X509Infrastructure" />
+<CLASS NAME="CIM_InstalledProduct" SUPERCLASS="CIM_Collection" />
+<CLASS NAME="CIM_InstalledProductImage" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeConnectionStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeEJBStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeEntityBeanStats" SUPERCLASS="CIM_J2eeEJBStats" />
+<CLASS NAME="CIM_J2eeJavaMailStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJCAStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJDBCStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJMSConnectionStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJMSEndpointStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJMSProducerStats" SUPERCLASS="CIM_J2eeJMSEndpointStats" />
+<CLASS NAME="CIM_J2eeJMSSessionStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJMSStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJTAStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeJVMStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeManagedObjectCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_J2eeMessageDrivenBeanStats" SUPERCLASS="CIM_J2eeEJBStats" />
+<CLASS NAME="CIM_J2eeServletStats" SUPERCLASS="CIM_J2eeStatistic" />
+<CLASS NAME="CIM_J2eeSessionBeanStats" SUPERCLASS="CIM_J2eeEJBStats" />
+<CLASS NAME="CIM_J2eeStatefulSessionBeanStats" SUPERCLASS="CIM_J2eeSessionBeanStats" />
+<CLASS NAME="CIM_J2eeStatelessSessionBeanStats" SUPERCLASS="CIM_J2eeSessionBeanStats" />
+<CLASS NAME="CIM_SoftwareElement" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_SoftwareElementComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareFeature" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_SoftwareFeatureComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareFeatureSoftwareElements" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_VideoBIOSElement" SUPERCLASS="CIM_SoftwareElement" />
+<CLASS NAME="CIM_VideoBIOSFeature" SUPERCLASS="CIM_SoftwareFeature" />
+<CLASS NAME="CIM_VideoBIOSFeatureVideoBIOSElements" SUPERCLASS="CIM_SoftwareFeatureSoftwareElements" ASSOCIATION="true" />
+<CLASS NAME="CIM_ActsAsSpare" ASSOCIATION="true" />
+<CLASS NAME="CIM_AllocationCapabilities" SUPERCLASS="CIM_Capabilities" />
+<CLASS NAME="CIM_CollectedCollections" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectedMSEs" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectionConfiguration" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectionSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConcreteDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConcreteIdentity" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_ContainedLocation" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementAllocatedFromPool" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementLocation" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementProfile" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementSoftwareIdentity" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EthernetPortAllocationSettingData" SUPERCLASS="CIM_ResourceAllocationSettingData" />
+<CLASS NAME="CIM_ExtraCapacityGroup" SUPERCLASS="CIM_RedundancyGroup" />
+<CLASS NAME="CIM_Job" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_PhysicalElementLocation" SUPERCLASS="CIM_ElementLocation" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProcessorAllocationSettingData" SUPERCLASS="CIM_ResourceAllocationSettingData" />
+<CLASS NAME="CIM_ProductSoftwareComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_RedundancyComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_RedundancySet" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_ScopedSetting" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_StatisticsCollection" SUPERCLASS="CIM_SystemSpecificCollection" />
+<CLASS NAME="CIM_StorageRedundancySet" SUPERCLASS="CIM_RedundancySet" />
+<CLASS NAME="CIM_AssociatedBlockStatisticsManifestCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_BlockStatisticsCapabilities" SUPERCLASS="CIM_StatisticsCapabilities" />
+<CLASS NAME="CIM_FCPortCapabilities" SUPERCLASS="CIM_LogicalPortCapabilities" />
+<CLASS NAME="CIM_GroupInDiskGroup" SUPERCLASS="CIM_CollectedCollections" ASSOCIATION="true" />
+<CLASS NAME="CIM_PrintJob" SUPERCLASS="CIM_Job" />
+<CLASS NAME="CIM_StorageSettingsAssociatedToCapabilities" SUPERCLASS="CIM_SettingAssociatedToCapabilities" ASSOCIATION="true" />
+<CLASS NAME="CIM_StorageSettingsGeneratedFromCapabilities" SUPERCLASS="CIM_SettingAssociatedToCapabilities" ASSOCIATION="true" />
+<CLASS NAME="CIM_Zone" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_ZoneSet" SUPERCLASS="CIM_ConnectivityCollection" />
+<CLASS NAME="CIM_ClassCreation" SUPERCLASS="CIM_ClassIndication" />
+<CLASS NAME="CIM_ClassDeletion" SUPERCLASS="CIM_ClassIndication" />
+<CLASS NAME="CIM_FormattedIndicationSubscription" SUPERCLASS="CIM_IndicationSubscription" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementConformsToProfile" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReferencedProfile" SUPERCLASS="CIM_ReferencedSpecification" ASSOCIATION="true" />
+<CLASS NAME="CIM_SubProfileRequiresProfile" SUPERCLASS="CIM_ReferencedProfile" ASSOCIATION="true" />
+<CLASS NAME="CIM_WBEMProtocolServiceCapabilities" SUPERCLASS="CIM_ProtocolServiceCapabilities" />
+<CLASS NAME="CIM_WSManagementCapabilities" SUPERCLASS="CIM_WBEMProtocolServiceCapabilities" />
+<CLASS NAME="CIM_ContainedProposal" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_IKEAction" SUPERCLASS="CIM_SANegotiationAction" />
+<CLASS NAME="CIM_IKEProposal" SUPERCLASS="CIM_SAProposal" />
+<CLASS NAME="CIM_IPsecAction" SUPERCLASS="CIM_SANegotiationAction" />
+<CLASS NAME="CIM_IPsecProposal" SUPERCLASS="CIM_SAProposal" />
+<CLASS NAME="CIM_IPsecTransportAction" SUPERCLASS="CIM_IPsecAction" />
+<CLASS NAME="CIM_IPsecTunnelAction" SUPERCLASS="CIM_IPsecAction" />
+<CLASS NAME="CIM_PreconfiguredSAAction" SUPERCLASS="CIM_SAStaticAction" />
+<CLASS NAME="CIM_PreconfiguredTransportAction" SUPERCLASS="CIM_PreconfiguredSAAction" />
+<CLASS NAME="CIM_PreconfiguredTunnelAction" SUPERCLASS="CIM_PreconfiguredSAAction" />
+<CLASS NAME="CIM_SARule" SUPERCLASS="CIM_PolicyRule" />
+<CLASS NAME="CIM_TransformOfPreconfiguredAction" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogicalElementUnitOfWorkDef" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_StartedUoW" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SubUoWDef" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AHTransform" SUPERCLASS="CIM_SATransform" />
+<CLASS NAME="CIM_BGPPeerUsesRouteMap" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPRouteMapsInRoutingPolicy" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_BoundedPrioritySchedulingElement" SUPERCLASS="CIM_PrioritySchedulingElement" />
+<CLASS NAME="CIM_CLPCapabilities" SUPERCLASS="CIM_ProtocolServiceCapabilities" />
+<CLASS NAME="CIM_EntriesInFilterList" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ESPTransform" SUPERCLASS="CIM_SATransform" />
+<CLASS NAME="CIM_FilteredBGPAttributes" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_FilterEntry" SUPERCLASS="CIM_FilterEntryBase" />
+<CLASS NAME="CIM_IPCOMPTransform" SUPERCLASS="CIM_SATransform" />
+<CLASS NAME="CIM_IPRoute" SUPERCLASS="CIM_NextHopRouting" />
+<CLASS NAME="CIM_IPSubnet" SUPERCLASS="CIM_LogicalNetwork" />
+<CLASS NAME="CIM_IPXNetwork" SUPERCLASS="CIM_LogicalNetwork" />
+<CLASS NAME="CIM_LANSegment" SUPERCLASS="CIM_LogicalNetwork" />
+<CLASS NAME="CIM_ListsInRoutingPolicy" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_MediaRedirectionCapabilities" SUPERCLASS="CIM_RedirectionServiceCapabilities" />
+<CLASS NAME="CIM_CardInSlot" SUPERCLASS="CIM_PackageInSlot" ASSOCIATION="true" />
+<CLASS NAME="CIM_CardOnCard" SUPERCLASS="CIM_Container" ASSOCIATION="true" />
+<CLASS NAME="CIM_Chassis" SUPERCLASS="CIM_PhysicalFrame" />
+<CLASS NAME="CIM_ChassisInRack" SUPERCLASS="CIM_Container" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConnectorOnPackage" SUPERCLASS="CIM_Container" ASSOCIATION="true" />
+<CLASS NAME="CIM_Docked" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HomeForMedia" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Magazine" SUPERCLASS="CIM_StorageMediaLocation" />
+<CLASS NAME="CIM_MemoryOnCard" SUPERCLASS="CIM_PackagedComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_MemoryWithMedia" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageInChassis" SUPERCLASS="CIM_Container" ASSOCIATION="true" />
+<CLASS NAME="CIM_ParticipatesInSet" ASSOCIATION="true" />
+<CLASS NAME="CIM_PhysicalMediaInLocation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccountAuthentication" SUPERCLASS="CIM_AuthenticationCondition" />
+<CLASS NAME="CIM_AuthenticationRule" SUPERCLASS="CIM_PolicyRule" />
+<CLASS NAME="CIM_ElementInPolicyRoleCollection" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_FilterOfPacketCondition" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyActionStructure" SUPERCLASS="CIM_PolicyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyConditionInPolicyCondition" SUPERCLASS="CIM_PolicyConditionStructure" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyConditionInPolicyRule" SUPERCLASS="CIM_PolicyConditionStructure" ASSOCIATION="true" />
+<CLASS NAME="PRS_ActivityContact" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_AdminAssociation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_AdministrativeContact" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Attached" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_Categorization" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ContactContactItem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="PRS_ContactOrganization" SUPERCLASS="PRS_ContactContactItem" ASSOCIATION="true" />
+<CLASS NAME="PRS_ContactPerson" SUPERCLASS="PRS_ContactContactItem" ASSOCIATION="true" />
+<CLASS NAME="CIM_AffectedJobElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_CorrespondingSettingDataRecord" ASSOCIATION="true" />
+<CLASS NAME="CIM_CorrespondingSettingsRecord" ASSOCIATION="true" />
+<CLASS NAME="CIM_DataFile" SUPERCLASS="CIM_LogicalFile" />
+<CLASS NAME="CIM_DeviceFile" SUPERCLASS="CIM_LogicalFile" />
+<CLASS NAME="CIM_DiagnosticCompletionRecord" SUPERCLASS="CIM_DiagnosticServiceRecord" />
+<CLASS NAME="CIM_Directory" SUPERCLASS="CIM_LogicalFile" />
+<CLASS NAME="CIM_DirectoryContainsFile" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_FIFOPipeFile" SUPERCLASS="CIM_LogicalFile" />
+<CLASS NAME="CIM_FileIdentity" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_OwningJobElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_UnixDeviceFile" SUPERCLASS="CIM_DeviceFile" />
+<CLASS NAME="CIM_UnixDirectory" SUPERCLASS="CIM_Directory" />
+<CLASS NAME="CIM_CertificateManagementCapabilities" SUPERCLASS="CIM_CredentialManagementCapabilities" />
+<CLASS NAME="CIM_MoreOrganizationInfo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MoreRoleInfo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Person" SUPERCLASS="CIM_UserContact" />
+<CLASS NAME="CIM_PublicPrivateKeyPair" SUPERCLASS="CIM_UsersCredential" ASSOCIATION="true" />
+<CLASS NAME="CIM_AGPSoftwareFeature" SUPERCLASS="CIM_SoftwareFeature" />
+<CLASS NAME="CIM_BIOSElement" SUPERCLASS="CIM_SoftwareElement" />
+<CLASS NAME="CIM_BIOSFeature" SUPERCLASS="CIM_SoftwareFeature" />
+<CLASS NAME="CIM_BIOSFeatureBIOSElements" SUPERCLASS="CIM_SoftwareFeatureSoftwareElements" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectedSoftwareElements" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectedSoftwareFeatures" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_FRUIncludesSoftwareFeature" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeConnectionPoolStats" SUPERCLASS="CIM_J2eeConnectionStats" />
+<CLASS NAME="CIM_J2eeJCAConnectionPools" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJCANonpooledConnections" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJDBCConnectionPools" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJDBCNonpooledConnections" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJMSConnectionSessions" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJMSConsumerStats" SUPERCLASS="CIM_J2eeJMSEndpointStats" />
+<CLASS NAME="CIM_J2eeJMSSessionConsumers" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJMSSessionProducers" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJMSStatConnections" SUPERCLASS="CIM_RelatedStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProductSoftwareFeatures" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConcreteJob" SUPERCLASS="CIM_Job" />
+<CLASS NAME="CIM_DefaultSetting" SUPERCLASS="CIM_ElementSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_EnabledLogicalElement" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_IsSpare" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogicalDevice" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_PhysicalComputerSystemView" SUPERCLASS="CIM_View" />
+<CLASS NAME="CIM_Realizes" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Service" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_ServiceAccessPoint" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_ServiceAccessURI" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_ServiceAffectsElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceAffectsElementWithQuota" SUPERCLASS="CIM_ServiceAffectsElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceAvailableToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceSAPDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareInstallationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_StorageExtent" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_System" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_SystemComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemDevice" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemPackaging" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_TimeService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_CommonDatabase" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_DatabaseAdministrator" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DatabaseControlFile" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DatabaseFile" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_DatabaseSegment" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_DatabaseService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ServiceAvailableToDatabase" SUPERCLASS="CIM_ServiceAvailableToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_AggregatePExtent" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_AggregatePSExtent" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_AlarmDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_AssociatedAlarm" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Battery" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_CompositeExtent" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_ConfigurationReportingService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Controller" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_CoolingDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_DeviceConnection" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceIdentity" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceSoftware" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DisplayController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_Door" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_DoorAccessToDevice" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DoorAccessToPhysicalElement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ErrorCountersForDevice" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_ESCONController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_ExtentInDiskGroup" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_Fan" SUPERCLASS="CIM_CoolingDevice" />
+<CLASS NAME="CIM_FibreProtocolService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_HardwareThread" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_HeatPipe" SUPERCLASS="CIM_CoolingDevice" />
+<CLASS NAME="CIM_IBSubnetManager" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_IDEController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_IndicatorLED" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_InfraredController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_LabelReader" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_LogicalDisk" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_LogicalModule" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_LogicalPort" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_ManagementController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_MediaAccessDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_MediaPartition" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_MediaPresent" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MediaTransferDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_Memory" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_Modem" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_NetworkAdapter" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_NetworkAdapterRedundancyComponent" SUPERCLASS="CIM_RedundancyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_NetworkPort" SUPERCLASS="CIM_LogicalPort" />
+<CLASS NAME="CIM_NetworkVirtualAdapter" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_NonVolatileStorage" SUPERCLASS="CIM_Memory" />
+<CLASS NAME="CIM_PackageDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ParallelController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_PassThroughModule" SUPERCLASS="CIM_LogicalModule" />
+<CLASS NAME="CIM_PCIController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_PCIDevice" SUPERCLASS="CIM_PCIController" />
+<CLASS NAME="CIM_PCIeSwitch" SUPERCLASS="CIM_PCIDevice" />
+<CLASS NAME="CIM_PCIPort" SUPERCLASS="CIM_LogicalPort" />
+<CLASS NAME="CIM_PCMCIAController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_PhysicalExtent" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_PickerElement" SUPERCLASS="CIM_MediaTransferDevice" />
+<CLASS NAME="CIM_PortActiveConnection" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PortController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_PortOnDevice" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PowerSource" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_PowerSupply" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_PowerUtilizationManagementService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Printer" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_PrinterServicingJob" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PrintJobFile" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_PrintSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_PrintService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Processor" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_ProcessorCore" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_ProtectedSpaceExtent" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_ProtocolController" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_ProtocolControllerForDevice" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProtocolControllerForPort" SUPERCLASS="CIM_ProtocolControllerForDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProtocolControllerForUnit" SUPERCLASS="CIM_ProtocolControllerForDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizesExtent" SUPERCLASS="CIM_Realizes" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizesPExtent" SUPERCLASS="CIM_RealizesExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_Refrigeration" SUPERCLASS="CIM_CoolingDevice" />
+<CLASS NAME="CIM_Scanner" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_SCSIController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_SCSIProtocolController" SUPERCLASS="CIM_ProtocolController" />
+<CLASS NAME="CIM_Sensor" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_SerialController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_SharedDeviceManagementService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_SharingDependency" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Snapshot" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_SnapshotOfExtent" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SSAController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_StatisticsService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_StorageDefect" ASSOCIATION="true" />
+<CLASS NAME="CIM_StorageLibrary" SUPERCLASS="CIM_System" />
+<CLASS NAME="CIM_StoragePool" SUPERCLASS="CIM_LogicalElement" />
+<CLASS NAME="CIM_StorageVolume" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_SuppliesPower" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_TapeDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_TapePartition" SUPERCLASS="CIM_MediaPartition" />
+<CLASS NAME="CIM_TokenRingAdapter" SUPERCLASS="CIM_NetworkAdapter" />
+<CLASS NAME="CIM_TokenRingPort" SUPERCLASS="CIM_NetworkPort" />
+<CLASS NAME="CIM_UninterruptiblePowerSupply" SUPERCLASS="CIM_PowerSupply" />
+<CLASS NAME="CIM_USBController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_USBDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_USBHub" SUPERCLASS="CIM_USBDevice" />
+<CLASS NAME="CIM_USBPort" SUPERCLASS="CIM_LogicalPort" />
+<CLASS NAME="CIM_USBPortOnHub" SUPERCLASS="CIM_PortOnDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_UserDevice" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_VideoController" SUPERCLASS="CIM_Controller" />
+<CLASS NAME="CIM_VideoHead" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_VideoSetting" SUPERCLASS="CIM_ElementSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_VolatileStorage" SUPERCLASS="CIM_Memory" />
+<CLASS NAME="CIM_VolumeSet" SUPERCLASS="CIM_StorageVolume" />
+<CLASS NAME="CIM_Watchdog" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_WiFiPort" SUPERCLASS="CIM_NetworkPort" />
+<CLASS NAME="CIM_WiFiRadio" SUPERCLASS="CIM_LogicalDevice" />
+<CLASS NAME="CIM_WORMDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_ZoneService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_IndicationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_CIMXMLCapabilities" SUPERCLASS="CIM_WBEMProtocolServiceCapabilities" />
+<CLASS NAME="CIM_IdentificationOfManagedSystem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ObjectManagerCommunicationMechanism" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_WBEMServer" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_WBEMService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ContainedTransform" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_IKERule" SUPERCLASS="CIM_SARule" />
+<CLASS NAME="CIM_IPsecPolicyForSystem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPsecRule" SUPERCLASS="CIM_SARule" />
+<CLASS NAME="CIM_PacketConditionInSARule" SUPERCLASS="CIM_PolicyConditionInPolicyRule" ASSOCIATION="true" />
+<CLASS NAME="CIM_MetricService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_BGPIPRoute" SUPERCLASS="CIM_IPRoute" />
+<CLASS NAME="CIM_ConditioningService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_DropperService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_DropThresholdCalculationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_HeadTailDropper" SUPERCLASS="CIM_DropperService" />
+<CLASS NAME="CIM_HostedRoute" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPNetworkConnection" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_KVMRedirectionSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_MarkerService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_MediaRedirectionSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_MeterService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_NetworkPipe" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_NetworkPipeComposition" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_NetworkService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_NextService" ASSOCIATION="true" />
+<CLASS NAME="CIM_NextServiceAfterMeter" ASSOCIATION="true" />
+<CLASS NAME="CIM_PacketSchedulingService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_PreambleMarkerService" SUPERCLASS="CIM_MarkerService" />
+<CLASS NAME="CIM_Priority8021QMarkerService" SUPERCLASS="CIM_MarkerService" />
+<CLASS NAME="CIM_QoSService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_QoSSubService" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueuingService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_REDDropperService" SUPERCLASS="CIM_DropperService" />
+<CLASS NAME="CIM_RedirectionService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_RouteCalculationService" SUPERCLASS="CIM_NetworkService" />
+<CLASS NAME="CIM_SchedulingServiceToSchedule" ASSOCIATION="true" />
+<CLASS NAME="CIM_SNMPCommunityString" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_SNMPService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_TextRedirectionSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_TextRedirectionService" SUPERCLASS="CIM_RedirectionService" />
+<CLASS NAME="CIM_TokenBucketMeterService" SUPERCLASS="CIM_MeterService" />
+<CLASS NAME="CIM_ToSMarkerService" SUPERCLASS="CIM_MarkerService" />
+<CLASS NAME="CIM_USBRedirectionSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_VLAN" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_VLANService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_WeightedREDDropperService" SUPERCLASS="CIM_DropperService" />
+<CLASS NAME="CIM_PolicyActionInPolicyAction" SUPERCLASS="CIM_PolicyActionStructure" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyActionInPolicyRule" SUPERCLASS="CIM_PolicyActionStructure" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyInSystem" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicySetInSystem" SUPERCLASS="CIM_PolicyInSystem" ASSOCIATION="true" />
+<CLASS NAME="PRS_SISService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_AssociatedJobMethodResult" ASSOCIATION="true" />
+<CLASS NAME="CIM_BIOSService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_BootConfigSetting" SUPERCLASS="CIM_SettingData" />
+<CLASS NAME="CIM_BootSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_ClusteringSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_ComputerSystem" SUPERCLASS="CIM_System" />
+<CLASS NAME="CIM_ComputerSystemPackage" SUPERCLASS="CIM_SystemPackaging" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceAccessedByFile" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_DiagnosticTest" SUPERCLASS="CIM_DiagnosticService" />
+<CLASS NAME="CIM_DiagnosticTestInPackage" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_FileSystem" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_HelpService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_HelpServiceAvailableToFile" SUPERCLASS="CIM_ServiceAvailableToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedFileSystem" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_JobDestination" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_JobDestinationJobs" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_JobQueue" SUPERCLASS="CIM_JobDestination" />
+<CLASS NAME="CIM_LastAppliedSnapshot" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LocalFileSystem" SUPERCLASS="CIM_FileSystem" />
+<CLASS NAME="CIM_Log" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_LogManagesRecord" ASSOCIATION="true" />
+<CLASS NAME="CIM_MessageLog" SUPERCLASS="CIM_Log" />
+<CLASS NAME="CIM_Mount" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_OOBAlertService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_OperatingSystem" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_PlatformWatchdogService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Process" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_ProcessExecutable" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProcessOfJob" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_RecordInLog" ASSOCIATION="true" />
+<CLASS NAME="CIM_RecordLog" SUPERCLASS="CIM_Log" />
+<CLASS NAME="CIM_RemoteFileSystem" SUPERCLASS="CIM_FileSystem" />
+<CLASS NAME="CIM_ResidesOnExtent" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RunningOS" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceProcess" ASSOCIATION="true" />
+<CLASS NAME="CIM_SnapshotOfVirtualSystem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemResource" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_Thread" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_UnitaryComputerSystem" SUPERCLASS="CIM_ComputerSystem" />
+<CLASS NAME="CIM_UnixLocalFileSystem" SUPERCLASS="CIM_LocalFileSystem" />
+<CLASS NAME="CIM_UnixProcess" SUPERCLASS="CIM_Process" />
+<CLASS NAME="CIM_UnixProcessStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_UnixThread" SUPERCLASS="CIM_Thread" />
+<CLASS NAME="CIM_UseOfLog" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_UseOfMessageLog" SUPERCLASS="CIM_UseOfLog" ASSOCIATION="true" />
+<CLASS NAME="CIM_VirtualComputerSystem" SUPERCLASS="CIM_ComputerSystem" />
+<CLASS NAME="CIM_WakeUpService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Account" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_AccountIdentity" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccountMapsToAccount" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccountOnSystem" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_CollectionInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_CredentialManagementSAP" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_HostedACI" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedAuthenticationRequirement" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MorePersonInfo" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SecurityService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_SecurityServiceUsesAccount" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemAdministrator" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemAdministratorGroup" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemAdministratorRole" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_UsersAccount" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Action" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_ActionSequence" ASSOCIATION="true" />
+<CLASS NAME="CIM_ApplicationSystem" SUPERCLASS="CIM_System" />
+<CLASS NAME="CIM_ApplicationSystemDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ApplicationSystemDirectory" ASSOCIATION="true" />
+<CLASS NAME="CIM_ApplicationSystemHierarchy" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ApplicationSystemSoftwareFeature" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedAppSystemOverviewStatistics" SUPERCLASS="CIM_ElementStatisticalData" ASSOCIATION="true" />
+<CLASS NAME="CIM_Check" SUPERCLASS="CIM_ManagedElement" />
+<CLASS NAME="CIM_DiagnosticTestSoftware" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DirectoryAction" SUPERCLASS="CIM_Action" />
+<CLASS NAME="CIM_DirectorySpecification" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_DiskSpaceCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_ExecuteProgram" SUPERCLASS="CIM_Action" />
+<CLASS NAME="CIM_FileAction" SUPERCLASS="CIM_Action" />
+<CLASS NAME="CIM_FileSpecification" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_FromDirectoryAction" ASSOCIATION="true" />
+<CLASS NAME="CIM_FromDirectorySpecification" ASSOCIATION="true" />
+<CLASS NAME="CIM_InstalledSoftwareElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeApplication" SUPERCLASS="CIM_ApplicationSystem" />
+<CLASS NAME="CIM_J2eeDeployedObject" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_J2eeEJB" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_J2eeEntityBean" SUPERCLASS="CIM_J2eeEJB" />
+<CLASS NAME="CIM_J2eeJCAConnectionFactory" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeJCAManagedConnectionFactory" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeJDBCDataSource" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeJDBCDriver" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeJVM" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeManagedObject" SUPERCLASS="CIM_EnabledLogicalElement" />
+<CLASS NAME="CIM_J2eeMessageDrivenBean" SUPERCLASS="CIM_J2eeEJB" />
+<CLASS NAME="CIM_J2eeModule" SUPERCLASS="CIM_J2eeDeployedObject" />
+<CLASS NAME="CIM_J2eeModuleUsesJVM" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeResource" SUPERCLASS="CIM_SystemResource" />
+<CLASS NAME="CIM_J2eeResourceAdapter" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_J2eeResourceAdapterModule" SUPERCLASS="CIM_J2eeModule" />
+<CLASS NAME="CIM_J2eeRMI_IIOPResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeServer" SUPERCLASS="CIM_ApplicationSystem" />
+<CLASS NAME="CIM_J2eeServerUsesJVM" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeServlet" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_J2eeSessionBean" SUPERCLASS="CIM_J2eeEJB" />
+<CLASS NAME="CIM_J2eeStatefulSessionBean" SUPERCLASS="CIM_J2eeSessionBean" />
+<CLASS NAME="CIM_J2eeStatelessSessionBean" SUPERCLASS="CIM_J2eeSessionBean" />
+<CLASS NAME="CIM_J2eeURLResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeWebModule" SUPERCLASS="CIM_J2eeModule" />
+<CLASS NAME="CIM_MemoryCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_ModifySettingAction" SUPERCLASS="CIM_Action" />
+<CLASS NAME="CIM_OperatingSystemSoftwareFeature" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_OSVersionCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_RebootAction" SUPERCLASS="CIM_Action" />
+<CLASS NAME="CIM_RemoveDirectoryAction" SUPERCLASS="CIM_DirectoryAction" />
+<CLASS NAME="CIM_RemoveFileAction" SUPERCLASS="CIM_FileAction" />
+<CLASS NAME="CIM_SettingCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_SoftwareElementActions" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareElementChecks" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareElementSAPImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareElementServiceImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareElementVersionCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_SoftwareFeatureSAPImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SoftwareFeatureServiceImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwapSpaceCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_SystemBIOS" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_VersionCompatibilityCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_AdminDomain" SUPERCLASS="CIM_System" />
+<CLASS NAME="CIM_BasedOn" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConfigurationForSystem" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ContainedDomain" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceSAPImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceServiceImplementation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DeviceStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_ExtentRedundancyComponent" SUPERCLASS="CIM_RedundancyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedAccessPoint" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedCollection" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedResourcePool" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedService" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_InstalledSoftwareIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_OpaqueManagementData" SUPERCLASS="CIM_StorageExtent" />
+<CLASS NAME="CIM_OpaqueManagementDataService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_PowerManagementService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ProductServiceComponent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProtocolEndpoint" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_ProvidesServiceToElement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RemoteServiceAccessPoint" SUPERCLASS="CIM_ServiceAccessPoint" />
+<CLASS NAME="CIM_ResourcePoolConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_SAPAvailableForElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_SAPSAPDependency" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SAPStatistics" SUPERCLASS="CIM_Statistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceAccessBySAP" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceServiceDependency" SUPERCLASS="CIM_ProvidesServiceToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_SettingForSystem" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_VirtualSystemManagementService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_VirtualSystemSnapshotService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_DatabaseStorageArea" SUPERCLASS="CIM_FileSystem" />
+<CLASS NAME="CIM_DatabaseSystem" SUPERCLASS="CIM_ApplicationSystem" />
+<CLASS NAME="CIM_AdapterActiveConnection" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AggregatePSExtentBasedOnAggregatePExtent" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_AggregatePSExtentBasedOnPExtent" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_AggregateRedundancyComponent" SUPERCLASS="CIM_ExtentRedundancyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_AGPVideoController" SUPERCLASS="CIM_VideoController" />
+<CLASS NAME="CIM_AllocatedFromStoragePool" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedBattery" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedComponentExtent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedCooling" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedIndicatorLED" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedLabelReader" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedMemory" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedProcessorMemory" SUPERCLASS="CIM_AssociatedMemory" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedProtocolController" SUPERCLASS="CIM_ProtocolControllerForDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedRemainingExtent" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedSensor" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BinarySensor" SUPERCLASS="CIM_Sensor" />
+<CLASS NAME="CIM_BIOSLoadedInNV" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BlockStatisticsService" SUPERCLASS="CIM_StatisticsService" />
+<CLASS NAME="CIM_CacheMemory" SUPERCLASS="CIM_Memory" />
+<CLASS NAME="CIM_CallBasedModem" SUPERCLASS="CIM_Modem" />
+<CLASS NAME="CIM_CDROMDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_ChangerDevice" SUPERCLASS="CIM_MediaTransferDevice" />
+<CLASS NAME="CIM_CompositeExtentBasedOn" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemMemory" SUPERCLASS="CIM_SystemDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemProcessor" SUPERCLASS="CIM_SystemDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_ConnectionBasedModem" SUPERCLASS="CIM_Modem" />
+<CLASS NAME="CIM_ControlledBy" SUPERCLASS="CIM_DeviceConnection" ASSOCIATION="true" />
+<CLASS NAME="CIM_ControllerConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_DeviceServicesLocation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiscreteSensor" SUPERCLASS="CIM_Sensor" />
+<CLASS NAME="CIM_DiskDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_DisketteDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_DiskPartition" SUPERCLASS="CIM_MediaPartition" />
+<CLASS NAME="CIM_DiskPartitionBasedOnVolume" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_Display" SUPERCLASS="CIM_UserDevice" />
+<CLASS NAME="CIM_DriveInDiskGroup" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_DSLModem" SUPERCLASS="CIM_ConnectionBasedModem" />
+<CLASS NAME="CIM_DVDDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_EthernetAdapter" SUPERCLASS="CIM_NetworkAdapter" />
+<CLASS NAME="CIM_EthernetPort" SUPERCLASS="CIM_NetworkPort" />
+<CLASS NAME="CIM_FCPort" SUPERCLASS="CIM_NetworkPort" />
+<CLASS NAME="CIM_FibreChannelAdapter" SUPERCLASS="CIM_NetworkAdapter" />
+<CLASS NAME="CIM_FibrePort" SUPERCLASS="CIM_LogicalPort" />
+<CLASS NAME="CIM_FibrePortActiveLogin" ASSOCIATION="true" />
+<CLASS NAME="CIM_FibrePortOnFCAdapter" SUPERCLASS="CIM_PortOnDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_FlatPanel" SUPERCLASS="CIM_Display" />
+<CLASS NAME="CIM_HDSLModem" SUPERCLASS="CIM_DSLModem" />
+<CLASS NAME="CIM_HostedStoragePool" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_InterLibraryPort" SUPERCLASS="CIM_MediaTransferDevice" />
+<CLASS NAME="CIM_ISDNModem" SUPERCLASS="CIM_CallBasedModem" />
+<CLASS NAME="CIM_Keyboard" SUPERCLASS="CIM_UserDevice" />
+<CLASS NAME="CIM_LibraryExchange" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LibraryPackage" SUPERCLASS="CIM_SystemPackaging" ASSOCIATION="true" />
+<CLASS NAME="CIM_LimitedAccessPort" SUPERCLASS="CIM_MediaTransferDevice" />
+<CLASS NAME="CIM_LLDPEthernetPort" SUPERCLASS="CIM_EthernetPort" />
+<CLASS NAME="CIM_LogicalDiskBasedOnExtent" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogicalDiskBasedOnPartition" SUPERCLASS="CIM_LogicalDiskBasedOnExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogicalDiskBasedOnVolume" SUPERCLASS="CIM_LogicalDiskBasedOnExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogicalDiskBasedOnVolumeSet" SUPERCLASS="CIM_LogicalDiskBasedOnVolume" ASSOCIATION="true" />
+<CLASS NAME="CIM_MagnetoOpticalDrive" SUPERCLASS="CIM_MediaAccessDevice" />
+<CLASS NAME="CIM_ModulePort" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_MultiStateSensor" SUPERCLASS="CIM_Sensor" />
+<CLASS NAME="CIM_NumericSensor" SUPERCLASS="CIM_Sensor" />
+<CLASS NAME="CIM_OOBAlertServiceOnModem" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_OOBAlertServiceOnNetworkAdapter" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_OOBAlertServiceOnNetworkPort" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageAlarm" SUPERCLASS="CIM_PackageDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageCooling" SUPERCLASS="CIM_PackageDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PCIBridge" SUPERCLASS="CIM_PCIDevice" />
+<CLASS NAME="CIM_PCVideoController" SUPERCLASS="CIM_VideoController" />
+<CLASS NAME="CIM_PExtentRedundancyComponent" SUPERCLASS="CIM_ExtentRedundancyComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PickerForChanger" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PickerLabelReader" SUPERCLASS="CIM_AssociatedLabelReader" ASSOCIATION="true" />
+<CLASS NAME="CIM_PointingDevice" SUPERCLASS="CIM_UserDevice" />
+<CLASS NAME="CIM_PortImplementsEndpoint" SUPERCLASS="CIM_DeviceSAPImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_POTSModem" SUPERCLASS="CIM_CallBasedModem" />
+<CLASS NAME="CIM_PrintQueue" SUPERCLASS="CIM_JobDestination" />
+<CLASS NAME="CIM_ProtectedExtentBasedOn" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_ProtocolControllerAccessesUnit" SUPERCLASS="CIM_ProtocolControllerForDevice" ASSOCIATION="true" />
+<CLASS NAME="CIM_PSExtentBasedOnPExtent" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueueForPrintService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueueForwardsToPrintSAP" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizedOnSide" SUPERCLASS="CIM_RealizesExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizesAggregatePExtent" SUPERCLASS="CIM_RealizesExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizesDiskPartition" SUPERCLASS="CIM_RealizesExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_RealizesTapePartition" SUPERCLASS="CIM_RealizesExtent" ASSOCIATION="true" />
+<CLASS NAME="CIM_SCSIInterface" SUPERCLASS="CIM_ControlledBy" ASSOCIATION="true" />
+<CLASS NAME="CIM_SDSLModem" SUPERCLASS="CIM_DSLModem" />
+<CLASS NAME="CIM_SerialInterface" SUPERCLASS="CIM_ControlledBy" ASSOCIATION="true" />
+<CLASS NAME="CIM_StorageConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_Tachometer" SUPERCLASS="CIM_NumericSensor" />
+<CLASS NAME="CIM_TapePartitionOnSurface" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_TemperatureSensor" SUPERCLASS="CIM_NumericSensor" />
+<CLASS NAME="CIM_Unimodem" SUPERCLASS="CIM_POTSModem" />
+<CLASS NAME="CIM_USBConnection" SUPERCLASS="CIM_DeviceConnection" ASSOCIATION="true" />
+<CLASS NAME="CIM_USBControllerHasHub" SUPERCLASS="CIM_ControlledBy" ASSOCIATION="true" />
+<CLASS NAME="CIM_VDSLModem" SUPERCLASS="CIM_DSLModem" />
+<CLASS NAME="CIM_VoltageSensor" SUPERCLASS="CIM_NumericSensor" />
+<CLASS NAME="CIM_VolumeSetBasedOnPSExtent" SUPERCLASS="CIM_BasedOn" ASSOCIATION="true" />
+<CLASS NAME="CIM_WakeUpServiceOnModem" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_WakeUpServiceOnNetworkAdapter" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_WakeUpServiceOnNetworkPort" SUPERCLASS="CIM_DeviceServiceImplementation" ASSOCIATION="true" />
+<CLASS NAME="CIM_CIMXMLCommunicationMechanism" SUPERCLASS="CIM_ObjectManagerCommunicationMechanism" />
+<CLASS NAME="CIM_ObjectManager" SUPERCLASS="CIM_WBEMService" />
+<CLASS NAME="CIM_ObjectManagerAdapter" SUPERCLASS="CIM_WBEMService" />
+<CLASS NAME="CIM_ProtocolAdapter" SUPERCLASS="CIM_WBEMService" />
+<CLASS NAME="CIM_PeerGatewayForPreconfiguredTunnel" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PeerGatewayForTunnel" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedNextHop" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AutonomousSystem" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_AverageRateMeterService" SUPERCLASS="CIM_MeterService" />
+<CLASS NAME="CIM_BGPAttributesForRoute" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPClustersInAS" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_BGPService" SUPERCLASS="CIM_RouteCalculationService" />
+<CLASS NAME="CIM_BGPServiceAttributes" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPServiceStatistics" SUPERCLASS="CIM_ServiceStatistics" ASSOCIATION="true" />
+<CLASS NAME="CIM_CalculatedRoutes" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CalculatesAmong" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CalculationBasedOnQueue" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CalculationServiceForDropper" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ClassifierService" SUPERCLASS="CIM_ConditioningService" />
+<CLASS NAME="CIM_CLPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_ConditioningServiceOnEndpoint" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Confederation" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_DHCPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_DiffServService" SUPERCLASS="CIM_QoSService" />
+<CLASS NAME="CIM_DNSProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_DSCPMarkerService" SUPERCLASS="CIM_MarkerService" />
+<CLASS NAME="CIM_EFService" SUPERCLASS="CIM_DiffServService" />
+<CLASS NAME="CIM_EGPRouteCalcDependency" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EgressConditioningServiceOnEndpoint" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ElementInSchedulingService" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_EndpointForIPNetworkConnection" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EndpointIdentity" SUPERCLASS="CIM_LogicalIdentity" ASSOCIATION="true" />
+<CLASS NAME="CIM_EndpointOfNetworkPipe" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EWMAMeterService" SUPERCLASS="CIM_MeterService" />
+<CLASS NAME="CIM_FilterEntryInSystem" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_FilterListInSystem" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_FlowService" SUPERCLASS="CIM_QoSService" />
+<CLASS NAME="CIM_ForwardingService" SUPERCLASS="CIM_NetworkService" />
+<CLASS NAME="CIM_ForwardsAmong" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Hdr8021PService" SUPERCLASS="CIM_QoSService" />
+<CLASS NAME="CIM_HeadTailDropQueueBinding" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedAdminDistance" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedBGPAttributes" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedBGPPeerGroup" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedBGPRouteMap" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedFilterEntryBase" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedFilterList" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedForwardingServices" SUPERCLASS="CIM_HostedService" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedRoutingPolicy" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedRoutingServices" SUPERCLASS="CIM_HostedService" ASSOCIATION="true" />
+<CLASS NAME="CIM_InBGPPeerGroup" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_IngressConditioningServiceOnEndpoint" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_InLogicalNetwork" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_IPXProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_iSCSIConnection" SUPERCLASS="CIM_NetworkPipe" />
+<CLASS NAME="CIM_iSCSISession" SUPERCLASS="CIM_NetworkPipe" />
+<CLASS NAME="CIM_LANEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_LogicalNetworkService" ASSOCIATION="true" />
+<CLASS NAME="CIM_Network" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_NetworkPortConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_NetworkServicesInAdminDomain" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_NetworksInAdminDomain" ASSOCIATION="true" />
+<CLASS NAME="CIM_NextScheduler" SUPERCLASS="CIM_NextService" ASSOCIATION="true" />
+<CLASS NAME="CIM_NonWorkConservingSchedulingService" SUPERCLASS="CIM_PacketSchedulingService" />
+<CLASS NAME="CIM_OSPFProtocolEndpointBase" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_OSPFService" SUPERCLASS="CIM_RouteCalculationService" />
+<CLASS NAME="CIM_OSPFServiceConfiguration" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_OSPFVirtualInterface" SUPERCLASS="CIM_OSPFProtocolEndpointBase" />
+<CLASS NAME="CIM_PrecedenceService" SUPERCLASS="CIM_QoSService" />
+<CLASS NAME="CIM_QoSConditioningSubService" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueueAllocation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueueHierarchy" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_QueueToSchedule" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReflectorClientService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReflectorNonClientService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReflectorService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RemoteAccessAvailableToElement" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RouteForwardedByService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RoutersInAS" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_RoutersInBGPCluster" SUPERCLASS="CIM_CollectedMSEs" ASSOCIATION="true" />
+<CLASS NAME="CIM_RoutesBGP" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RouteUsesEndpoint" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RoutingProtocolDomain" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_RoutingProtocolDomainInAS" SUPERCLASS="CIM_ContainedDomain" ASSOCIATION="true" />
+<CLASS NAME="CIM_SchedulerUsed" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SCSIProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_SecurityAssociationEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_SourceRoutingService" SUPERCLASS="CIM_ForwardingService" />
+<CLASS NAME="CIM_SpanningTreeService" SUPERCLASS="CIM_ForwardingService" />
+<CLASS NAME="CIM_Specific802dot1QVLANService" SUPERCLASS="CIM_VLANService" />
+<CLASS NAME="CIM_SSHProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_SwitchPort" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_SwitchPortDynamicForwarding" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchPortPair" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchPortSourceRouting" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchPortSpanningTree" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchPortStaticForwarding" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchService" SUPERCLASS="CIM_ForwardingService" />
+<CLASS NAME="CIM_SwitchServiceSourceRouting" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchServiceSpanningTree" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchServiceVLAN" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_TCPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_TelnetProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_TransparentBridgingService" SUPERCLASS="CIM_ForwardingService" />
+<CLASS NAME="CIM_TransparentBridgingStaticForwarding" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_TrapSourceForSNMPService" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_UDPProtocolEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_USBRedirectionService" SUPERCLASS="CIM_RedirectionService" />
+<CLASS NAME="CIM_VLANEndpoint" SUPERCLASS="CIM_ProtocolEndpoint" />
+<CLASS NAME="CIM_VLANFor" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_WiFiEndpoint" SUPERCLASS="CIM_LANEndpoint" />
+<CLASS NAME="CIM_PolicyGroupInSystem" SUPERCLASS="CIM_PolicySetInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyRepository" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_PolicyRepositoryInPolicyRepository" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyRoleCollectionInSystem" SUPERCLASS="CIM_HostedCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyRuleInSystem" SUPERCLASS="CIM_PolicySetInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReusablePolicyContainer" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_AllocatedResource" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AvailableDiagnosticService" SUPERCLASS="CIM_ServiceAvailableToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_BootOSFromFS" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BootService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_BootServiceAccessBySAP" SUPERCLASS="CIM_ServiceAccessBySAP" ASSOCIATION="true" />
+<CLASS NAME="CIM_Cluster" SUPERCLASS="CIM_ComputerSystem" />
+<CLASS NAME="CIM_ClusteringService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ClusterServiceAccessBySAP" SUPERCLASS="CIM_ServiceAccessBySAP" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComponentCS" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticLog" SUPERCLASS="CIM_RecordLog" />
+<CLASS NAME="CIM_DiagnosticResultForTest" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticSettingForTest" SUPERCLASS="CIM_ElementSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_DiagnosticsLog" SUPERCLASS="CIM_RecordLog" />
+<CLASS NAME="CIM_DiagnosticTestForMSE" SUPERCLASS="CIM_ProvidesServiceToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_DMA" SUPERCLASS="CIM_SystemResource" />
+<CLASS NAME="CIM_Export" ASSOCIATION="true" />
+<CLASS NAME="CIM_FileStorage" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedBootSAP" SUPERCLASS="CIM_HostedAccessPoint" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedBootService" SUPERCLASS="CIM_HostedService" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedClusterSAP" SUPERCLASS="CIM_HostedAccessPoint" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedClusterService" SUPERCLASS="CIM_HostedService" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedJobDestination" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostingCS" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_InstalledOS" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_IRQ" SUPERCLASS="CIM_SystemResource" />
+<CLASS NAME="CIM_LogInDataFile" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogInDeviceFile" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LogInStorage" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_MemoryMappedIO" SUPERCLASS="CIM_SystemResource" />
+<CLASS NAME="CIM_MemoryResource" SUPERCLASS="CIM_MemoryMappedIO" />
+<CLASS NAME="CIM_NFS" SUPERCLASS="CIM_RemoteFileSystem" />
+<CLASS NAME="CIM_OperationLog" SUPERCLASS="CIM_UseOfMessageLog" ASSOCIATION="true" />
+<CLASS NAME="CIM_OSProcess" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ParticipatingCS" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PortResource" SUPERCLASS="CIM_MemoryMappedIO" />
+<CLASS NAME="CIM_ProcessThread" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ResourceOfSystem" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_SystemPartition" SUPERCLASS="CIM_ComponentCS" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccountManagementService" SUPERCLASS="CIM_SecurityService" />
+<CLASS NAME="CIM_AuthenticationService" SUPERCLASS="CIM_SecurityService" />
+<CLASS NAME="CIM_AuthorizationService" SUPERCLASS="CIM_SecurityService" />
+<CLASS NAME="CIM_AuthorizedUse" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CredentialManagementService" SUPERCLASS="CIM_AuthenticationService" />
+<CLASS NAME="CIM_IdentityManagementService" SUPERCLASS="CIM_AuthenticationService" />
+<CLASS NAME="CIM_KerberosKeyDistributionCenter" SUPERCLASS="CIM_CredentialManagementService" />
+<CLASS NAME="CIM_KeyBasedCredentialManagementService" SUPERCLASS="CIM_CredentialManagementService" />
+<CLASS NAME="CIM_LocalCredentialManagementService" SUPERCLASS="CIM_CredentialManagementService" />
+<CLASS NAME="CIM_ManagedCredential" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ManagesAccount" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Notary" SUPERCLASS="CIM_CredentialManagementService" />
+<CLASS NAME="CIM_NotaryVerifiesBiometric" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PrivilegeManagementService" SUPERCLASS="CIM_AuthorizationService" />
+<CLASS NAME="CIM_PublicKeyManagementService" SUPERCLASS="CIM_LocalCredentialManagementService" />
+<CLASS NAME="CIM_RequireCredentialsFrom" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RoleBasedAuthorizationService" SUPERCLASS="CIM_PrivilegeManagementService" />
+<CLASS NAME="CIM_SecurityServiceForSystem" SUPERCLASS="CIM_ProvidesServiceToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_ServiceUsesSecurityService" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SharedSecretService" SUPERCLASS="CIM_LocalCredentialManagementService" />
+<CLASS NAME="CIM_StorageHardwareIDManagementService" SUPERCLASS="CIM_IdentityManagementService" />
+<CLASS NAME="CIM_TrustHierarchy" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_VerificationService" SUPERCLASS="CIM_AuthenticationService" />
+<CLASS NAME="CIM_ArchitectureCheck" SUPERCLASS="CIM_Check" />
+<CLASS NAME="CIM_CopyFileAction" SUPERCLASS="CIM_FileAction" />
+<CLASS NAME="CIM_CreateDirectoryAction" SUPERCLASS="CIM_DirectoryAction" />
+<CLASS NAME="CIM_DirectorySpecificationFile" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeAppClientModule" SUPERCLASS="CIM_J2eeModule" />
+<CLASS NAME="CIM_J2eeApplicationHostedOnServer" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeApplicationModule" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeDomain" SUPERCLASS="CIM_AdminDomain" />
+<CLASS NAME="CIM_J2eeEJBModule" SUPERCLASS="CIM_J2eeModule" />
+<CLASS NAME="CIM_J2eeJavaMailResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeJCAConnectionFactoryManagedConnectionFactory" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJCAResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeJDBCDataSourceDriver" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJDBCResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeJDBCResourceUsesDataSource" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeJMSResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeJNDIResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeJTAResource" SUPERCLASS="CIM_J2eeResource" />
+<CLASS NAME="CIM_J2eeResourceAdapterInModule" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeResourceOnServer" SUPERCLASS="CIM_ResourceOfSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeServerInDomain" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeServletInModule" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_ToDirectoryAction" ASSOCIATION="true" />
+<CLASS NAME="CIM_ToDirectorySpecification" ASSOCIATION="true" />
+<CLASS NAME="CIM_ActiveConnection" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedPowerManagementService" SUPERCLASS="CIM_ServiceAvailableToElement" ASSOCIATION="true" />
+<CLASS NAME="CIM_BindsTo" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_LaunchInContextSAP" SUPERCLASS="CIM_RemoteServiceAccessPoint" />
+<CLASS NAME="CIM_LaunchInContextService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ProtocolService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_ProvidesEndpoint" SUPERCLASS="CIM_ServiceAccessBySAP" ASSOCIATION="true" />
+<CLASS NAME="CIM_RemotePort" SUPERCLASS="CIM_RemoteServiceAccessPoint" />
+<CLASS NAME="CIM_AssociatedDatabaseSystem" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_DatabaseStorage" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_AccessLabelReader" SUPERCLASS="CIM_AssociatedLabelReader" ASSOCIATION="true" />
+<CLASS NAME="CIM_ADSLModem" SUPERCLASS="CIM_DSLModem" />
+<CLASS NAME="CIM_AssociatedCacheMemory" SUPERCLASS="CIM_AssociatedMemory" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedSupplyVoltageSensor" SUPERCLASS="CIM_AssociatedSensor" ASSOCIATION="true" />
+<CLASS NAME="CIM_CableModem" SUPERCLASS="CIM_ConnectionBasedModem" />
+<CLASS NAME="CIM_CollectionOfSensors" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_CurrentSensor" SUPERCLASS="CIM_NumericSensor" />
+<CLASS NAME="CIM_DesktopMonitor" SUPERCLASS="CIM_Display" />
+<CLASS NAME="CIM_MonitorSetting" SUPERCLASS="CIM_ElementSetting" ASSOCIATION="true" />
+<CLASS NAME="CIM_OwningPrintQueue" SUPERCLASS="CIM_JobDestinationJobs" ASSOCIATION="true" />
+<CLASS NAME="CIM_PackageTempSensor" SUPERCLASS="CIM_PackageDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PrinterServicingQueue" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SCSIInitiatorTargetLogicalUnitPath" ASSOCIATION="true" />
+<CLASS NAME="CIM_SCSIPathConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_WiFiPortConfigurationService" SUPERCLASS="CIM_NetworkPortConfigurationService" />
+<CLASS NAME="CIM_CommMechanismForAdapter" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CommMechanismForManager" SUPERCLASS="CIM_ServiceAccessBySAP" ASSOCIATION="true" />
+<CLASS NAME="CIM_CommMechanismForObjectManagerAdapter" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_NamespaceInManager" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPsecPolicyForEndpoint" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RuleThatGeneratedSA" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AFService" SUPERCLASS="CIM_DiffServService" />
+<CLASS NAME="CIM_ASBGPEndpoints" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPAdminDistance" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPPeerGroupService" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BGPRoutingPolicy" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_BindsToLANEndpoint" SUPERCLASS="CIM_BindsTo" ASSOCIATION="true" />
+<CLASS NAME="CIM_ClassifierElement" SUPERCLASS="CIM_ClassifierService" />
+<CLASS NAME="CIM_ClassifierElementInClassifierService" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_ClassifierElementUsesFilterList" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ClassifierFilterSet" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EndpointInLink" SUPERCLASS="CIM_MemberOfCollection" ASSOCIATION="true" />
+<CLASS NAME="CIM_FailNextScheduler" SUPERCLASS="CIM_NextScheduler" ASSOCIATION="true" />
+<CLASS NAME="CIM_FilterOfSecurityAssociation" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_ForwardedRoutes" SUPERCLASS="CIM_RouteForwardedByService" ASSOCIATION="true" />
+<CLASS NAME="CIM_HostedNetworkPipe" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_IKESAEndpoint" SUPERCLASS="CIM_SecurityAssociationEndpoint" />
+<CLASS NAME="CIM_InboundVLAN" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_InSegment" SUPERCLASS="CIM_InLogicalNetwork" ASSOCIATION="true" />
+<CLASS NAME="CIM_IPConfigurationService" SUPERCLASS="CIM_Service" />
+<CLASS NAME="CIM_IPsecSAEndpoint" SUPERCLASS="CIM_SecurityAssociationEndpoint" />
+<CLASS NAME="CIM_iSCSIProtocolEndpoint" SUPERCLASS="CIM_SCSIProtocolEndpoint" />
+<CLASS NAME="CIM_NextServiceAfterClassifierElement" SUPERCLASS="CIM_NextService" ASSOCIATION="true" />
+<CLASS NAME="CIM_OSPFArea" SUPERCLASS="CIM_RoutingProtocolDomain" />
+<CLASS NAME="CIM_OSPFProtocolEndpoint" SUPERCLASS="CIM_OSPFProtocolEndpointBase" />
+<CLASS NAME="CIM_OutboundVLAN" SUPERCLASS="CIM_SAPSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PeerOfSAEndpoint" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_Phase1SAUsedForPhase2" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RelatedSpanningTree" SUPERCLASS="CIM_ServiceServiceDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_RelatedTransparentBridgingService" SUPERCLASS="CIM_ServiceSAPDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_SNMPTrapTarget" SUPERCLASS="CIM_RemotePort" />
+<CLASS NAME="CIM_Switchable" SUPERCLASS="CIM_BindsToLANEndpoint" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchesAmong" SUPERCLASS="CIM_ForwardsAmong" ASSOCIATION="true" />
+<CLASS NAME="CIM_SwitchServiceTransparentBridging" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_TransformOfSecurityAssociation" SUPERCLASS="CIM_ElementSettingData" ASSOCIATION="true" />
+<CLASS NAME="CIM_TransparentBridgingDynamicForwarding" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_AcceptCredentialFrom" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyActionInPolicyRepository" SUPERCLASS="CIM_PolicyInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyConditionInPolicyRepository" SUPERCLASS="CIM_PolicyInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_PolicyContainerInPolicyContainer" SUPERCLASS="CIM_SystemComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_ReusablePolicy" SUPERCLASS="CIM_PolicyInSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_AllocatedDMA" SUPERCLASS="CIM_AllocatedResource" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemResource" SUPERCLASS="CIM_ResourceOfSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_AuthenticateForUse" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CertificateAuthority" SUPERCLASS="CIM_CredentialManagementService" />
+<CLASS NAME="CIM_CertificateManagementService" SUPERCLASS="CIM_KeyBasedCredentialManagementService" />
+<CLASS NAME="CIM_IKESecretIsNamed" SUPERCLASS="CIM_ManagedCredential" ASSOCIATION="true" />
+<CLASS NAME="CIM_KDCIssuesKerberosTicket" SUPERCLASS="CIM_ManagedCredential" ASSOCIATION="true" />
+<CLASS NAME="CIM_LocallyManagedPublicKey" SUPERCLASS="CIM_ManagedCredential" ASSOCIATION="true" />
+<CLASS NAME="CIM_ManagesAccountOnSystem" SUPERCLASS="CIM_SecurityServiceForSystem" ASSOCIATION="true" />
+<CLASS NAME="CIM_SharedSecretIsShared" SUPERCLASS="CIM_ManagedCredential" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeConnectionFactoryAvailableToJCAResource" SUPERCLASS="CIM_HostedDependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_J2eeEJBInModule" SUPERCLASS="CIM_ServiceComponent" ASSOCIATION="true" />
+<CLASS NAME="CIM_AssociatedSupplyCurrentSensor" SUPERCLASS="CIM_AssociatedSensor" ASSOCIATION="true" />
+<CLASS NAME="CIM_AFRelatedServices" ASSOCIATION="true" />
+<CLASS NAME="CIM_AreaOfConfiguration" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_EndpointInArea" SUPERCLASS="CIM_Component" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemDMA" SUPERCLASS="CIM_ComputerSystemResource" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemIRQ" SUPERCLASS="CIM_ComputerSystemResource" ASSOCIATION="true" />
+<CLASS NAME="CIM_ComputerSystemMappedIO" SUPERCLASS="CIM_ComputerSystemResource" ASSOCIATION="true" />
+<CLASS NAME="CIM_CAHasPublicCertificate" SUPERCLASS="CIM_Dependency" ASSOCIATION="true" />
+<CLASS NAME="CIM_CASignsPublicKeyCertificate" SUPERCLASS="CIM_ManagedCredential" ASSOCIATION="true" />
+</CLASSES>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<CIM CIMVERSION="2.3" DTDVERSION="2.2"><DECLARATION><DECLGROUP><VALUE.OBJECT>
+<CLASS SUPERCLASS="CIM_PolicyActionStructure" NAME="CIM_PolicyActionInPolicyAction"><QUALIFIER NAME="Association" TYPE="boolean"><VALUE>true</VALUE></QUALIFIER><QUALIFIER NAME="Aggregation" TYPE="boolean"><VALUE>true</VALUE></QUALIFIER><QUALIFIER NAME="Version" TYPE="string"><VALUE>2.6.0</VALUE></QUALIFIER><QUALIFIER NAME="UMLPackagePath" TYPE="string"><VALUE>CIM::Policy</VALUE></QUALIFIER><QUALIFIER NAME="Description" TYPE="string"><VALUE>PolicyActionInPolicyAction is used to represent the compounding of policy actions into a higher-level policy action.</VALUE></QUALIFIER><PROPERTY.REFERENCE CLASSORIGIN="CIM_PolicyActionInPolicyAction" PROPAGATED="false" REFERENCECLASS="CIM_CompoundPolicyAction" NAME="GroupComponent"><QUALIFIER OVERRIDABLE="false" NAME="Aggregate" TYPE="boolean"><VALUE>true</VALUE></QUALIFIER><QUALIFIER TOSUBCLASS="false" NAME="Override" TYPE="string"><VALUE>GroupComponent</VALUE></QUALIFIER><QUALIFIER TRANSLATABLE="true" NAME="Description" TYPE="string"><VALUE>This property represents the CompoundPolicyAction that contains one or more PolicyActions.</VALUE></QUALIFIER><QUALIFIER OVERRIDABLE="false" NAME="Key" TYPE="boolean"><VALUE>true</VALUE></QUALIFIER></PROPERTY.REFERENCE><PROPERTY.REFERENCE CLASSORIGIN="CIM_PolicyActionInPolicyAction" PROPAGATED="false" REFERENCECLASS="CIM_PolicyAction" NAME="PartComponent"><QUALIFIER TOSUBCLASS="false" NAME="Override" TYPE="string"><VALUE>PartComponent</VALUE></QUALIFIER><QUALIFIER TRANSLATABLE="true" NAME="Description" TYPE="string"><VALUE>This property holds the name of a PolicyAction contained by one or more CompoundPolicyActions.</VALUE></QUALIFIER><QUALIFIER OVERRIDABLE="false" NAME="Key" TYPE="boolean"><VALUE>true</VALUE></QUALIFIER></PROPERTY.REFERENCE><PROPERTY CLASSORIGIN="CIM_PolicyActionStructure" PROPAGATED="true" NAME="ActionOrder" TYPE="uint16"><QUALIFIER TRANSLATABLE="true" NAME="Description" TYPE="string"><VALUE>ActionOrder is an unsigned integer &apos;n&apos; that indicates the relative position of a PolicyAction in the sequence of actions associated with a PolicyRule or CompoundPolicyAction. When &apos;n&apos; is a positive integer, it indicates a place in the sequence of actions to be performed, with smaller integers indicating earlier positions in the sequence. The special value &apos;0&apos; indicates &apos;don&apos;t care&apos;. If two or more PolicyActions have the same non-zero sequence number, they may be performed in any order, but they must all be performed at the appropriate place in the overall action sequence. 
+
+A series of examples will make ordering of PolicyActions clearer: 
+o If all actions have the same sequence number, regardless of whether it is &apos;0&apos; or non-zero, any order is acceptable. 
+o The values: 
+1:ACTION A 
+2:ACTION B 
+1:ACTION C 
+3:ACTION D 
+indicate two acceptable orders: A,C,B,D or C,A,B,D, 
+since A and C can be performed in either order, but only at the &apos;1&apos; position. 
+o The values: 
+0:ACTION A 
+2:ACTION B 
+3:ACTION C 
+3:ACTION D 
+require that B,C, and D occur either as B,C,D or as B,D,C. Action A may appear at any point relative to B, C, and D. Thus the complete set of acceptable orders is: A,B,C,D; B,A,C,D; B,C,A,D; B,C,D,A; A,B,D,C; B,A,D,C; B,D,A,C; B,D,C,A. 
+
+Note that the non-zero sequence numbers need not start with &apos;1&apos;, and they need not be consecutive. All that matters is their relative magnitude.</VALUE></QUALIFIER></PROPERTY></CLASS></VALUE.OBJECT></DECLGROUP></DECLARATION></CIM>
