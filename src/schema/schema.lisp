@@ -75,7 +75,7 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
 
                    
 (defun compile-schema (xml-file &optional lisp-file)
-  "Load a definition from a CIMXML encoded file and generate the equalivalent Lisp forms"
+  "Parse an XML schema definition file and generate the equivalent Climbe Lisp code to define it. You should then include this Lisp file into your project to make the class available."
   (let ((path (merge-pathnames xml-file)))
 	;; if a lisp-file is not specified then make a default one
 	(unless lisp-file
@@ -116,6 +116,10 @@ CLASS-SYBMOL should be the Lisp symbol naming the CIM class to which this method
 	path))
 
 (defun compile-schema* (pathspec)
+  "Compile all files in the directory.
+
+Example: (COMPILE-SCHEMA* \"*.xml\")
+"
   (dolist (xml-file (directory pathspec))    
     (format t "[~A] Compiling...~%" (pathname-name xml-file))
 	(handler-case (compile-schema xml-file)
