@@ -2,6 +2,9 @@
 
 (in-package #:climbe.encoding)
 
+;; read this document for more information
+;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0227_1.2.0.pdf
+
 
 (defconstant* +soap-envelope+ "http://www.w3.org/2003/05/soap-envelope")
 (defconstant* +soap-addressing+ "http://schemas.xmlsoap.org/ws/2004/08/addressing")
