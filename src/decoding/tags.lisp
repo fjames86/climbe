@@ -5,19 +5,35 @@
 ;; these functions are used in the deftag macro so lets define them all in 
 ;; a seperate file so they are available when we actually use the macro.
 
+;; tag format: (tag-name tag-attributes &rest contents)
+;; tag-name: name | (name . namespace)
+;; tag-attributes: (name . value)
+
+(defun tag-name (tag)
+  (let ((n (first tag)))
+    (if (consp n)
+        (car n)
+        n)))
+
+(defun tag= (name tag)
+  (when (listp tag)
+    (let ((n (tag-name tag)))
+      (string-equal name n))))
+
 (defun find-tag (name tags)
   "Find the tag with the name provided. Expects TAGS to be an alist."
   (declare (type string name))
   (when (listp tags)
-    (find name tags :key #'first :test #'string-equal)))
+    (find-if (lambda (tag)
+               (tag= name tag))
+             tags)))
 
 (defun find-tags (name tags)
   "Find all tags with a matching name."
-  (when (listp tags)
-    (mapcan (lambda (tag)	      
-	      (when (and (listp tag) (string-equal name (first tag)))
-		(list tag)))
-	    tags)))
+  (mapcan (lambda (tag)	      
+            (when (tag= name tag)
+              (list tag)))
+          tags))
 
 (defun last-char (string)
   "Get the last character of the string."
@@ -50,6 +66,7 @@
         (subseq string 0 (1- (length string)))
         string)))
 
+(defparameter *tag-prefix* "CIMXML")
 
 (defmacro deftag (name attributes elements &body body)
   "Define a decoding handler. 
@@ -71,12 +88,13 @@ because they call each other so otherwise the function calls will not resolve."
                              (gensym (symbol-name element)))
                            (unless (symbolp elements)
                              elements))))
-    `(defun ,(intern (concatenate 'string "DECODE-CIMXML-" (symbol-name name)))
+    `(defun ,(intern (format nil "DECODE-~A-~A" *tag-prefix* (symbol-name name)))
          (,gtag)
        (destructuring-bind (,gname ,gattrs &rest ,gcontent) ,gtag
+         (declare (ignore ,gname))
          ,(unless attributes 
-                  `(declare (ignore ,gattrs)))
-         (assert (string-equal ,gname ,(symbol-name name)))
+                  `(declare (ignore ,gattrs)))         
+;;         (assert (string-equal ,gname ,(symbol-name name)))
          ;; extract the element tags
          (let (,@(mapcar (lambda (gelement element)
                            (let ((element-name (element-name element)))
@@ -105,14 +123,14 @@ because they call each other so otherwise the function calls will not resolve."
                                   (when ,gelement
                                     ,(cond
 				      ((or (element-list-p element) (element-nlist-p element))
-				       `(mapcar (function ,(intern (concatenate 'string 
-										"DECODE-CIMXML-" 
-										element-name)))
+				       `(mapcar (function ,(intern (format nil
+                                                           "DECODE-~A-~A" *tag-prefix*
+                                                           element-name)))
 						,gelement))
 				      (t
-				       `(,(intern (concatenate 'string 
-							       "DECODE-CIMXML-" 
-							       element-name))
+				       `(,(intern (format nil
+                                          "DECODE-~A-~A" *tag-prefix*
+                                          element-name))
 					  ,gelement)))))))
                            gelements
                            (unless (symbolp elements) elements))

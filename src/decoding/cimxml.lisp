@@ -16,16 +16,22 @@
                          :test #'char=))
                string))))
 
+(defun decode-xml-stream (stream)
+  (cxml:parse-stream stream (cxml-xmls:make-xmls-builder)))
 
 (defun decode-xml-file (path)
   "Parse an entire xml file. Because it has to load the whole file first this does not scale well - do not use it to load large schema definitions. "
   (with-open-file (f path :direction :input :element-type '(unsigned-byte 8))
     (cxml:parse-stream f (cxml-xmls:make-xmls-builder))))
 
-(defun decode-cim (string)
-  "Decode a CIMXML encoded string. The xml must consist of a single toplevel CIM tag."
-  (declare (type string string))
-  (decode-cimxml-cim (decode-xml string)))
+
+
+(defun decode-cimxml (input)
+  "Decode some INPUT. It can be either a string or a stream."
+  (if (stringp input)
+      (decode-cimxml-cim (decode-xml input))
+      (decode-cimxml-cim (decode-xml-stream input))))
+
 
 
 (defun decode-boolean (string)
@@ -56,6 +62,12 @@
     (if type
 	type
 	(error "Type ~S not found" string))))
+
+
+;; ensure the prefix is set
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (setf *tag-prefix* "CIMXML"))
+
 
 
 ;;<!ELEMENT CIM (MESSAGE|DECLARATION)>

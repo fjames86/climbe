@@ -49,7 +49,8 @@
                       :components
                       ((:file "package")
                        (:file "tags" :depends-on ("package"))
-                       (:file "cimxml" :depends-on ("tags")))
+                       (:file "cimxml" :depends-on ("tags"))
+                       (:file "wsman" :depends-on ("tags")))
                       :depends-on (:core))
              (:module :cimom
                       :pathname "cimom"

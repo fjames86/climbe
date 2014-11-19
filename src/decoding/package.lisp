@@ -6,12 +6,10 @@
   (:use #:cl
         #:climbe.utils
         #:climbe.core)
-  (:export #:decode-cim
-           #:decode-xml-file
-           #:decode-xml
+  (:export #:decode-xml-file
            #:decode-xml-octets
-           #:decode-cimxml-cim          
-   ))
+           #:decode-cimxml
+           #:decode-wsman))
 
 
 
