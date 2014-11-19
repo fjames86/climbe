@@ -41,14 +41,15 @@
                       :pathname "encoding"
                       :components 
                       ((:file "package")
-                       (:file "encoding" :depends-on ("package")))
+                       (:file "cimxml" :depends-on ("package"))
+                       (:file "wsman" :depends-on ("package")))
                       :depends-on (:core))
              (:module :decoding
                       :pathname "decoding"
                       :components
                       ((:file "package")
                        (:file "tags" :depends-on ("package"))
-                       (:file "decoding" :depends-on ("tags")))
+                       (:file "cimxml" :depends-on ("tags")))
                       :depends-on (:core))
              (:module :cimom
                       :pathname "cimom"
@@ -76,7 +77,6 @@
 					  ((:file "package")
 					   (:file "schema" :depends-on ("package")))
 					  :depends-on (:core :cimom :encoding :decoding))
-             (:file "package" :depends-on (:core :cimom :client :server :schema))
-             )))
-  :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm))
+             (:file "package" :depends-on (:core :cimom :client :server :schema)) )))
+  :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm :cl-who))
 
