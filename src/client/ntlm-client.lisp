@@ -106,7 +106,8 @@
  <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsmid=\"http://schemas.dmtf.org/wbem/wsman/identity/1/wsmanidentity.xsd\"><s:Header/><s:Body><wsmid:Identify/></s:Body></s:Envelope>
 ")
 
-(defun wsman-logicaldisk ()
+;; exmaple content from msdn 
+(defun wsman-logical-disk ()
   "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
 <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" 
             xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" 
@@ -140,15 +141,17 @@
 
 Do this by running: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
 
-WinRM is by default setup in a non-functioning state: it has only an HTTP listener but has AllowUnencrypted=false"
-  (babel:octets-to-string 
+WinRM is by default setup in a non-functioning state: it has only an HTTP listener but has AllowUnencrypted=false.
+
+Returns a decoded envelope structure."
+  (decode-wsman
    (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
                       (list :method :post 
                             :content content
-                            :content-type "application/soap+xml; charset=UTF-8")
+                            :content-type "application/soap+xml; charset=UTF-8"
+                            :want-stream t)
                       :username username 
                       :password-md4 password
                       :version (ntlm:make-ntlm-version 1 1 1))))
-
 
 
