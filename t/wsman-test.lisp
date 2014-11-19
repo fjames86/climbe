@@ -48,6 +48,7 @@
 
 
 (defun test-call (host password)
+  "Call the host with the pre-prepared content, then with the generated content. decode the result."
   (list 
    (call-wsman password (wsman-logical-disk) :host host)
    (call-wsman password (climbe.encoding::encode-logical-disk) :host host)))

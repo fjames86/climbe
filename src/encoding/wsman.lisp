@@ -38,4 +38,29 @@
 		(:|w:OperationTimeout| "PT60.000S"))
       (:|s:Body|))))
 
+
+
+
+
+;; encoding structure 
 			
+(defparameter *wsman-stream* *standard-output*)
+
+(defun encode-wsman-envelope (header body)
+  (cl-who:with-html-output (*wsman-stream*)
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+	               :|xmlns:a| +soap-addressing+
+				   :|xmlns:w| +soap-wsman+
+      (encode-wsman-header header)
+      (encode-wsman-body body))))
+
+(defun encode-wsman-header (content)
+  (cl-who:with-html-output (*wsman-stream*)
+    (:|s:Header| content)))
+
+(defun encode-wsman-body (body)
+  (cl-who:with-html-output (*wsman-stream*)
+    (:|s:Body| body)))
+
+
+  
