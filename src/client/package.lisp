@@ -26,7 +26,7 @@
            #:call-enumerate-qualifiers
 
 ;;           #:ntlm-http-request
-;;           #:call-wsman
+           #:call-wsman
            ))
 
 
