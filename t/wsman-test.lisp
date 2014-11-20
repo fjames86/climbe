@@ -36,6 +36,7 @@
 </s:Envelope>")
 
 
+
 (defun test-wsman ()
   (let ((decoded (climbe.decoding::parse-wsman-string (climbe.encoding::encode-logical-disk))))
     (climbe.decoding::decode-wsman-envelope decoded)))

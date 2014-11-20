@@ -67,6 +67,33 @@
       (:|s:Body|))))
 
 
+(defun encode-call (class-name action)
+  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
+  (cl-who:with-html-output-to-string (s)
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+	(:|s:Envelope| :|xmlns:s| +soap-envelope+
+	               :|xmlns:a| +soap-addressing+
+				   :|xmlns:w| +soap-wsman+
+	  (:|s:Header|
+		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
+		(:|w:ResourceURI| :|s:mustUnderstand| "true" 
+          (format s "http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/~A" class-name))
+		(:|a:ReplyTo|
+		  (:|a:Address| :|s:mustUnderstand| "true"
+			"http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+		(:|a:Action| :|s:mustUnderstand| "true"
+          (format s "~A"
+                  (ecase action
+                    (:get +wsman-get+) 
+                    (:enumerate +wsman-enumerate+))))
+		(:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
+		(:|a:MessageID| "uuid:4ED2993C-4339-4E99-81FC-C2FD3812781A")
+		(:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
+		(:|w:SelectorSet|
+		  (:|w:Selector| :|Name| "DeviceId" "c:"))
+		(:|w:OperationTimeout| "PT60.000S"))
+      (:|s:Body|))))
 
 
 

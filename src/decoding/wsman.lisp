@@ -108,4 +108,10 @@
 (deftag operationtimeout () timeout
   (car timeout))
 
+(deftag fault () (text)
+  (make-cim-error :cim-failt text))
+
+(deftag text () contents
+  (car contents))
+
 
