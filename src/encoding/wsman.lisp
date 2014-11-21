@@ -48,7 +48,7 @@
     (terpri s)
 	(:|s:Envelope| :|xmlns:s| +soap-envelope+
 	               :|xmlns:a| +soap-addressing+
-				   :|xmlns:w| +soap-wsman+
+		       :|xmlns:w| +soap-wsman+
 	  (:|s:Header|
 		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
 		(:|w:ResourceURI| :|s:mustUnderstand| "true"
@@ -74,7 +74,8 @@
     (terpri s)
 	(:|s:Envelope| :|xmlns:s| +soap-envelope+
 	               :|xmlns:a| +soap-addressing+
-				   :|xmlns:w| +soap-wsman+
+		       :|xmlns:w| +soap-wsman+
+		       :|xmlns:wsen| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
 	  (:|s:Header|
 		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
 		(:|w:ResourceURI| :|s:mustUnderstand| "true" 
@@ -93,7 +94,46 @@
 		(:|w:SelectorSet|
 		  (:|w:Selector| :|Name| "DeviceId" "c:"))
 		(:|w:OperationTimeout| "PT60.000S"))
-      (:|s:Body|))))
+      (:|s:Body|
+	(case action
+	  (:enumerate (encode-wsman-enumerate s)))))))
+
+
+(defun encode-wsman-enumerate (stream)
+  (cl-who:with-html-output (s stream)
+    (:|wsen:Enumerate| 
+;;      (:|wsen:EndTo| "P0Y0M0DT0H0M0S")
+      (:|wsen:Expires| "P0Y0M0DT1H1M0S")
+;;      (:|wsen:Filter| :|Dialect| "s:anyURI" "s:Any")
+      )))
+
+(defun wsman-sample-enumerate ()
+ "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\"
+             xmlns:wsa=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\"
+             xmlns:wsen=\"http://schemas.xmlsoap.org/ws/2004/09/enumeration\"> 
+   <s:Header> 
+     <wsa:Action> 
+       http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate 
+     </wsa:Action> 
+     <wsa:MessageID> 
+       uuid:e7c5726b-de29-4313-b4d4-b3425b200839 
+     </wsa:MessageID> 
+     <wsa:To>http://hyperb.angelo.exsequi.com:5985/wsman</wsa:To> 
+     <wsa:ReplyTo> 
+       <wsa:Address> 
+         http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous 
+       </wsa:Address> 
+     </wsa:ReplyTo> 
+     <wsa:ResourceURI s:mustUnderstand=\"true\">
+       http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/Win32_LogicalDisk
+     </wsa:ResourceURI>
+   </s:Header> 
+   <s:Body> 
+     <wsen:Enumerate> 
+       <wsen:Expires> PT10M </wsen:Expires> 
+     </wsen:Enumerate> 
+   </s:Body> 
+  </s:Envelope>")
 
 
 
