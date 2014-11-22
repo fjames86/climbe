@@ -1,19 +1,34 @@
 Climbe
 ======
 
-Climbe is a CIM engine, comprising both CIMOM/server and client. It currently supports the CIMXML encoding protocol, 
+Climbe is a Common Lisp Common Information Model (CIM) engine for Web-based enterprise management (WBEM).
 
-At present the client is working and capable of talking to OpenPegasus and SFCB servers.
+It comprises both a CIMOM/server and client. It currently supports the CIMXML encoding protocol, with experimental
+support for WS-Man coming soon.
+
+At present the client is working and capable of talking to the well known OpenPegasus and SFCB servers.
 
 The CIMOM/server component is not yet complete and has much more work to do yet before it's stable.
 
-Support for WS-Management (WS-Man) is intended at some point, this should make it possible to
-interact with Windows WMI via the WinRM protocol (which is basically WS-Man). 
+Rudimentary support for Web Services Manangement (WS-Man) encoding is now available. 
+This makes it possible to communicate with the Microsoft Windows WinRM service 
+which exposes WMI using the SOAP-based protocol WS-Man.
 
-CIMOM
--------
+1. CIMOM
+-----------
 
-Providers are implemented by defining regular CLOS classes and specializing certain generics.
+The CIMOM (CIM object manager) is implented by extending CLOS using the Meta-object protocol (MOP). This means
+the CIM classes themselves are implenented as regular CLOS classes (instances of CIM-STANDARD-CLASS). 
+All the CIM class metadata is included in these CLOS instances. 
+Server-side instances (i.e. in the CIMOM) of the CIM classes are real CLOS instances, 
+rather than some struct container. This means we can implement the CIMOM as a set of generic functions
+which merely need specializing for the CIM class. 
+
+1.1 Providers
+----------------
+
+Providers are implemented by defining regular CLOS classes which use the meta-class CIM-STANDARD-CLASS.
+Specialize certain generics to implement the CIM intrinsic methods.
 
 ```
 (defcim-class person ()
@@ -28,14 +43,18 @@ Providers are implemented by defining regular CLOS classes and specializing cert
   (:cim-name "Person")
   (:qualifiers (:description "Person class")))
 
-(defmethod provider-enumerate-instances ((class-name (eql 'person)))
+;; specialize on a dummy instance (i.e. an empty instance) of the Person class
+(defmethod provider-enumerate-instances ((dummy-instance person))
   (list (make-instance 'person :name "Bob" :age 31)))
 
+;; specialize on an instance of the Person class. The instance will have the provided key slots 
+;; set to the values in the request.
 (defmethod provider-get-instance ((instance person))
   (if (string-equal (person-name instance) "Bob")
       (make-instance 'person :name "Bob" :age 31)
 	  (cim-error :not-found)))
 
+;; define an extrinsic method of the class
 (defcim-method hello ((instance person) (message string "Message" :in (:description "Message to say")))
   ((:cim-name "Hello")
    (:return-type string)
@@ -44,8 +63,35 @@ Providers are implemented by defining regular CLOS classes and specializing cert
  
 ```
 
-Schema
--------
+The intrinsic methods are implemented by these generic functions:
+* provider-enumerate-instances (mandatory)
+* provider-get-instance (mandatory)
+* provider-create-instance (optional)
+* provider-modify-instance (optional)
+* provider-delete-instance (optional)
+* provider-association-instances (mandatory for indication classes)
+* provider-reference-instances (mandatory for indication classes)
+
+For each of them a default method is provided which raises a CIM-NOT-SUPPORTED error.
+
+
+1.2 Associations
+---------------
+
+Sort of working but still very buggy. Still a work in progress.
+
+TODO: regular classes have no knowledge of any associations they have. This means we can't 
+implement associations properly because when asked for assocations of a regular class it doesn't know 
+where to look. This needs some serious work doing to it before it's working.
+
+1.3 Indications
+----------------
+
+CIM export messages supported by the client and server but it's still a work in progress. 
+
+
+2. Schema
+-----------
 
 The DMTF provides CIM schema (class definitions) in either MOF or XML format. Climbe can convert the XML format
 schema definitions to the equivalent Lisp with the COMPILE-SCHEMA function. This can be used to generate
@@ -55,12 +101,24 @@ For schema which are only distributed in MOF (e.g. SMI-S schema) you can either 
 other tool (e.g. OpenPegasus) or type the Lisp in by hand. Because of this there is no MOF compiler.
 All CIM classes must be added to Lisp using DEFCIM-CLASS.
 
-Client
--------
+2.1 Compiled schema
+-------------------
 
-Each of the intrinsic methods has an encoding function to generate the
-CIM-XML content. The CALL-CIM-SERVER function provides basic functionality but each
-of the intrinsic CIM methods has a CALL-* function.
+The DMTF CIM schema 2.42 are compiled and included with this release. They can be included into your build
+to be used as required.
+
+Note that CIM classes can be added into different CIM namespaces with no need to define multiple CLOS classes
+with the same content. Just use ADD-CLASS-TO-NAMESPACE to add a defined CLOS class to the namespace. 
+
+
+
+
+3. Client
+----------
+
+Each of the intrinsic methods has an encoding function to generate the CIM-XML content. 
+The CALL-CIM-SERVER function provides basic functionality but each of the intrinsic CIM methods 
+has a CALL-* function.
 
 ```
 ;; call EnumerateInstances
@@ -72,35 +130,45 @@ of the intrinsic CIM methods has a CALL-* function.
                           "Person"
                           :namespace "root/cimv2")
 
-
-;; Supported client calls:
-;;   call-get-class
-;;   call-get-instance
-;;   call-delete-instance
-;;   call-modify-instance
-;;   call-enumerate-classes
-;;   call-enumerate-class-names
-;;   call-enumerate-instances
-;;   call-enumerate-instance-names
-;;   call-associators
-;;   call-associator-names
-;;   call-references
-;;   call-reference-names
-;;   call-enumerate-qualifiers
-
-
-
 ```
+
+Note that all these client calls use the CIMXML encoding protocol. Experimental support for WS-Man is coming.
+
+3.1 Supported client calls
+---------------------------
+
+* call-get-class
+* call-get-instance
+* call-delete-instance
+* call-modify-instance
+* call-enumerate-classes
+* call-enumerate-class-names
+* call-enumerate-instances
+* call-enumerate-instance-names
+* call-associators
+* call-associator-names
+* call-references
+* call-reference-names
+* call-enumerate-qualifiers
+
 
 TODO: need to support more of the CIM HTTP header codes.
 
+3.2 WS-Man client
+------------------
+
+You can now communicate with WinRM (availble from Windows 8 and Server 2012) directly 
+with the Climbe client (enabling the Climbe server to support WS-Man is a big task and not likely to 
+be accomplished soon). The client supports NTLM authentication.
 
 
 
-Server
-------
 
-Partially complete. The server runs but the handlers are still very buggy.
+4. Server
+----------
+
+Server is partially complete, in that it works but is likely to be very buggy still. Most of the handlers
+have yet to be tested. The server only supports CIMXML at present.
 
 ```
 
@@ -119,22 +187,18 @@ Partially complete. The server runs but the handlers are still very buggy.
 
 ```
 
-
-
 TODO: need to add support for the various CIM http codes.
 
-Associations
--------------
+5. Required packages
+---------------------
 
-Sort of working but still very buggy. Still a work in progress.
+Climbe requires several standard packages which are all available in quicklisp. These are
+Closer-MOP, CL-PPCRE, CXML, Drakma, Hunchentoot, Babel, Parse-Number, CL-WHO.
 
-
-Indications
------------
-
-CIM export messages supported by the client and server but it's still
-a work in progress. 
+It also requires the NTLM package, which is not in quicklisp at present. You should 
+get the most recent version from github.com/fjames86.
 
 
 
 Frank James 2014.
+

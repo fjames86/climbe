@@ -108,13 +108,14 @@
 
 
 (defun call-wsman (password content &key (username "administrator") (host "127.0.0.1"))
-  "NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
+  "Returns a decoded envelope structure.
 
-Do this by running: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
-
+NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
 WinRM is by default setup in a non-functioning state: it has only an HTTP listener but has AllowUnencrypted=false.
 
-Returns a decoded envelope structure."
+Ensure you have an HTTP listener using: winrm qc
+Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
+"
   (decode-wsman
    (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
                       (list :method :post 

@@ -14,8 +14,9 @@
 (defconstant* +soap-event+ "http://schemas.xmlsoap.org/ws/2004/09/eventing")
 
 ;; set some cl-who options
-(setf cl-who:*downcase-tokens-p* nil)
-(setf cl-who:*attribute-quote-char* #\")
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (setf cl-who:*downcase-tokens-p* nil)
+  (setf cl-who:*attribute-quote-char* #\"))
 
 
 
@@ -103,7 +104,7 @@
   (cl-who:with-html-output (s stream)
     (:|wsen:Enumerate| 
 ;;      (:|wsen:EndTo| "P0Y0M0DT0H0M0S")
-      (:|wsen:Expires| "P0Y0M0DT1H1M0S")
+      (:|wsen:Expires| "PT60.000S")
 ;;      (:|wsen:Filter| :|Dialect| "s:anyURI" "s:Any")
       )))
 
