@@ -76,7 +76,10 @@
 	(:|s:Envelope| :|xmlns:s| +soap-envelope+
 	               :|xmlns:a| +soap-addressing+
 		       :|xmlns:w| +soap-wsman+
-		       :|xmlns:wsen| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+		       :|xmlns:n| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+		       :|xmlns:w| "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
+		       :|xmlns:p| "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd"
+		       :|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
 	  (:|s:Header|
 		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
 		(:|w:ResourceURI| :|s:mustUnderstand| "true" 
@@ -102,9 +105,9 @@
 
 (defun encode-wsman-enumerate (stream)
   (cl-who:with-html-output (s stream)
-    (:|wsen:Enumerate| 
+    (:|n:Enumerate| 
 ;;      (:|wsen:EndTo| "P0Y0M0DT0H0M0S")
-      (:|wsen:Expires| "PT60.000S")
+      (:|n:Expires| "PT60.000S")
 ;;      (:|wsen:Filter| :|Dialect| "s:anyURI" "s:Any")
       )))
 
@@ -167,4 +170,6 @@
 
 (defun encode-wsman-body (body)
   (wformat "<s:Body>~A</s:Body>" body))
+
+
 

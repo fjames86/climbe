@@ -66,3 +66,30 @@
 					 (write-string "&#x" stream)
 					 (write (char-code char) :stream stream :base 16)
 					 (write-char #\; stream))))))))
+
+
+;; ---- need to listen on a socket so we can reverse engineer msft's wsman message encoding
+(defun listen-socket (port)
+  (let ((socket (usocket:socket-listen "localhost" port 
+				       :reuse-address t)))
+    (unwind-protect 
+	 (let ((conn (usocket:socket-accept socket)))
+	   (setf (usocket:socket-option conn :receive-timeout) 1)
+	   (unwind-protect 
+		(let ((stream (usocket:socket-stream conn)))
+		  ;; got the stream, read from it then timeout
+		  (loop :for l = (read-line stream nil nil)
+		     :while l 
+		     :do (print l)))
+	     (usocket:socket-close conn)))
+    (usocket:socket-close socket))))
+
+;; NOTES: you must do the following
+;; 1. ensure your winrm client is set to allow unencrypted traffic
+;; winrm set winrm/config/client @{AllowUnencrypted="true"}
+;; 2. in powershell make a cim session
+;; $sess = New-CimSession 
+;; $sess = New-CimSession -ComputerName "localhost" -Port 9989 -OperationTimeoutSec 1 -SkipTestConnection -Authentication Basic -Credential (Get-Credential)
+;; 3. try calling a function
+;; e.g. $sess | Get-CimClass
+;; this should print out the resulting wsman 
