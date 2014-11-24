@@ -116,14 +116,18 @@ WinRM is by default setup in a non-functioning state: it has only an HTTP listen
 Ensure you have an HTTP listener using: winrm qc
 Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
 "
-  (decode-wsman
-   (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
-                      (list :method :post 
-                            :content content
-                            :content-type "application/soap+xml; charset=UTF-8"
-                            :want-stream t)
-                      :username username 
-                      :password-md4 password
-                      :version (ntlm:make-ntlm-version 1 1 1))))
+  (let ((response 
+	 (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
+			    (list :method :post 
+				  :content content
+				  :content-type "application/soap+xml; charset=UTF-8"
+				  :want-stream t)
+			    :username username 
+			    :password-md4 password
+			    :version (ntlm:make-ntlm-version 1 1 1))))
+    (decode-wsman response)))
 
+
+;; to setup the wsman server:
+;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
 
