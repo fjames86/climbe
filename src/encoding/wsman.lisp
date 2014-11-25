@@ -69,14 +69,6 @@
 
 
 
-(defun get-cim-class (namespace message-id &key (url "http://localhost:9899/wsman") (class-name ""))
-  (format nil
-	  "<s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:a=\"http://schemas.xmlsoap.org/ws/2004/08/addressing\" xmlns:n=\"http://schemas.xmlsoap.org/ws/2004/09/enumeration\" xmlns:w=\"http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd\" xmlns:p=\"http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd\" xmlns:b=\"http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd\"><s:Header><a:To>~A</a:To><w:ResourceURI s:mustUnderstand=\"true\">http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*</w:ResourceURI><a:ReplyTo><a:Address s:mustUnderstand=\"true\">http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous</a:Address></a:ReplyTo><a:Action s:mustUnderstand=\"true\">http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate</a:Action><w:MaxEnvelopeSize s:mustUnderstand=\"true\">512000</w:MaxEnvelopeSize><a:MessageID>~A</a:MessageID><w:Locale xml:lang=\"en-GB\" s:mustUnderstand=\"false\" /><p:DataLocale xml:lang=\"en-GB\" s:mustUnderstand=\"false\" /><p:SessionId s:mustUnderstand=\"false\">uuid:91A8C559-19BC-4A5E-B99F-8A39CF77253E</p:SessionId><p:OperationID s:mustUnderstand=\"false\">uuid:F524DB49-033D-4942-972D-9701919ECF34</p:OperationID><p:SequenceId s:mustUnderstand=\"false\">1</p:SequenceId><w:SelectorSet><w:Selector Name=\"__cimnamespace\">~A</w:Selector><w:Selector Name=\"ClassName\"></w:Selector>~A</w:SelectorSet><w:OptionSet xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"><w:Option Name=\"IncludeInheritanceHierarchy\" Type=\"xs:boolean\">true</w:Option><w:Option Name=\"IncludeInheritedElements\" Type=\"xs:boolean\">true</w:Option><w:Option Name=\"IncludeQualifiers\" Type=\"xs:boolean\">true</w:Option><w:Option Name=\"__MI_CallbackRegistration\" Type=\"xs:int\">11</w:Option><w:Option Name=\"wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE\" Type=\"xs:unsignedInt\">0</w:Option><w:Option Name=\"wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE\" Type=\"xs:unsignedInt\">1</w:Option><w:Option Name=\"wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE\" Type=\"xs:unsignedInt\">2</w:Option><w:Option Name=\"wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE\" Type=\"xs:unsignedInt\">1</w:Option><w:Option Name=\"msftwinrm:UsePreciseArrays\" Type=\"xs:boolean\">true</w:Option></w:OptionSet><w:OperationTimeout>PT1.000S</w:OperationTimeout></s:Header><s:Body><n:Enumerate><w:OptimizeEnumeration/><w:MaxElements>32000</w:MaxElements></n:Enumerate></s:Body></s:Envelope>"
-	  url 
-	  message-id
-	  namespace
-	  class-name))
-
 (defun encode-wsman-get-cim-class (url msg-id op-id namespace class-name seq-id session-id)
   "Generate a get class body. Form reverse engineered from a Get-CimClass powershell call."
   (cl-who:with-html-output-to-string (s)
@@ -127,3 +119,51 @@
 	  (:|p:OptimizeEnumeration|)
 	  (:|p:MaxElements| "32000")))))
   nil)
+
+
+
+(defun encode-wsman-get-cim-instance (uri namespace class-name msg-id session-id op-id seq-id)
+  (cl-who:with-html-output-to-string (s)
+    (:|s:Envelope| 
+      :|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
+      :|xmlns:p| "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd"
+      :|xmlns:w| "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
+      :|xmlns:n| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+      :|xmlns:a| "http://schemas.xmlsoap.org/ws/2004/08/addressing"
+      :|xmlns:s| "http://www.w3.org/2003/05/soap-envelope"
+      (:|s:Header| 
+	(:|a:To| (princ uri s))
+	(:|p:ResourceURI| :|s:mustUnderstand| "true"
+	  (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" class-name))
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+	(:|p:MaxEnvelopeSize| :|s:mustUnderstand| "true"
+	  "512000")
+	(:|a:MessageID| (princ msg-id s))
+	(:|p:Locale| :|s:mustUnderstand| "false"
+	  :|xml:lang| "en-GB")
+	(:|p:DataLocale| :|s:mustUnderstand| "false" :|xml:lang| "en-GB")
+	(:|p:SessionId| :|s:mustUnderstand| "false" (princ session-id s))
+	(:|p:OperationID| :|s:mustUnderstand| "false" (princ op-id s))
+	(:|p:SequenceId| :|s:mustUnderstand| "false"
+	  (princ seq-id s))
+	(:|p:SelectorSet|
+	  (:|p:Selector| :|Name| "__cimnamespace" (princ namespace s)))
+	(:|p:OptionSet|
+	  :|xmlns:xsi| "http://www.w3.org/2001/XMLSchema-instance"
+	  (:|p:Option| :|Type| "xs:int" :|Name| "__MI_CallbackRegistration" "11")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "0")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "1")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "2")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE" "1")
+	  (:|p:Option| :|Type| "xs:boolean" :|Name| "msftwinrm:UsePreciseArrays" "true"))
+	(:|p:OperationTimeout| "PT1.000S"))
+      (:|s:Body|
+	(:|n:Enumerate|
+	  (:|p:OptimizeEnumeration|)
+	  (:|p:MaxElements| "32000")
+	  (:|p:EnumerationMode| "EnumerateObjectAndEPR"))))))
+

@@ -25,6 +25,7 @@
 
 
 	   #:encode-wsman-get-cim-class
+	   #:encode-wsman-get-cim-instance
            ))
 
 

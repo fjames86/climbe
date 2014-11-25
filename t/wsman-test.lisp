@@ -48,11 +48,11 @@
 
 
 
-(defun test-call (host password &key (username "administrator"))
+(defun test-call (uri password &key (username "administrator"))
   "Call the host with the pre-prepared content, then with the generated content. decode the result."
   (list 
-   (call-wsman password (wsman-logical-disk) :host host :username username)
-   (call-wsman password (climbe.encoding::encode-logical-disk) :host host :username username)))
+   (call-wsman password (wsman-logical-disk) :uri uri :username username)
+   (call-wsman password (climbe.encoding::encode-logical-disk) :uri uri :username username)))
 
 
 

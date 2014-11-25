@@ -156,3 +156,24 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 	      :uri uri))
 
 
+(defun call-wsman-get-instance (&key 
+				   (uri *cim-uri*) 
+				   (namespace *cim-namespace*) 
+				   (username "administrator")
+				   (password "")
+				   (msg-id "")
+				   (op-id "")
+				   (class-name "")
+				   (seq-id "")
+				   (session-id ""))
+  "First attempt at getting cim instances from WinRM."
+  (call-wsman password
+	      (encode-wsman-get-cim-instance uri 
+					     namespace
+					     class-name
+					     msg-id
+					     session-id
+					     op-id
+					     seq-id)
+	      :username username
+	      :uri uri))
