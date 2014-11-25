@@ -22,6 +22,9 @@
            #:encode-enumerate-qualifiers
 
            #:encode-cimxml-response
+
+
+	   #:encode-wsman-get-cim-class
            ))
 
 

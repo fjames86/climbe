@@ -27,6 +27,7 @@
 
 ;;           #:ntlm-http-request
            #:call-wsman
+	   #:call-wsman-get-class
            ))
 
 

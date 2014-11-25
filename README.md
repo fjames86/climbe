@@ -1,5 +1,5 @@
-Climbe
-======
+#Climbe
+=======
 
 Climbe is a Common Lisp Common Information Model (CIM) engine for Web-based enterprise management (WBEM).
 
@@ -14,7 +14,7 @@ Rudimentary support for Web Services Manangement (WS-Man) encoding is now availa
 This makes it possible to communicate with the Microsoft Windows WinRM service 
 which exposes WMI using the SOAP-based protocol WS-Man.
 
-1. CIMOM
+##1. CIMOM
 -----------
 
 The CIMOM (CIM object manager) is implented by extending CLOS using the Meta-object protocol (MOP). This means
@@ -24,7 +24,7 @@ Server-side instances (i.e. in the CIMOM) of the CIM classes are real CLOS insta
 rather than some struct container. This means we can implement the CIMOM as a set of generic functions
 which merely need specializing for the CIM class. 
 
-1.1 Providers
+###1.1 Providers
 ----------------
 
 Providers are implemented by defining regular CLOS classes which use the meta-class CIM-STANDARD-CLASS.
@@ -75,8 +75,8 @@ The intrinsic methods are implemented by these generic functions:
 For each of them a default method is provided which raises a CIM-NOT-SUPPORTED error.
 
 
-1.2 Associations
----------------
+###1.2 Associations
+--------------------
 
 Sort of working but still very buggy. Still a work in progress.
 
@@ -84,13 +84,13 @@ TODO: regular classes have no knowledge of any associations they have. This mean
 implement associations properly because when asked for assocations of a regular class it doesn't know 
 where to look. This needs some serious work doing to it before it's working.
 
-1.3 Indications
-----------------
+###1.3 Indications
+------------------
 
 CIM export messages supported by the client and server but it's still a work in progress. 
 
 
-2. Schema
+##2. Schema
 -----------
 
 The DMTF provides CIM schema (class definitions) in either MOF or XML format. Climbe can convert the XML format
@@ -101,8 +101,8 @@ For schema which are only distributed in MOF (e.g. SMI-S schema) you can either 
 other tool (e.g. OpenPegasus) or type the Lisp in by hand. Because of this there is no MOF compiler.
 All CIM classes must be added to Lisp using DEFCIM-CLASS.
 
-2.1 Compiled schema
--------------------
+###2.1 Compiled schema
+-----------------------
 
 The DMTF CIM schema 2.42 are compiled and included with this release. They can be included into your build
 to be used as required.
@@ -113,8 +113,8 @@ with the same content. Just use ADD-CLASS-TO-NAMESPACE to add a defined CLOS cla
 
 
 
-3. Client
-----------
+##3. Client
+-------------
 
 Each of the intrinsic methods has an encoding function to generate the CIM-XML content. 
 The CALL-CIM-SERVER function provides basic functionality but each of the intrinsic CIM methods 
@@ -134,8 +134,8 @@ has a CALL-* function.
 
 Note that all these client calls use the CIMXML encoding protocol. Experimental support for WS-Man is coming.
 
-3.1 Supported client calls
----------------------------
+###3.1 Supported client calls
+------------------------------
 
 * call-get-class
 * call-get-instance
@@ -154,18 +154,20 @@ Note that all these client calls use the CIMXML encoding protocol. Experimental 
 
 TODO: need to support more of the CIM HTTP header codes.
 
-3.2 WS-Man client
-------------------
+###3.2 WS-Man client
+---------------------
 
 You can now communicate with WinRM (availble from Windows 8 and Server 2012) directly 
 with the Climbe client (enabling the Climbe server to support WS-Man is a big task and not likely to 
 be accomplished soon). The client supports NTLM authentication.
 
 
+Some rudimentary client calls now available are:
+* call-wsman-get-class 
 
 
-4. Server
-----------
+##4. Server
+-------------
 
 Server is partially complete, in that it works but is likely to be very buggy still. Most of the handlers
 have yet to be tested. The server only supports CIMXML at present.
@@ -189,8 +191,8 @@ have yet to be tested. The server only supports CIMXML at present.
 
 TODO: need to add support for the various CIM http codes.
 
-5. Required packages
----------------------
+##5. Required packages
+------------------------
 
 Climbe requires several standard packages which are all available in quicklisp. These are
 Closer-MOP, CL-PPCRE, CXML, Drakma, Hunchentoot, Babel, Parse-Number, CL-WHO.

@@ -107,7 +107,7 @@
 ")
 
 
-(defun call-wsman (password content &key (username "administrator") (host "127.0.0.1"))
+(defun call-wsman (password content &key (username "administrator") (uri "http://localhost:5985/wsman"))
   "Returns a decoded envelope structure.
 
 NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
@@ -117,7 +117,7 @@ Ensure you have an HTTP listener using: winrm qc
 Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
 "
   (let ((response 
-	 (ntlm-http-request (format nil "http://~A:5985/wsman" host) 
+	 (ntlm-http-request uri
 			    (list :method :post 
 				  :content content
 				  :content-type "application/soap+xml; charset=UTF-8"
@@ -130,4 +130,29 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 
 ;; to setup the wsman server:
 ;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
+
+
+
+(defun call-wsman-get-class (&key 
+				   (uri *cim-uri*) 
+				   (namespace *cim-namespace*) 
+				   (username "administrator")
+				   (password "")
+				   (msg-id "")
+				   (op-id "")
+				   (class-name "")
+				   (seq-id "")
+				   (session-id ""))
+  "First attempt at getting cim classes from WinRM."
+  (call-wsman password
+	      (encode-wsman-get-cim-class uri 
+					  msg-id 
+					  op-id 
+					  namespace 
+					  class-name 
+					  seq-id 
+					  session-id)
+	      :username username
+	      :uri uri))
+
 
