@@ -177,3 +177,29 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 					     seq-id)
 	      :username username
 	      :uri uri))
+
+(defun call-wsman-associations (&key 
+				   (uri *cim-uri*) 
+				   (namespace *cim-namespace*) 
+				   (username "administrator")
+				   (password "")
+				   (msg-id "")
+				   (op-id "")
+				   (class-name "")
+				   (seq-id "")
+				   (session-id "")
+				  (assoc-class "")
+				  (result-class ""))
+  "First attempt at getting cim instances from WinRM."
+  (call-wsman password
+	      (encode-wsman-get-cim-associated-instances namespace
+							 uri 
+							 op-id
+							 msg-id
+							 session-id
+							 seq-id
+							 result-class
+							 assoc-class
+							 class-name)
+	      :username username
+	      :uri uri))

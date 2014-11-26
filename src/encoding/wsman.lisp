@@ -167,3 +167,59 @@
 	  (:|p:MaxElements| "32000")
 	  (:|p:EnumerationMode| "EnumerateObjectAndEPR"))))))
 
+
+
+(defun encode-wsman-get-cim-associated-instances (namespace uri op-id msg-id session-id seq-id result-class assoc-class class-name)
+  (cl-who:with-html-output-to-string (s)
+    (:|s:Envelope| 
+      :|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
+      :|xmlns:p| "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd"
+      :|xmlns:w| "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
+      :|xmlns:n| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
+      :|xmlns:a| "http://schemas.xmlsoap.org/ws/2004/08/addressing"
+      :|xmlns:s| "http://www.w3.org/2003/05/soap-envelope"
+      (:|s:Header| 
+	(:|a:To| (princ uri s))
+	(:|p:ResourceURI| :|s:mustUnderstand| "true"
+	  (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" class-name))
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+	(:|p:MaxEnvelopeSize| :|s:mustUnderstand| "true"
+	  "512000")
+	(:|a:MessageID| (princ msg-id s))
+	(:|p:Locale| :|s:mustUnderstand| "false"
+	  :|xml:lang| "en-GB")
+	(:|p:DataLocale| :|s:mustUnderstand| "false" :|xml:lang| "en-GB")
+	(:|p:SessionId| :|s:mustUnderstand| "false" (princ session-id s))
+	(:|p:OperationID| :|s:mustUnderstand| "false" (princ op-id s))
+	(:|p:SequenceId| :|s:mustUnderstand| "false"
+	  (princ seq-id s))
+	(:|p:SelectorSet|
+	  (:|p:Selector| :|Name| "__cimnamespace" (princ namespace s)))
+	(:|p:OptionSet|
+	  :|xmlns:xsi| "http://www.w3.org/2001/XMLSchema-instance"
+	  (:|p:Option| :|Type| "xs:int" :|Name| "__MI_CallbackRegistration" "11")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "0")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "1")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "2")
+	  (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE" "1")
+	  (:|p:Option| :|Type| "xs:boolean" :|Name| "msftwinrm:UsePreciseArrays" "true"))
+	(:|p:OperationTimeout| "PT1.000S"))
+      (:|s:Body|
+	(:|n:Enumerate|
+	  (:|p:OptimizeEnumeration|)
+	  (:|p:MaxElements| "32000")
+	  (:|p:EnumerationMode| "EnumerateObjectAndEPR")
+	  (:|p:Filter| :|Dialect| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding/associationFilter"
+	    (:|b:AssociatedInstances| 
+	      (:|b:Object| 
+		(:|a:Address| "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous")
+		(:|a:ReferenceParameters|
+		  (:|w:ResourceURI| (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" namespace))
+		  (:|w:SelectorSet| 
+		    (:|w:Selector| :|Name| "__cimnamespace" (princ class-name s)))))
+	      (:|b:AssociationClassName| (princ assoc-class s))
+	      (:|b:ResultClassName| (princ result-class s)))))))))
