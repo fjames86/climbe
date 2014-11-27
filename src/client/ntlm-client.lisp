@@ -107,7 +107,7 @@
 ")
 
 
-(defun call-wsman (password content &key (username "administrator") (uri "http://localhost:5985/wsman"))
+(defun call-wsman (password content &key (username "administrator") (uri "http://localhost:5985/wsman") domain)
   "Returns a decoded envelope structure.
 
 NOTE: you MUST have the WinRm HTTP listener running and accepting Unencrypted traffic for this to work.
@@ -116,20 +116,27 @@ WinRM is by default setup in a non-functioning state: it has only an HTTP listen
 Ensure you have an HTTP listener using: winrm qc
 Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
 "
-  (let ((response 
+  (multiple-value-bind (response status-code headers ruri stream must-close reason)
 	 (ntlm-http-request uri
 			    (list :method :post 
 				  :content content
 				  :content-type "application/soap+xml; charset=UTF-8"
 				  :want-stream t)
 			    :username username 
+			    :domain domain
 			    :password-md4 password
-			    :version (ntlm:make-ntlm-version 1 1 1))))
-    (decode-wsman response)))
+			    :version (ntlm:make-ntlm-version 1 1 1))
+    (declare (ignore ruri stream must-close headers))
+;;    (format t "HEADERS: ~S~%" headers)
+    (if (= status-code 200)
+	(decode-wsman response)
+	(error "Failed ~S: ~S" status-code reason))))
 
 
 ;; to setup the wsman server:
 ;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
+
+
 
 
 

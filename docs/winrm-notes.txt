@@ -1,0 +1,57 @@
+
+
+
+Creating a listener
+--------------------
+
+Ensure you have an HTTP listener using: winrm qc
+
+Or create one using:
+
+winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
+
+
+
+Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
+
+
+UAC filtering
+--------------
+
+If you're using an administrator account on a local machine (WORKGROUP) 
+then it's not going to work. See this thread:
+
+https://social.technet.microsoft.com/Forums/en-US/198cfb43-4eea-4418-b32e-bb42232d8bfd/winrm-server-manager-access-denied-to-any-host?forum=w7itprogeneral
+
+You need to create this magic registry key and set it to 1
+
+[HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System] LocalAccountTokenFilterPolicy 
+
+Reverse engineering WinRM calls
+-------------------------------
+
+Setup a socket listener using
+(climbe.utils::listen-socket 9999)
+
+From powershell do
+
+$sess = New-CimSession Basic -Credential (Cet-Credential) -ComputerName "localhost" -OperationTimeoutSec 1 -SkipTestConnection -Port 9999 -SessionOption (New-CimSessionOption -NoEncryption)
+
+Now call Lisp to get an idea of what the winrm client does:
+
+Get-CimClass -CimSession $sess
+Get-CimClass -CimSession $sess -ClassName "xxxx"
+Get-CimInstance -CimSession $sess -ClassName "xxx"
+
+etc etc
+
+
+Making WinRM calls
+-------------------
+
+Generate content based off the content we got back from winrm. call using
+
+(call-wsman password content)
+
+This uses an NTLM negotiate authentication.
+
