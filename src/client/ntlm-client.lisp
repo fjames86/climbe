@@ -141,24 +141,24 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 
 
 (defun call-wsman-get-class (&key 
-				   (uri *cim-uri*) 
-				   (namespace *cim-namespace*) 
-				   (username "administrator")
-				   (password "")
-				   (msg-id "")
-				   (op-id "")
-				   (class-name "")
-				   (seq-id "")
-				   (session-id ""))
+			       (uri *cim-uri*) 
+			       (namespace *cim-namespace*) 
+			       (username "administrator")
+			       (password "")
+			       msg-id
+			       op-id
+			       (class-name "")
+			       seq-id
+			       session-id)
   "First attempt at getting cim classes from WinRM."
   (call-wsman password
-	      (encode-wsman-get-cim-class uri 
-					  msg-id 
-					  op-id 
-					  namespace 
-					  class-name 
-					  seq-id 
-					  session-id)
+	      (encode-wsman-get-cim-class :url uri 
+					  :msg-id msg-id 
+					  :op-id op-id 
+					  :namespace namespace 
+					  :class-name class-name 
+					  :seq-id seq-id 
+					  :session-id session-id)
 	      :username username
 	      :uri uri))
 

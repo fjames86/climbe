@@ -12,7 +12,7 @@ winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
 
 
 
-Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted=\"true\"}
+Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted="true"}
 
 
 UAC filtering
