@@ -67,6 +67,46 @@
 		(:|w:OperationTimeout| "PT60.000S"))
       (:|s:Body|))))
 
+;; read this
+;; http://msdn.microsoft.com/en-us/library/cc251709.aspx
+;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0227_1.0.0.pdf
+
+
+(defun encode-wsman-get-class ()
+  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
+  (cl-who:with-html-output-to-string (s)
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+	(:|s:Envelope| :|xmlns:s| +soap-envelope+
+	               :|xmlns:a| +soap-addressing+
+		       :|xmlns:w| +soap-wsman+
+	  (:|s:Header|
+		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
+		(:|w:ResourceURI| :|s:mustUnderstand| "true"
+		 "http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/*")
+		(:|a:ReplyTo|
+		  (:|a:Address| :|s:mustUnderstand| "true"
+			"http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+		(:|a:Action| :|s:mustUnderstand| "true"
+		  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+		(:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
+		(:|a:MessageID| (princ (gen-id) s))
+		(:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
+		(:|w:OperationTimeout| "PT60.000S"))
+      (:|s:Body|))))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 (defun encode-wsman-get-instance (class-name name value)
   "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
@@ -125,7 +165,7 @@
 	      "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
 	  (:|a:Action| :|s:mustUnderstand| "true"
 	    "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-	  (:|p:MaxEnvelopeSize| :|s:mustUnderstand| "true"
+	  (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true"
 	    "512000")
 	  (:|a:MessageID| (princ msg-id s))
 	  (:|p:Locale| :|xml:lang| "en-GB" :|s:mustUnderstand| "false" )
@@ -181,7 +221,7 @@
 	      "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
 	  (:|a:Action| :|s:mustUnderstand| "true"
 	    "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-	  (:|p:MaxEnvelopeSize| :|s:mustUnderstand| "true"
+	  (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true"
 	    "512000")
 	  (:|a:MessageID| (princ msg-id s))
 	  (:|p:Locale| :|s:mustUnderstand| "false"
@@ -234,7 +274,7 @@
 	      "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
 	  (:|a:Action| :|s:mustUnderstand| "true"
 	    "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-	  (:|p:MaxEnvelopeSize| :|s:mustUnderstand| "true"
+	  (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true"
 	    "512000")
 	  (:|a:MessageID| (princ msg-id s))
 	  (:|p:Locale| :|s:mustUnderstand| "false"
@@ -289,185 +329,3 @@
 
 
 
-
-;; mine
-
-(("Envelope" . "http://www.w3.org/2003/05/soap-envelope")
- ((("b" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd")
-  (("p" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-  (("w" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-  (("n" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.xmlsoap.org/ws/2004/09/enumeration")
-  (("a" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-  (("s" . "http://www.w3.org/2000/xmlns/")
-   "http://www.w3.org/2003/05/soap-envelope"))
- (("Header" . "http://www.w3.org/2003/05/soap-envelope") NIL
-  (("To" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   "http://127.0.0.1:5985/wsman")
-  (("ResourceURI" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
-  (("ReplyTo" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   (("Address" . "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-    ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
-  (("Action" . "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-  (("MaxEnvelopeSize" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "512000")
-  (("MessageID" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   "uuid:83C678F3-CCA2-4A29-8CFB-5F2AED435B08")
-  (("Locale" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false")
-    (("lang" . "http://www.w3.org/XML/1998/namespace") "en-GB")))
-  (("DataLocale" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false")
-    (("lang" . "http://www.w3.org/XML/1998/namespace") "en-GB")))
-  (("SessionId" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "uuid:CCDE3E03-FC02-F888-7F92-290D3DB6F1E6")
-  (("OperationID" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "uuid:2F63CF20-09DF-276E-8465-1A44373539C7")
-  (("SequenceId" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "1")
-  (("SelectorSet" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd") NIL
-   (("Selector" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Name" "__cimnamespace")) "root/cimv2")
-   (("Selector" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Name" "ClassName")) "Win32_PhysicalDisk"))
-  (("OptionSet" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("xsi" . "http://www.w3.org/2000/xmlns/")
-     "http://www.w3.org/2001/XMLSchema-instance"))
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeInheritanceHierarchy")) "true")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeInheritedElements")) "true")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeQualifiers")) "true")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:int") ("Name" "__MI_CallbackRegistration")) "11")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "0")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "1")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "2")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE"))
-    "1")
-   (("Option" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "msftwinrm:UsePreciseArrays")) "true"))
-  (("OperationTimeout" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   NIL "PT60.000S"))
- (("Body" . "http://www.w3.org/2003/05/soap-envelope") NIL
-  (("Enumerate" . "http://schemas.xmlsoap.org/ws/2004/09/enumeration") NIL
-   (("OptimizeEnumeration"
-     . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-    NIL)
-   (("MaxElements" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd") NIL
-    "32000"))))
-
-;; msft
-(("Envelope" . "http://www.w3.org/2003/05/soap-envelope")
- ((("b" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd")
-  (("p" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-  (("w" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-  (("n" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.xmlsoap.org/ws/2004/09/enumeration")
-  (("a" . "http://www.w3.org/2000/xmlns/")
-   "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-  (("s" . "http://www.w3.org/2000/xmlns/")
-   "http://www.w3.org/2003/05/soap-envelope"))
- (("Header" . "http://www.w3.org/2003/05/soap-envelope") NIL
-  (("To" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   "http://localhost:9999/wsman")
-  (("ResourceURI" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
-  (("ReplyTo" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   (("Address" . "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-    ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
-  (("Action" . "http://schemas.xmlsoap.org/ws/2004/08/addressing")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-  (("MaxEnvelopeSize" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "true"))
-   "512000")
-  (("MessageID" . "http://schemas.xmlsoap.org/ws/2004/08/addressing") NIL
-   "uuid:7CEAE5B6-ECE5-4FCC-A6E2-6861A2FBFA99")
-  (("Locale" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false")
-    (("lang" . "http://www.w3.org/XML/1998/namespace") "en-GB")))
-  (("DataLocale" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false")
-    (("lang" . "http://www.w3.org/XML/1998/namespace") "en-GB")))
-  (("SessionId" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "uuid:4CEACFD4-CFED-4458-B73F-151723F69274")
-  (("OperationID" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "uuid:AC72A7F8-9424-496C-B9E3-2F4A71389961")
-  (("SequenceId" . "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd")
-   ((("mustUnderstand" . "http://www.w3.org/2003/05/soap-envelope") "false"))
-   "1")
-  (("SelectorSet" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd") NIL
-   (("Selector" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Name" "__cimnamespace")) "root/cimv2")
-   (("Selector" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Name" "ClassName"))))
-  (("OptionSet" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-   ((("xsi" . "http://www.w3.org/2000/xmlns/")
-     "http://www.w3.org/2001/XMLSchema-instance"))
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeInheritanceHierarchy")) "true")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeInheritedElements")) "true")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "IncludeQualifiers")) "true")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:int") ("Name" "__MI_CallbackRegistration")) "11")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "0")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "1")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE"))
-    "2")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:unsignedInt")
-     ("Name" "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE"))
-    "1")
-   (("Option" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    (("Type" "xs:boolean") ("Name" "msftwinrm:UsePreciseArrays")) "true"))
-  (("OperationTimeout" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd") NIL
-   "PT1.000S"))
- (("Body" . "http://www.w3.org/2003/05/soap-envelope") NIL
-  (("Enumerate" . "http://schemas.xmlsoap.org/ws/2004/09/enumeration") NIL
-   (("OptimizeEnumeration" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
-    NIL)
-   (("MaxElements" . "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd") NIL
-    "32000"))))
