@@ -39,11 +39,12 @@
 (defconstant* +wsman-create+ "http://schemas.xmlsoap.org/ws/2004/09/transfer/Create")
 (defconstant* +wsman-create-response+ "http://schemas.xmlsoap.org/ws/2004/09/transfer/CreateResponse")
 
+(defconstant* +ws-cim+ "http://schemas.dmtf.org/wbem/ws-cim/1/cim-schema/2/*")
 
 
 
 (defun encode-logical-disk ()
-  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
+  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO. This actually works."
   (cl-who:with-html-output-to-string (s)
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
     (terpri s)
@@ -61,9 +62,9 @@
 		  "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get")
 		(:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
 		(:|a:MessageID| "uuid:4ED2993C-4339-4E99-81FC-C2FD3812781A")
-		(:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
+		(:|w:Locale| :|xml:lang| "en-GB" :|s:mustUnderstand| "false")
 		(:|w:SelectorSet|
-		  (:|w:Selector| :|Name| "DeviceId" "c:"))
+		  (:|w:Selector| :|Name| "DeviceId" "d:"))
 		(:|w:OperationTimeout| "PT60.000S"))
       (:|s:Body|))))
 
@@ -71,40 +72,32 @@
 ;; http://msdn.microsoft.com/en-us/library/cc251709.aspx
 ;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0227_1.0.0.pdf
 
-
-(defun encode-wsman-get-class ()
-  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
-  (cl-who:with-html-output-to-string (s)
+(defun encode-wsman-get-class (class-name namespace &key (url "http://127.0.0.1/wsman"))
+  "This seems to actually WORK!!!"
+  (cl-who:with-html-output-to-string (s) 
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
     (terpri s)
-	(:|s:Envelope| :|xmlns:s| +soap-envelope+
-	               :|xmlns:a| +soap-addressing+
-		       :|xmlns:w| +soap-wsman+
-	  (:|s:Header|
-		(:|a:To| "http://hyperb.angelo.exsequi.com:5985/wsman")
-		(:|w:ResourceURI| :|s:mustUnderstand| "true"
-		 "http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/*")
-		(:|a:ReplyTo|
-		  (:|a:Address| :|s:mustUnderstand| "true"
-			"http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
-		(:|a:Action| :|s:mustUnderstand| "true"
-		  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-		(:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
-		(:|a:MessageID| (princ (gen-id) s))
-		(:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
-		(:|w:OperationTimeout| "PT60.000S"))
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+                   :|xmlns:a| +soap-addressing+
+                   :|xmlns:w| +soap-wsman+
+      (:|s:Header|
+	(:|a:To| (write-string url s))
+	(:|w:ResourceURI| :|s:mustUnderstand| "true"
+	  "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:MessageID| (write-string (gen-id) s))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get")
+	(:|w:SelectorSet|
+	  (:|w:Selector| :|Name| "ClassName" (write-string class-name s))
+	  (:|w:Selector| :|Name| "__cimnamespace" (write-string namespace s))))
       (:|s:Body|))))
 
 
 
-
-
-
-
-
-
-
-
+;; ---------- experimental -----------------
 
 
 
@@ -314,6 +307,7 @@
 
 
 (defun gen-id ()
+  "generates an ID used in WinRM calls."
   (flet ((digits (n)
 	   (loop for i below n collect 
 		(random 16))))

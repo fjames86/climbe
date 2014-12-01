@@ -133,6 +133,19 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 	(error "Failed ~S: ~S" status-code reason))))
 
 
+(defun call-wsman* (password content &key (username "administrator") (uri "http://localhost:5985/wsman") domain)
+  (ntlm-http-request uri
+		     (list :method :post 
+			   :content content
+			   :content-type "application/soap+xml; charset=UTF-8"
+			   :want-stream nil)
+		     :username username 
+		     :domain domain
+		     :password-md4 password
+		     :version (ntlm:make-ntlm-version 1 1 1)))
+
+
+
 ;; to setup the wsman server:
 ;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
 
@@ -145,23 +158,16 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 			       (namespace *cim-namespace*) 
 			       (username "administrator")
 			       (password "")
-			       msg-id
-			       op-id
-			       (class-name "")
-			       seq-id
-			       session-id)
-  "First attempt at getting cim classes from WinRM."
-  (call-wsman password
-	      (encode-wsman-get-cim-class :url uri 
-					  :msg-id msg-id 
-					  :op-id op-id 
-					  :namespace namespace 
-					  :class-name class-name 
-					  :seq-id seq-id 
-					  :session-id session-id)
-	      :username username
-	      :uri uri))
-
+			       (class-name ""))
+  "Get a CIM class from WinRM."
+  (first 
+   ;; this should always end up being a list of 1 element
+   (climbe.decoding::envelope-body 
+    (call-wsman password
+		(climbe.encoding::encode-wsman-get-class class-name namespace)
+		:username username
+		:uri uri))))
+  
 
 (defun call-wsman-get-instance (&key 
 				   (uri *cim-uri*) 

@@ -27,18 +27,15 @@
 
 ;; structures we use to put the wsman contents into 
 (defstruct envelope 
-  nslist header body)
+  header body)
 
 (defstruct header 
   to 
   resource-uri 
   reply-address 
   action 
-  max-envelope-size 
-  message-id 
-  locale 
-  selector-set 
-  timeout)
+  message-id)
+
 
 
 ;; ensure the prefix is set to wsman
@@ -49,29 +46,33 @@
   (make-envelope :header header 
                  :body body))
 
-(deftag header () (to resourceuri replyto action maxenvelopesize locale? messageid? selectorset operationtimeout?)
+(deftag header () (to resourceuri replyto action messageid)
   (make-header :to to
                :resource-uri resourceuri
                :reply-address replyto
                :action action
-               :max-envelope-size maxenvelopesize
-               :locale locale
-               :message-id messageid
-               :selector-set selectorset
-               :timeout operationtimeout))
+               :message-id messageid))
 
 (deftag body () instances
-  (mapcar (lambda (instance)             
-            (destructuring-bind ((classname . ns) attributes &rest slots) instance
-              (declare (ignore ns attributes))
-              (make-cim-instance :classname classname
-                                 :slots 
-                                 (mapcar (lambda (slot)
-                                           (destructuring-bind ((slot-name . ns) attributes &rest value) slot
-                                             (declare (ignore ns attributes))
-                                             (list (intern slot-name :keyword) (car value))))
-                                         slots))))
-          instances))
+  (mapcar (lambda (instance)
+	    (let ((tname (car instance)))
+	      (cond
+		((and (stringp tname) (string-equal tname "CLASS"))
+		 ;; a CIM-XML encoded class. we get this from get-class
+		 ;; calls to WinRM 
+		 (decode-cimxml-class instance))
+		(t 
+		 ;; WS-Man instances should look like this
+		 (destructuring-bind ((classname . ns) attributes &rest slots) instance
+		   (declare (ignore ns attributes))
+		   (make-cim-instance :classname classname
+				      :slots 
+				      (mapcar (lambda (slot)
+						(destructuring-bind ((slot-name . ns) attributes &rest value) slot
+						  (declare (ignore ns attributes))
+						  (list (intern slot-name :keyword) (car value))))
+					      slots)))))))
+	      instances))
                                         
 
 (deftag to () uri

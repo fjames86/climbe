@@ -24,7 +24,7 @@
            #:encode-cimxml-response
 
 
-	   #:encode-wsman-get-cim-class
+	   #:encode-wsman-get-class
 	   #:encode-wsman-get-cim-instance
 	   #:encode-wsman-get-cim-associated-instances
            ))
