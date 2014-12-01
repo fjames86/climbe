@@ -157,20 +157,21 @@ TODO: need to support more of the CIM HTTP header codes.
 ###3.2 WS-Man client
 ---------------------
 
-You can now communicate with WinRM (availble from Windows 8 and Server 2012) directly 
-with the Climbe client (enabling the Climbe server to support WS-Man is a big task and not likely to 
-be accomplished soon). The client supports NTLM authentication.
+You can now directly communicate with the WinRM service on Windows 8 and Server 2012 with the Climbe client. The client uses Negotiate (NTLM) authentication.
 
 
-Some rudimentary client calls now available are:
+Some client calls now available are:
 * call-wsman-get-class 
+This requests a specific class encoded in CIM-XML format. The WS-Man server
+must support this format (this is the format WinRM uses).
 
+TODO: work out how to do enumerations.
 
 ##4. Server
 -------------
 
 Server is partially complete, in that it works but is likely to be very buggy still. Most of the handlers
-have yet to be tested. The server only supports CIMXML at present.
+have yet to be tested. The server only supports CIM-XML at present.
 
 ```
 

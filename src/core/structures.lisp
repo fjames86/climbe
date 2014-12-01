@@ -18,7 +18,7 @@
 
 ;; representation of a CIM method 
 (defstruct cim-method
-  name return-type in-params out-params qualifiers function symbol)
+  name return-type in-params out-params qualifiers function symbol origin)
 
 (defun cim-method-parameters (method)
   (append (cim-method-in-params method)
@@ -81,12 +81,15 @@
   (cim-class-qualifiers cim))
 
 (defmethod print-object ((cim cim-class) stream)
-  (format stream "#S(CIM-CLASS ~A)" (cim-name cim)))
+  (format stream "#S(CIM-CLASS ~A :SLOTS ~A :METHODS ~A)" 
+	  (cim-name cim)
+	  (mapcar #'cim-name (cim-class-slots cim))
+	  (mapcar #'cim-name (cim-class-methods cim))))
 
 
 ;; slots
 (defstruct cim-slot 
-  name type default qualifiers)
+  name type default qualifiers origin)
 
 (defmethod cim-name ((cim cim-slot))
   (cim-slot-name cim))

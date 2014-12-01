@@ -308,7 +308,15 @@
                  superclass)
    :qualifiers qualifier
    :methods method
-   :slots (append property property.array property.reference)))
+   :slots 
+   (mapcar (lambda (slot)
+	     (destructuring-bind (name value type qualifiers &key origin &allow-other-keys) slot
+	       (make-cim-slot :name name
+			      :type type
+			      :default value
+			      :qualifiers qualifiers
+			      :origin origin)))
+	   (append property property.array property.reference))))
                  
 
 ;;<!ELEMENT INSTANCE (QUALIFIER*,(PROPERTY|PROPERTY.ARRAY|PROPERTY.REFERENCE)*)>
@@ -342,8 +350,8 @@
 ;;     %Propagated;
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
-(deftag property (name type) (qualifier* value)
-  (list name value (decode-cim-type type) qualifier))
+(deftag property (name type classorigin) (qualifier* value)
+  (list name value (decode-cim-type type) qualifier :origin classorigin))
 			 
 ;;<!ELEMENT PROPERTY.ARRAY (QUALIFIER*,VALUE.ARRAY?)>
 ;;<!ATTLIST PROPERTY.ARRAY 
@@ -354,11 +362,12 @@
 ;;    %Propagated;
 ;;    %EmbeddedObject;
 ;;    xml:lang   NMTOKEN  #IMPLIED>
-(deftag property.array (name type) (qualifier* value.array)
+(deftag property.array (name type classorigin) (qualifier* value.array)
   (list name 
 	value.array 
 	(list 'array (decode-cim-type type))
-    qualifier))
+    qualifier
+    :origin classorigin))
 
 ;;<!ELEMENT PROPERTY.REFERENCE (QUALIFIER*,VALUE.REFERENCE?)>
 ;;<!ATTLIST PROPERTY.REFERENCE
@@ -366,8 +375,8 @@
 ;;     %ReferenceClass;
 ;;     %ClassOrigin;
 ;;     %Propagated;>
-(deftag property.reference (name referenceclass) (qualifier* value.reference)
-  (list name referenceclass value.reference qualifier))
+(deftag property.reference (name referenceclass classorigin) (qualifier* value.reference)
+  (list name referenceclass value.reference qualifier :origin classorigin))
 
 ;;<!ELEMENT METHOD (QUALIFIER*,(PARAMETER|PARAMETER.REFERENCE|PARAMETER.ARRAY|PARAMETER.REFARRAY)*)>
 ;;<!ATTLIST METHOD 
@@ -375,32 +384,31 @@
 ;;     %CIMType;          #IMPLIED 
 ;;     %ClassOrigin;
 ;;     %Propagated;>
-(deftag method (name type) (qualifier* parameter* parameter.reference* parameter.array* parameter.refarray*)  
+(deftag method (name type classorigin) (qualifier* parameter* parameter.reference* parameter.array* parameter.refarray*)  
   (make-cim-method 
    :name name
    :return-type (decode-cim-type type)
    :in-params (append parameter parameter.reference parameter.array parameter.refarray)
-   :qualifiers qualifier))
+   :qualifiers qualifier
+   :origin classorigin))
 
 ;;<!ELEMENT PARAMETER (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER 
 ;;     %CIMName;
 ;;     %CIMType;      #REQUIRED>
 (deftag parameter (name type) (qualifier*)
-  (cons (intern (string-upcase name))
-        (make-cim-parameter :name name
-                            :type (decode-cim-type type)
-                            :qualifiers qualifier)))
+  (make-cim-parameter :name name
+		      :type (decode-cim-type type)
+		      :qualifiers qualifier))
 
 ;;<!ELEMENT PARAMETER.REFERENCE (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.REFERENCE
 ;;     %CIMName;
 ;;     %ReferenceClass;>
 (deftag parameter.reference (name referenceclass) (qualifier*)
-  (cons (intern (string-upcase name))
-        (make-cim-parameter :name name
-                            :type referenceclass
-                            :qualifiers qualifier)))
+  (make-cim-parameter :name name
+		      :type referenceclass
+		      :qualifiers qualifier))
 
 ;;<!ELEMENT PARAMETER.ARRAY (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.ARRAY
@@ -408,10 +416,9 @@
 ;;     %CIMType;           #REQUIRED
 ;;     %ArraySize;>
 (deftag parameter.array (name type) (qualifier*)
-  (cons (intern (string-upcase name))
-        (make-cim-parameter :name name
-                            :type (list 'array (decode-cim-type type))
-                            :qualifiers qualifier)))
+  (make-cim-parameter :name name
+		      :type (list 'array (decode-cim-type type))
+		      :qualifiers qualifier))
 
 ;;<!ELEMENT PARAMETER.REFARRAY (QUALIFIER*)>
 ;;<!ATTLIST PARAMETER.REFARRAY
@@ -419,10 +426,9 @@
 ;;     %ReferenceClass;
 ;;     %ArraySize;>
 (deftag parameter.refarray (name referenceclass) (qualifier*)
-  (cons (intern (string-upcase name))
-        (make-cim-parameter :name name
-                            :type referenceclass
-                            :qualifiers qualifier)))
+  (make-cim-parameter :name name
+		      :type referenceclass
+		      :qualifiers qualifier))
 
 ;;<!ELEMENT MESSAGE (SIMPLEREQ|MULTIREQ|SIMPLERSP|MULTIRSP|
 ;;          SIMPLEEXPREQ|MULTIEXPREQ|SIMPLEEXPRSP|MULTIEXPRSP)>
