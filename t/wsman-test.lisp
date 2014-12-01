@@ -73,6 +73,15 @@
 	  namespace
 	  class-name))
 
+;; THIS ACTUALLY WORKS!!1!
+(defun works-get-class (class-name &key (namespace "root/cimv2") (username "") (password ""))
+  (call-wsman-get-class :uri "http://127.0.0.1:5985/wsman"
+			:namespace namespace
+			:class-name class-name 
+			:username username
+			:password password))
+
+
 
 
 ;; http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/Win32_LogicalDisk
