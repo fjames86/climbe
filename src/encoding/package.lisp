@@ -23,10 +23,14 @@
 
            #:encode-cimxml-response
 
-
+	   #:encode-wsman-identity
 	   #:encode-wsman-get-class
-	   #:encode-wsman-get-cim-instance
-	   #:encode-wsman-get-cim-associated-instances
+	   #:encode-wsman-enumerate-classes
+	   #:encode-wsman-enumerate-instances
+	   #:encode-wsman-pull
+
+	   #:encode-wsman-get-instance
+
            ))
 
 

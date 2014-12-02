@@ -64,7 +64,8 @@
                       :components
                       ((:file "package")
                        (:file "client" :depends-on ("package"))
-                       (:file "ntlm-client" :depends-on ("client")))
+                       (:file "ntlm-client" :depends-on ("client"))
+		       (:file "wsman" :depends-on ("ntlm-client")))
                       :depends-on (:core :cimom :encoding :decoding))
              (:module :server
                       :pathname "server"

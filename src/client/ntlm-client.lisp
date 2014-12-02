@@ -101,10 +101,12 @@
                  keyword-args)
           (error "No CHALLENGE response")))))
 
-(defun wsman-identity ()
-  "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
- <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsmid=\"http://schemas.dmtf.org/wbem/wsman/identity/1/wsmanidentity.xsd\"><s:Header/><s:Body><wsmid:Identify/></s:Body></s:Envelope>
-")
+;; ---------------------------
+
+;; to setup the wsman server:
+;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
+
+
 
 
 (defun call-wsman (password content &key (username "administrator") (uri "http://localhost:5985/wsman") domain)
@@ -146,73 +148,3 @@ Ensure it accepts connections: winrm set winrm/config/service @{AllowUnencrypted
 
 
 
-;; to setup the wsman server:
-;; winrm create winrm/config/listener?Address=IP:127.0.0.1+Transport=HTTP
-
-
-
-
-
-(defun call-wsman-get-class (&key 
-			       (uri *cim-uri*) 
-			       (namespace *cim-namespace*) 
-			       (username "administrator")
-			       (password "")
-			       (class-name ""))
-  "Get a CIM class from WinRM."
-  (first 
-   ;; this should always end up being a list of 1 element
-   (climbe.decoding::envelope-body 
-    (call-wsman password
-		(climbe.encoding::encode-wsman-get-class class-name namespace)
-		:username username
-		:uri uri))))
-  
-
-(defun call-wsman-get-instance (&key 
-				   (uri *cim-uri*) 
-				   (namespace *cim-namespace*) 
-				   (username "administrator")
-				   (password "")
-				   (msg-id "")
-				   (op-id "")
-				   (class-name "")
-				   (seq-id "")
-				   (session-id ""))
-  "First attempt at getting cim instances from WinRM."
-  (call-wsman password
-	      (encode-wsman-get-cim-instance uri 
-					     namespace
-					     class-name
-					     msg-id
-					     session-id
-					     op-id
-					     seq-id)
-	      :username username
-	      :uri uri))
-
-(defun call-wsman-associations (&key 
-				   (uri *cim-uri*) 
-				   (namespace *cim-namespace*) 
-				   (username "administrator")
-				   (password "")
-				   (msg-id "")
-				   (op-id "")
-				   (class-name "")
-				   (seq-id "")
-				   (session-id "")
-				  (assoc-class "")
-				  (result-class ""))
-  "First attempt at getting cim instances from WinRM."
-  (call-wsman password
-	      (encode-wsman-get-cim-associated-instances namespace
-							 uri 
-							 op-id
-							 msg-id
-							 session-id
-							 seq-id
-							 result-class
-							 assoc-class
-							 class-name)
-	      :username username
-	      :uri uri))

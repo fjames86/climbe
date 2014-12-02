@@ -12,6 +12,7 @@
 (defconstant* +soap-addressing+ "http://schemas.xmlsoap.org/ws/2004/08/addressing")
 (defconstant* +soap-wsman+ "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd")
 (defconstant* +soap-event+ "http://schemas.xmlsoap.org/ws/2004/09/eventing")
+(defconstant* +soap-enumerate+ "http://schemas.xmlsoap.org/ws/2004/09/enumeration")
 
 ;; set some cl-who options
 (eval-when (:compile-toplevel :load-toplevel :execute)
@@ -28,6 +29,9 @@
 
 (defconstant* +wsman-subscribe+ "http://schemas.xmlsoap.org/ws/2004/08/eventing/Subscribe")
 
+(defconstant* +wsman-pull+ "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Pull")
+(defconstant* +wsman-renew+ "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Renew")
+
 (defconstant* +wsman-pull-response+ "http://schemas.xmlsoap.org/ws/2004/09/enumeration/PullResponse")
 
 (defconstant* +wsman-put+ "http://schemas.xmlsoap.org/ws/2004/09/transfer/Put")
@@ -39,7 +43,13 @@
 (defconstant* +wsman-create+ "http://schemas.xmlsoap.org/ws/2004/09/transfer/Create")
 (defconstant* +wsman-create-response+ "http://schemas.xmlsoap.org/ws/2004/09/transfer/CreateResponse")
 
-(defconstant* +ws-cim+ "http://schemas.dmtf.org/wbem/ws-cim/1/cim-schema/2/*")
+;; FIXME: check this
+(defconstant* +ws-cim+ "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/*")
+
+(defun encode-wsman-identity ()
+  "<?xml version=\"1.0\" encoding=\"utf-8\" ?>
+ <s:Envelope xmlns:s=\"http://www.w3.org/2003/05/soap-envelope\" xmlns:wsmid=\"http://schemas.dmtf.org/wbem/wsman/identity/1/wsmanidentity.xsd\"><s:Header/><s:Body><wsmid:Identify/></s:Body></s:Envelope>
+")
 
 
 
@@ -72,7 +82,7 @@
 ;; http://msdn.microsoft.com/en-us/library/cc251709.aspx
 ;; http://www.dmtf.org/sites/default/files/standards/documents/DSP0227_1.0.0.pdf
 
-(defun encode-wsman-get-class (class-name namespace &key (url "http://127.0.0.1/wsman"))
+(defun encode-wsman-get-class (class-name namespace &key uri)
   "This seems to actually WORK!!!"
   (cl-who:with-html-output-to-string (s) 
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
@@ -81,7 +91,7 @@
                    :|xmlns:a| +soap-addressing+
                    :|xmlns:w| +soap-wsman+
       (:|s:Header|
-	(:|a:To| (write-string url s))
+	(:|a:To| (write-string uri s))
 	(:|w:ResourceURI| :|s:mustUnderstand| "true"
 	  "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
 	(:|a:ReplyTo|
@@ -96,12 +106,112 @@
       (:|s:Body|))))
 
 
+(defun encode-wsman-enumerate-classes (namespace &key uri)
+  "This works!! It returns an enumeration context which can then be used
+in one or more pull requests to get data. The context probably has a lifetime so will expire after some period of time."
+  (cl-who:with-html-output-to-string (s) 
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+                   :|xmlns:a| +soap-addressing+
+                   :|xmlns:w| +soap-wsman+
+		   :|xmlns:n| +soap-enumerate+
+      (:|s:Header|
+	(:|a:To| (write-string uri s))
+	(:|w:ResourceURI| :|s:mustUnderstand| "true"
+	  "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:MessageID| (write-string (gen-id) s))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+	(:|w:SelectorSet|
+	  (:|w:Selector| :|Name| "__cimnamespace" (write-string namespace s))
+	  (:|w:Selector| :|Name| "ClassName" "")))
+      (:|s:Body|
+	(:|n:Enumerate|)))))
 
-;; ---------- experimental -----------------
+(defun encode-wsman-enumerate-instances (class-name namespace &key uri)
+  "This works!! It returns an enumeration context which can then be used
+in one or more pull requests to get data. The context probably has a lifetime so will expire after some period of time."
+  (cl-who:with-html-output-to-string (s) 
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+                   :|xmlns:a| +soap-addressing+
+                   :|xmlns:w| +soap-wsman+
+		   :|xmlns:n| +soap-enumerate+
+      (:|s:Header|
+	(:|a:To| (write-string uri s))
+	(:|w:ResourceURI| :|s:mustUnderstand| "true"
+	  (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" class-name))
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:MessageID| (write-string (gen-id) s))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+	(:|w:SelectorSet|
+	  (:|w:Selector| :|Name| "__cimnamespace" (write-string namespace s))))
+      (:|s:Body|
+	(:|n:Enumerate|)))))
+
+
+(defun encode-wsman-pull (enumeration-context &key uri (max-elements 32000))
+  "Request the items specified by the original enumerate request."
+  (cl-who:with-html-output-to-string (s) 
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+                   :|xmlns:a| +soap-addressing+
+                   :|xmlns:w| +soap-wsman+
+		   :|xmlns:n| +soap-enumerate+
+      (:|s:Header|
+	(:|a:To| (write-string uri s))
+	(:|w:ResourceURI| :|s:mustUnderstand| "true"
+	  "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:MessageID| (write-string (gen-id) s))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  (write-string +wsman-pull+ s)))
+      (:|s:Body|
+	(:|n:Pull| 
+	  (:|n:EnumerationContext| (write-string enumeration-context s))
+	  (:|n:MaxElements| (princ max-elements s)))))))
+
+(defun encode-wsman-renew (enumeration-context &key uri)
+  "Renew an enumeration context so it can be pull'ed again."
+  (cl-who:with-html-output-to-string (s) 
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+    (:|s:Envelope| :|xmlns:s| +soap-envelope+
+                   :|xmlns:a| +soap-addressing+
+                   :|xmlns:w| +soap-wsman+
+		   :|xmlns:n| +soap-enumerate+
+      (:|s:Header|
+	(:|a:To| (write-string uri s))
+	(:|a:ReplyTo|
+	  (:|a:Address| :|s:mustUnderstand| "true"
+	    "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	(:|a:MessageID| (write-string (gen-id) s))
+	(:|a:Action| :|s:mustUnderstand| "true"
+	  (write-string +wsman-renew+ s)))
+      (:|s:Body|
+	(:|n:Renew| 
+	  (:|n:EnumerationContext| (write-string enumeration-context s)))))))
+
+;; other enumerate calls are   
+;; wsman enumerate getstatus 
+
+;; release 
 
 
 
-(defun encode-wsman-get-instance (class-name name value)
+
+(defun encode-wsman-get-instance (class-name namespace slots &key uri)
   "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
   (cl-who:with-html-output-to-string (s)
     "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
@@ -110,7 +220,7 @@
 	               :|xmlns:a| +soap-addressing+
 		       :|xmlns:w| +soap-wsman+
 	  (:|s:Header|
-		(:|a:To| "http://127.0.0.1:5985/wsman")
+		(:|a:To| (write-string uri s))
 		(:|w:ResourceURI| :|s:mustUnderstand| "true"
 		 (format s 
 			 "http://schemas.microsoft.com/wbem/wsman/1/wmi/root/cimv2/~A"
@@ -121,125 +231,17 @@
 		(:|a:Action| :|s:mustUnderstand| "true"
 		  "http://schemas.xmlsoap.org/ws/2004/09/transfer/Get")
 		(:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
-		(:|a:MessageID| "uuid:4ED2993C-4339-4E99-81FC-C2FD3812781A")
+		(:|a:MessageID| (write-string (gen-id) s))
 		(:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
 		(:|w:SelectorSet|
-		  (:|w:Selector| :|Name| name (princ value s)))
+		  (:|w:Selector| :|Name| "__cimnamespace" (write-string namespace s))
+		  (dolist (slot slots)
+		    (destructuring-bind (slot-name slot-value) slot
+		      (format s 
+			      "<w:Selector Name=\"~A\">~A</w:Selector>" slot-name slot-value))))
 		(:|w:OperationTimeout| "PT60.000S"))
       (:|s:Body|))))
 
-
-
-(defun encode-wsman-get-cim-class (&key url msg-id op-id namespace class-name seq-id session-id)
-  "Generate a get class body. Form reverse engineered from a Get-CimClass powershell call."
-  (let ((msg-id (or msg-id (gen-id)))
-	(op-id (or op-id (gen-id)))
-	(seq-id (or seq-id "1"))
-	(session-id (or session-id (gen-id)))
-	(class-name (or class-name ""))
-	(url (or url "http://127.0.0.1:5985/wsman"))
-	(namespace (or namespace "root/cimv2")))
-    (cl-who:with-html-output-to-string (s)
-    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-    (terpri s)
-      (:|s:Envelope| 
-	:|xmlns:s| "http://www.w3.org/2003/05/soap-envelope"
-	:|xmlns:a| "http://schemas.xmlsoap.org/ws/2004/08/addressing"
-	:|xmlns:n| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
-	:|xmlns:w| "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-	:|xmlns:p| "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd"
-	:|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
-	(:|s:Header| 
-	  (:|a:To| (princ url s))
-	  (:|p:ResourceURI| :|s:mustUnderstand| "true" 
-	    "http://schemas.dmtf.org/wbem/cim-xml/2/cim-schema/2/*")
-	  (:|a:ReplyTo|
-	    (:|a:Address| :|s:mustUnderstand| "true"
-	      "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
-	  (:|a:Action| :|s:mustUnderstand| "true"
-	    "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-	  (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true"
-	    "512000")
-	  (:|a:MessageID| (princ msg-id s))
-	  (:|p:Locale| :|xml:lang| "en-GB" :|s:mustUnderstand| "false" )
-	  (:|p:DataLocale| :|xml:lang| "en-GB" :|s:mustUnderstand| "false")
-	  (:|p:SessionId| :|s:mustUnderstand| "false" 
-	    (princ session-id s))
-	  (:|p:OperationID| :|s:mustUnderstand| "false"
-	    (princ op-id s))
-	  (:|p:SequenceId| :|s:mustUnderstand| "false"
-	    (princ seq-id s))
-	  (:|p:SelectorSet|
-	    (:|p:Selector| :|Name| "__cimnamespace" (princ namespace s))
-	    (:|p:Selector| :|Name| "ClassName" (princ class-name s)))
-	  (:|p:OptionSet| :|xmlns:xsi| "http://www.w3.org/2001/XMLSchema-instance"
-	    (:|p:Option| :|Name| "IncludeInheritanceHierarchy" :|Type| "xs:boolean" "true")
-	    (:|p:Option| :|Name| "IncludeInheritedElements" :|Type| "xs:boolean" "true")
-	    (:|p:Option| :|Name| "IncludeQualifiers" :|Type| "xs:boolean" "true")
-	    (:|p:Option| :|Name| "__MI_CallbackRegistration" :|Type| "xs:int" "11")
-	    (:|p:Option| :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" :|Type| "xs:unsignedInt" "0")
-	    (:|p:Option| :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" :|Type| "xs:unsignedInt" "1")
-	    (:|p:Option| :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" :|Type| "xs:unsignedInt" "2")
-	    (:|p:Option| :|Name| "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE" :|Type| "xs:unsignedInt" "1")
-	    (:|p:Option| :|Name| "msftwinrm:UsePreciseArrays" :|Type| "xs:boolean" "true"))
-	  (:|p:OperationTimeout| "PT60.000S"))
-	(:|s:Body|
-	  (:|n:Enumerate|
-	    (:|p:OptimizeEnumeration|)
-	    (:|p:MaxElements| "32000")))))))
-
-
-
-(defun encode-wsman-get-cim-instance (uri namespace class-name msg-id session-id op-id seq-id)
-  (let ((msg-id (or msg-id (gen-id)))
-	(session-id (or session-id (gen-id)))
-	(op-id (or op-id (gen-id)))
-	(seq-id (or seq-id "1")))
-    (cl-who:with-html-output-to-string (s)
-    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
-    (terpri s)
-      (:|s:Envelope| 
-	:|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
-	:|xmlns:p| "http://schemas.microsoft.com/wbem/wsman/1/wsman.xsd"
-	:|xmlns:w| "http://schemas.dmtf.org/wbem/wsman/1/wsman.xsd"
-	:|xmlns:n| "http://schemas.xmlsoap.org/ws/2004/09/enumeration"
-	:|xmlns:a| "http://schemas.xmlsoap.org/ws/2004/08/addressing"
-	:|xmlns:s| "http://www.w3.org/2003/05/soap-envelope"
-	(:|s:Header| 
-	  (:|a:To| (princ uri s))
-	  (:|p:ResourceURI| :|s:mustUnderstand| "true"
-	    (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" class-name))
-	  (:|a:ReplyTo|
-	    (:|a:Address| :|s:mustUnderstand| "true"
-	      "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
-	  (:|a:Action| :|s:mustUnderstand| "true"
-	    "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
-	  (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true"
-	    "512000")
-	  (:|a:MessageID| (princ msg-id s))
-	  (:|p:Locale| :|s:mustUnderstand| "false"
-	    :|xml:lang| "en-GB")
-	  (:|p:DataLocale| :|s:mustUnderstand| "false" :|xml:lang| "en-GB")
-	  (:|p:SessionId| :|s:mustUnderstand| "false" (princ session-id s))
-	  (:|p:OperationID| :|s:mustUnderstand| "false" (princ op-id s))
-	  (:|p:SequenceId| :|s:mustUnderstand| "false"
-	    (princ seq-id s))
-	  (:|p:SelectorSet|
-	    (:|p:Selector| :|Name| "__cimnamespace" (princ namespace s)))
-	  (:|p:OptionSet|
-	    :|xmlns:xsi| "http://www.w3.org/2001/XMLSchema-instance"
-	    (:|p:Option| :|Type| "xs:int" :|Name| "__MI_CallbackRegistration" "11")
-	    (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "0")
-	    (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "1")
-	    (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmiarray:__MI_OPERATIONOPTIONS_CHANNELVALUE" "2")
-	    (:|p:Option| :|Type| "xs:unsignedInt" :|Name| "wmi:__MI_OPERATIONOPTIONS_WRITEERRORMODE" "1")
-	    (:|p:Option| :|Type| "xs:boolean" :|Name| "msftwinrm:UsePreciseArrays" "true"))
-	  (:|p:OperationTimeout| "PT1.000S"))
-	(:|s:Body|
-	  (:|n:Enumerate|
-	    (:|p:OptimizeEnumeration|)
-	    (:|p:MaxElements| "32000")
-	    (:|p:EnumerationMode| "EnumerateObjectAndEPR")))))))
 
 
 

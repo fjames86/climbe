@@ -10,9 +10,12 @@ At present the client is working and capable of talking to the well known OpenPe
 
 The CIMOM/server component is not yet complete and has much more work to do yet before it's stable.
 
-Rudimentary support for Web Services Manangement (WS-Man) encoding is now available. 
-This makes it possible to communicate with the Microsoft Windows WinRM service 
-which exposes WMI using the SOAP-based protocol WS-Man.
+A Web Services Manangement (WS-Man) client is also included. This makes it possible to 
+communicate with the Microsoft Windows WinRM service which exposes WMI using the SOAP-based protocol WS-Man.
+
+This means native access to WMI from Lisp, provided the WinRM service is available on the 
+target machine.
+
 
 ##1. CIMOM
 -----------
@@ -161,11 +164,15 @@ You can now directly communicate with the WinRM service on Windows 8 and Server 
 
 
 Some client calls now available are:
-* call-wsman-get-class 
-This requests a specific class encoded in CIM-XML format. The WS-Man server
-must support this format (this is the format WinRM uses).
+* call-wsman-identity
+* call-wsman-get-class
+* call-wsman-enumerate-classes
+* call-wsman-get-instance
+* call-wsman-enumerate-instances
+* call-wsman-renew
 
-TODO: work out how to do enumerations.
+These have been shown to work with the Windows 8.1 WinRM service. 
+
 
 ##4. Server
 -------------

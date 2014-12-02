@@ -81,10 +81,8 @@
   (cim-class-qualifiers cim))
 
 (defmethod print-object ((cim cim-class) stream)
-  (format stream "#S(CIM-CLASS ~A :SLOTS ~A :METHODS ~A)" 
-	  (cim-name cim)
-	  (mapcar #'cim-name (cim-class-slots cim))
-	  (mapcar #'cim-name (cim-class-methods cim))))
+  (format stream "#S(CIM-CLASS ~A)" 
+	  (cim-name cim)))
 
 
 ;; slots

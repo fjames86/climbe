@@ -25,10 +25,17 @@
            #:call-reference-names
            #:call-enumerate-qualifiers
 
-;;           #:ntlm-http-request
+	   #:*wsman-username*
+	   #:*wsman-password*
+	   #:*wsman-uri*
            #:call-wsman
+	   #:call-wsman-identity
 	   #:call-wsman-get-class
+	   #:call-wsman-enumerate-classes
 	   #:call-wsman-get-instance
+	   #:call-wsman-enumerate-instances
+	   #:call-wsman-renew 
+
            ))
 
 

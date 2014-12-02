@@ -61,7 +61,11 @@
 		 ;; a CIM-XML encoded class. we get this from get-class
 		 ;; calls to WinRM 
 		 (decode-cimxml-class instance))
-		(t 
+		((and (listp tname) (string-equal (car tname) "PullResponse"))
+		 ;; (pull-resonse nil (enumeration-context) (items))
+		 (let ((items (cddr (find "Items" (cddr instance) :key #'caar :test #'string-equal))))
+		   items))
+		(t
 		 ;; WS-Man instances should look like this
 		 (destructuring-bind ((classname . ns) attributes &rest slots) instance
 		   (declare (ignore ns attributes))
@@ -69,7 +73,7 @@
 				      :slots 
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attributes &rest value) slot
-						  (declare (ignore ns attributes))
+						  (declare (ignore ns attributes))						      
 						  (list (intern slot-name :keyword) (car value))))
 					      slots)))))))
 	      instances))
