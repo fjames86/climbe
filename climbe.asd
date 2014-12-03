@@ -37,13 +37,20 @@
                        (:file "qualifiers" :depends-on ("types"))
                        (:file "structures" :depends-on ("qualifiers")))                       
                       :depends-on (:utils))
+             (:module :cimom
+                      :pathname "cimom"
+                      :components
+                      ((:file "package")
+                       (:file "classes" :depends-on ("package"))
+                       (:file "cimom" :depends-on ("classes")))
+                      :depends-on (:core))
              (:module :encoding
                       :pathname "encoding"
                       :components 
                       ((:file "package")
                        (:file "cimxml" :depends-on ("package"))
                        (:file "wsman" :depends-on ("package")))
-                      :depends-on (:core))
+                      :depends-on (:core :cimom))
              (:module :decoding
                       :pathname "decoding"
                       :components
@@ -51,13 +58,6 @@
                        (:file "tags" :depends-on ("package"))
                        (:file "cimxml" :depends-on ("tags"))
                        (:file "wsman" :depends-on ("tags")))
-                      :depends-on (:core))
-             (:module :cimom
-                      :pathname "cimom"
-                      :components
-                      ((:file "package")
-                       (:file "classes" :depends-on ("package"))
-                       (:file "cimom" :depends-on ("classes")))
                       :depends-on (:core))
              (:module :client
                       :pathname "client"
