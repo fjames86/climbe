@@ -9,6 +9,7 @@
   (:export #:decode-xml-file
            #:decode-xml-octets
            #:decode-cimxml
+	   #:decode-cimxml-cim
            #:decode-wsman))
 
 

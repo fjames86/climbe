@@ -4,7 +4,8 @@
 (defpackage #:climbe.encoding
   (:use #:cl 
         #:climbe.utils 
-        #:climbe.core)
+        #:climbe.core
+	#:climbe.cimom)
   (:export #:encode-cimxml-cim
            #:encode-get-class
            #:encode-get-instance

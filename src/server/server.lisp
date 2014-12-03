@@ -234,7 +234,7 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
     (declare (ignore localonly includequalifiers includeclassorigin propertylist))
     (let ((cl (find-cim-class classname namespace)))
       (if cl 
-	  (values cl :class)
+	  (values (class-to-declaration cl) :class)
 	  (cim-error :not-found
 		     (format nil "Class ~S not found" classname))))))
 

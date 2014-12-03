@@ -271,8 +271,9 @@
 ;;    %CIMName;>
 (defun encode-cimxml-keybinding (name value)
   (eformat "<KEYBINDING NAME=\"~A\">~%" name)
-  ;; FIXME: needs to handle value.reference values too!!!
-  (encode-cimxml-keyvalue value)
+  (if (cim-reference-p value)
+      (encode-cimxml-value.reference value)
+      (encode-cimxml-keyvalue value))
   (eformat "</KEYBINDING>~%"))
 
 ;;<!ELEMENT KEYVALUE (#PCDATA)>
@@ -320,10 +321,14 @@
 		 (encode-cimxml-slot* slot-name slot-value slot-type)))
 	 (eformat "</INSTANCE>~%"))
 	(t 
-	 (let ((class (class-of instance)))
-	   (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-name class))
-	   (dolist (slot (cim-class-slots class))
-		 (encode-cimxml-slot slot (slot-value instance (class-name slot))))
+	 (let* ((clos-class (class-of instance))
+		(cim-class (class-to-declaration clos-class)))
+	   (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-name cim-class))
+	   (dolist (clos-slot (closer-mop:class-slots clos-class))
+	     (let ((cim-slot (find (cim-name clos-slot) (cim-class-slots cim-class)
+				   :key #'cim-name :test #'string-equal)))
+	       (when cim-slot 
+		 (encode-cimxml-slot cim-slot (slot-value instance (class-name clos-slot))))))
 	   (eformat "</INSTANCE>~%")))))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>
@@ -358,6 +363,7 @@
 ;;     %EmbeddedObject;
 ;;     xml:lang   NMTOKEN  #IMPLIED>
 (defun encode-cimxml-property (slot &optional value)
+  (declare (type cim-slot slot))
   (eformat "<PROPERTY NAME=\"~A\" TYPE=\"~A\">~%"
 		   (cim-name slot) (encode-cimxml-type (cim-slot-type slot)))
   (dolist (qualifier (cim-qualifiers slot))
@@ -377,6 +383,7 @@
 ;;    %EmbeddedObject;
 ;;    xml:lang   NMTOKEN  #IMPLIED>
 (defun encode-cimxml-property.array (slot &optional value)
+  (declare (type cim-slot slot))
   (eformat "<PROPERTY.ARRAY NAME=\"~A\" TYPE=\"~A\">~%"
 		   (cim-name slot)
 		   (encode-cimxml-type (cim-slot-type slot)))
@@ -394,6 +401,7 @@
 ;;     %ClassOrigin;
 ;;     %Propagated;>
 (defun encode-cimxml-property.reference (slot &optional value)
+  (declare (type cim-slot slot))
   (eformat "<PROPERTY.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 		   (cim-name slot)
 		   (cim-name (find-class (cim-slot-type slot))))
@@ -422,10 +430,9 @@
 	   (encode-cimxml-property.reference slot value))))))
 
 (defun encode-cimxml-slot* (slot-name slot-value slot-type)
-  (encode-cimxml-slot (make-instance 'cim-standard-effective-slot-definition
-									 :cim-type slot-type
-									 :cim-name slot-name)
-					  slot-value))
+  (encode-cimxml-slot (make-cim-slot :name slot-name
+				     :type slot-type)
+		      slot-value))
 
 ;;<!ELEMENT METHOD (QUALIFIER*,(PARAMETER|PARAMETER.REFERENCE|PARAMETER.ARRAY|PARAMETER.REFARRAY)*)>
 ;;<!ATTLIST METHOD 
@@ -434,6 +441,7 @@
 ;;     %ClassOrigin;
 ;;     %Propagated;>
 (defun encode-cimxml-method (method)
+  (declare (type cim-method method))
   (eformat "<METHOD NAME=\"~A\">~%" (cim-name method))
   (dolist (qualifier (cim-qualifiers method))
 	(destructuring-bind (q . v) qualifier
@@ -447,6 +455,7 @@
 ;;     %CIMName;
 ;;     %CIMType;      #REQUIRED>
 (defun %encode-cimxml-parameter (parameter)
+  (declare (type cim-parameter parameter))
   (eformat "<PARAMETER NAME=\"~A\" TYPE=\"~A\">~%"
 	   (cim-name parameter)
 	   (encode-cimxml-type (cim-parameter-type parameter)))
@@ -460,6 +469,7 @@
 ;;     %CIMName;
 ;;     %ReferenceClass;>
 (defun encode-cimxml-parameter.reference (parameter)
+  (declare (type cim-parameter parameter))
   (eformat "<PARAMETER.REFERENCE NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 	   (cim-name parameter)
 	   (cim-name (find-class (cim-parameter-type parameter))))
@@ -474,6 +484,7 @@
 ;;     %CIMType;           #REQUIRED
 ;;     %ArraySize;>
 (defun encode-cimxml-parameter.array (parameter)
+  (declare (type cim-parameter parameter))
   (eformat "<PARAMETER.ARRAY NAME=\"~A\" TYPE=\"~A\">~%"
 	   (cim-name parameter)
 	   (encode-cimxml-type (cim-parameter-type parameter)))
@@ -488,6 +499,7 @@
 ;;     %ReferenceClass;
 ;;     %ArraySize;>
 (defun encode-cimxml-parameter.refarray (parameter)
+  (declare (type cim-parameter parameter))
   (eformat "<PARAMETER.REFARRAY NAME=\"~A\" REFERENCECLASS=\"~A\">~%"
 	   (cim-name parameter)
 	   (cim-name (find-class (cim-parameter-type parameter))))
@@ -499,6 +511,7 @@
 
 ;; Lisp function to wrap the above calls to the various parameter encoders
 (defun encode-cimxml-parameter (parameter)
+  (declare (type cim-parameter parameter))
   (let ((type (cim-parameter-type parameter)))
 	(cond
 	  ((and (listp type) (eq (car type) 'array))
@@ -777,7 +790,7 @@ PARAM-VALUES is a list of form (name value type)."
     (:value.reference
      (encode-cimxml-value.reference value))
     (:class
-     (if (consp value)
+     (if (listp value)
 		 (dolist (class value)
 		   (encode-cimxml-class class))
 		 (encode-cimxml-class value)))

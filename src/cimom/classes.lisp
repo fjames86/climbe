@@ -394,10 +394,10 @@ through the local namespace repository."
   (make-cim-class
    :name (cim-name class)
    :slots (mapcar (lambda (slot)
-					(list (cim-name slot)
-						  nil ;; value???
-						  (cim-slot-type slot)))
-				  (cim-class-direct-slots class))
+		    (make-cim-slot :name (cim-name slot)
+				   :type (cim-type slot)
+				   :qualifiers (cim-qualifiers slot)))
+		  (cim-class-direct-slots class))
    :qualifiers (cim-qualifiers class)
    :methods (cim-methods class)
    :superclass (let ((scs (cim-class-superclasses class)))
