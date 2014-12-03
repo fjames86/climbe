@@ -157,6 +157,17 @@ Note that all these client calls use the CIMXML encoding protocol. Experimental 
 
 TODO: need to support more of the CIM HTTP header codes.
 
+```
+(setf *cim-uri* "https://my.host.contoso.com:5989")
+
+(call-enumerate-classes nil :namespace "root/my/namespace")
+
+(call-get-class nil "myclass" :namespace "root/my/namespace")
+
+(call-enumerate-instances nil "Myclass" :namespace "root/my/namespace")
+```
+
+
 ###3.2 WS-Man client
 ---------------------
 
@@ -172,6 +183,21 @@ Some client calls now available are:
 * call-wsman-renew
 
 These have been shown to work with the Windows 8.1 WinRM service. 
+
+```
+(setf *wsman-uri* "https://my.host.contoso.com:5985/wsman"
+      *wsman-username* "administrator"
+      *wsman-password* "password")
+
+(call-wsman-enumerate-classes :namespace "root/my/namespace")
+
+(call-wsman-get-class "myclass" :namespace "root/my/namespace")
+
+(call-wsman-enumerate-instances "Win32_LogicalDisk" :namespace "root/cimv2")
+
+(call-wsman-get-instance "Win32_LogicalDisk" '(("DeviceId" "C:")) :namespace "root/cimv2")
+
+```
 
 
 ##4. Server
