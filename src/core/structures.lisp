@@ -71,6 +71,14 @@
 (defstruct cim-instance
   namespace classname slots)
 
+(defmethod cim-name ((cim cim-instance))
+    (cim-instance-classname cim))
+
+(defmethod cim-name ((cim cim-reference)) 
+    (cim-reference-classname cim))
+
+
+
 ;; CIM-CLASS is a client-side representation of a CIM class definition. 
 ;; It should be used everywhere outside the cimom module (where we use real CLOS meta-class instances).
 (defstruct cim-class

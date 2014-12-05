@@ -456,7 +456,7 @@
 (deftag methodcall (name) (localclasspath localinstancepath paramvalue*)
   (make-cim-request 
    :method-name name
-   :namespace-path (or localclasspath localinstancepath)
+   :reference (or localclasspath localinstancepath)
    :arguments paramvalue))
 
 ;;<!ELEMENT PARAMVALUE (VALUE|VALUE.REFERENCE|VALUE.ARRAY|VALUE.REFARRAY)?>

@@ -96,7 +96,43 @@ the encoding element type, as listed in ENCODE-CIMXML-IRETURNVALUE."
       (otherwise (cim-error :not-supported method-name)))))
   
 (defun process-extrinsic-request (request)
-  "Returns (VALUES return-value out-params). OUT-PARAMS should be a list of (param-name value type)."
+  "Returns (VALUES return-value out-params). OUT-PARAMS should be a list of (param-name value type).
+We can be given either a class or an instance. If it's a class then we should first
+find the CIM class (in the local repository). If it's an instance then we need to first
+ask the relevant provider for the real instance, since we are only give nthe key slots. This 
+means we need to call the provider-get-instnace call."
+  (with-slots (climbe.core::method-name climbe.core::arguments climbe.core::reference) request
+    (let* ((method-name climbe.core::method-name)
+	   (reference climbe.core::reference)
+	   (arguments climbe.core::arguments)
+	   (namespace (find-namespace (cim-reference-namespace reference)))
+	   (class (if namespace 
+		      (find-cim-class (cim-name reference) namespace)
+		      (cim-error :invalid-namespace)))
+	   (method (if class
+		       (find-cim-method method-name class)
+		       (cim-error :not-found))))
+      (unless method (cim-error :not-found method-name))
+      
+      (let ((real-args 
+	     (mapcan (lambda (param)
+		       (when (qualifier-p :in (cim-parameter-qualifiers param))
+			 (let ((a (find (cim-parameter-name param) arguments :key #'first :test #'string-equal)))
+			   (when a 
+			     (destructuring-bind (arg-name arg-val arg-type) a			     
+			       (declare (ignore arg-name arg-type))
+			       ;; FIXME: validate argument type
+			       (list arg-val))))))
+		     (cim-method-parameters method))))
+	;; apply the function to the args
+	(if (cim-reference-keyslots reference)
+	    ;; it's an instance
+	    (let ((instance (provider-get-instance (convert-cim-instance reference namespace))))
+	      (apply (cim-method-function method) instance real-args))
+	    ;; it's aclass
+	    (apply (cim-method-function method) nil real-args))))))
+	    
+	  
   (declare (ignore request))
   (cim-error :not-supported "Extrinsic methods not supported (yet)"))
 	  

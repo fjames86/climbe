@@ -35,16 +35,17 @@
 
 
 (defcim-method say-hello ((instance person) 
-                          (message string "Message" :in (:description "Message to say"))                          
+                          (message string "Message" :in (:description "Message to say")) 
                           (response string "Response" :out (:description "Response to message")))
     ((:return-type uint16)
      (:cim-name "SayHello")
      (:qualifiers (:description "A method to say hello")))
   (values 0
-          (list (cons 'response 
+          (list (list 'response 
                       (format nil "xxx Hello, ~A: ~A" 
                               (if instance (person-name instance) "anon")
-                              message)))))
+                              message)
+		     'string))))
 
 
 (defcim-class Parent (person)
