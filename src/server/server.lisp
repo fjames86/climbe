@@ -63,41 +63,42 @@
   "Returns (VALUES return-value return-type). RETURN-TYPE should be a keyword indicating
 the encoding element type, as listed in ENCODE-CIMXML-IRETURNVALUE."
   ;; FIXME: intern to a keyword? shouldn't really be doing all these strcmps
-  (let ((method-name (cim-request-method-name request)))
-	(hunchentoot:log-message* :info "~A" method-name)
-    (cond 
-      ((string-equal method-name "GetClass")
+  (let* ((method-name (cim-request-method-name request))
+	 (kw (intern (string-upcase method-name) :keyword)))
+    (hunchentoot:log-message* :info "~A" method-name)
+    (case kw
+      (:getclass
        (handle-get-class request))
-      ((string-equal method-name "GetInstance")
+      (:getinstance
        (handle-get-instance request))
-      ((string-equal method-name "DeleteInstance")
+      (:deleteinstance
        (handle-delete-instance request))
-      ((string-equal method-name "CreateInstance")
+      (:createinstance
        (handle-create-instance request))
-      ((string-equal method-name "ModifyInstance")
+      (:modifyinstance
        (handle-modify-instance request))
-      ((string-equal method-name "EnumerateClasses")
+      (:enumerateclasses
        (handle-enumerate-classes request))
-      ((string-equal method-name "EnumerateClassNames")
+      (:enumerateclassnames
        (handle-enumerate-class-names request))
-      ((string-equal method-name "EnumerateInstances")
+      (:enumerateinstances
        (handle-enumerate-instances request))
-      ((string-equal method-name "EnumerateInstanceNames")
+      (:enumerateinstancenames
        (handle-enumerate-instance-names request))
-      ((string-equal method-name "Associators")
+      (:associators
        (handle-associators request))
-      ((string-equal method-name "AssociatorNames")
+      (:associatornames
        (handle-associator-names request))
-      ((string-equal method-name "References")
+      (:references
        (handle-references request))
-      ((string-equal method-name "ReferenceNames")
+      (:referencenames
        (handle-reference-names request))
-      (t (cim-error :not-supported method-name)))))
+      (otherwise (cim-error :not-supported method-name)))))
   
 (defun process-extrinsic-request (request)
   "Returns (VALUES return-value out-params). OUT-PARAMS should be a list of (param-name value type)."
   (declare (ignore request))
-  (cim-error :not-supported "Extrinsic methods not supported"))
+  (cim-error :not-supported "Extrinsic methods not supported (yet)"))
 	  
 (defun handle-request (acceptor request)
   "Takes Hunchentoot acceptor and request objects, decodes the post data from the request, passes the 

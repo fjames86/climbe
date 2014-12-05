@@ -10,6 +10,7 @@
 ;; ------------------------------
 ;; examples
 
+(in-namespace "root/climbe/test")
 
 (defcim-class Person ()
   ((name string 

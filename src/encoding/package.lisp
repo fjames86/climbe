@@ -21,6 +21,7 @@
            #:encode-references
            #:encode-reference-names
            #:encode-enumerate-qualifiers
+	   #:encode-invoke-method
 
            #:encode-cimxml-response
 

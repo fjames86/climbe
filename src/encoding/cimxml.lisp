@@ -442,7 +442,7 @@
 ;;     %Propagated;>
 (defun encode-cimxml-method (method)
   (declare (type cim-method method))
-  (eformat "<METHOD NAME=\"~A\">~%" (cim-name method))
+  (eformat "<METHOD NAME=\"~A\" TYPE=\"~A\">~%" (cim-name method) (encode-cimxml-type (cim-method-return-type method)))
   (dolist (qualifier (cim-qualifiers method))
 	(destructuring-bind (q . v) qualifier
 	  (encode-cimxml-qualifier q v)))
@@ -1206,6 +1206,19 @@ PARAM-VALUES is a list of form (name value type)."
 ;; delete the instances created above?
 (defun encode-unsubscribe ()
   nil)
+
+
+;; TODO: invoke method
+
+(defun encode-invoke-method (method-name class-name arguments &key (id 1) (namespace "root/cimv2") key-slots)
+  (encode-cimxml-request 
+   method-name 
+   :id id
+   :namespace namespace
+   :intrinsic-p nil
+   :arguments arguments
+   :class-name class-name 
+   :key-slots key-slots))
 
 
 ;; --------------- export messsages ------

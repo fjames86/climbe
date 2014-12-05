@@ -307,24 +307,22 @@ If SUPER-CLASSES is T all the superclasses are also removed."
                          :in-params
                          (list ,@(mapcar (lambda (parameter)
                                            (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
-                                             `(cons ',lisp-name
-                                                    (make-cim-parameter 
-                                                     :name ,(if cim-name cim-name (string lisp-name))
-                                                     :type ',type
-                                                     :qualifiers (make-qualifiers-list 
-                                                                  (list ,@(qualifiers-list-helper 
-                                                                           qualifiers)))))))
+                                             `(make-cim-parameter 
+					       :name ,(if cim-name cim-name (string lisp-name))
+					       :type ',type
+					       :qualifiers (make-qualifiers-list 
+							    (list ,@(qualifiers-list-helper 
+								     qualifiers))))))
                                          in-params))
                          :out-params
                          (list ,@(mapcar (lambda (parameter)
                                            (destructuring-bind (lisp-name type &optional cim-name &rest qualifiers) parameter
-                                             `(cons ',lisp-name
-                                                    (make-cim-parameter 
-                                                     :name ,(if cim-name cim-name (string lisp-name))
-                                                     :type ',type
-                                                     :qualifiers (make-qualifiers-list 
-                                                                  (list ,@(qualifiers-list-helper 
-                                                                           qualifiers)))))))
+                                             `(make-cim-parameter 
+					       :name ,(if cim-name cim-name (string lisp-name))
+					       :type ',type
+					       :qualifiers (make-qualifiers-list 
+							    (list ,@(qualifiers-list-helper 
+								     qualifiers))))))
                                          out-params))
                          :function 
                          ,(cond

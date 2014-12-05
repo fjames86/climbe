@@ -27,6 +27,8 @@
 (defmethod cim-name ((method cim-method))
   (cim-method-name method))
 
+(defmethod cim-qualifiers ((method cim-method))
+  (cim-method-qualifiers method))
 
 
 ;; ###################################################################

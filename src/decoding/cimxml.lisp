@@ -387,7 +387,7 @@
 (deftag method (name type classorigin) (qualifier* parameter* parameter.reference* parameter.array* parameter.refarray*)  
   (make-cim-method 
    :name name
-   :return-type (decode-cim-type type)
+   :return-type (if type (decode-cim-type type) (error "no return type specified"))
    :in-params (append parameter parameter.reference parameter.array parameter.refarray)
    :qualifiers qualifier
    :origin classorigin))

@@ -82,3 +82,10 @@
              (:file "package" :depends-on (:core :cimom :client :server :schema)) )))
   :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm :cl-who))
 
+
+
+
+;; ----------------------
+
+;; a special system that loads the cim classes?
+
