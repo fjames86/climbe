@@ -379,13 +379,14 @@ through the local namespace repository."
 (defun instance-to-cim-instance (instance)
   "Convert a CLOS instance to a CIM-INSTANCE."
   (let ((cl (class-of instance)))
+    (break)
     (make-cim-instance :classname (cim-name cl)
                        :slots 
                        (mapcar (lambda (slot)
                                  (list (cim-name slot)
                                        (slot-value instance (closer-mop:slot-definition-name slot))
                                        (cim-slot-type slot)))
-                               (cim-class-direct-slots cl)))))
+                               (closer-mop:class-slots cl)))))
 
 (defun class-to-declaration (class)
   "Converts a CIM-STANDARD-CLASS instance into a CIM-CLASS structure"

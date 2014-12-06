@@ -360,7 +360,7 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
   (destructuring-request (request namespace) (classname)
     (let ((cl (find-cim-class classname namespace)))
       (if cl
-	  (values (enumerate-instances (class-name cl))
+	  (values (mapcar #'instance-to-cim-instance (enumerate-instances cl))
 		  :value.namedinstance)
 	  (cim-error :invalid-class classname)))))
 

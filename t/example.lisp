@@ -58,7 +58,7 @@
                         (make-instance 'parent
                                        :name "Alice" :age 30)))
 
-(defmethod provider-enumerate-instances ((class-name (eql 'parent)))
+(defmethod provider-enumerate-instances ((dummy parent))
   *parents*)
 
 (defmethod provider-get-instance ((instance person))
@@ -72,7 +72,7 @@
   (:qualifiers (:description "A child person.")))
 
 (defvar *children* (list (make-instance 'child :name "Bob" :age 2)))
-(defmethod provider-enumerate-instances ((class-name (eql 'child)))
+(defmethod provider-enumerate-instances ((dummy child))
   *children*)
 
 (defmethod provider-get-instance ((instance child))
