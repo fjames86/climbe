@@ -24,6 +24,7 @@
            #:call-references
            #:call-reference-names
            #:call-enumerate-qualifiers
+	   #:call-invoke-method 
 
 	   #:*wsman-username*
 	   #:*wsman-password*

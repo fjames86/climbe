@@ -131,10 +131,6 @@ means we need to call the provider-get-instnace call."
 	      (apply (cim-method-function method) instance real-args))
 	    ;; it's aclass
 	    (apply (cim-method-function method) nil real-args))))))
-	    
-	  
-  (declare (ignore request))
-  (cim-error :not-supported "Extrinsic methods not supported (yet)"))
 	  
 (defun handle-request (acceptor request)
   "Takes Hunchentoot acceptor and request objects, decodes the post data from the request, passes the 

@@ -439,14 +439,19 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 ;; TODO: invoke method
 
 (defun call-invoke-method (drakma-args method-name object arguments &key (namespace *cim-namespace*))
-  (apply #'call-cim-server 
-	 (encode-invoke-method method-name (cim-name object) arguments
-			       :namespace namespace
-			       :key-slots (when (cim-instance-p object)
-					    (cim-instance-slots object)))
-	 method-name 
-	 (cim-name object)
-	 drakma-args))
+  (let ((class-name (if (stringp object) object (cim-name object))))
+    (let ((response 
+	   (cim-message-response 
+	    (apply #'call-cim-server 
+		   (encode-invoke-method method-name class-name arguments
+					 :namespace namespace
+					 :key-slots (when (cim-instance-p object)
+						      (cim-instance-slots object)))
+		   method-name 
+		   class-name 
+		   drakma-args))))
+      (values (cim-response-return-value response)
+	      (cim-response-out-parameters response)))))
 
 
 
