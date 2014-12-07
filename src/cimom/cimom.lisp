@@ -151,7 +151,7 @@ in the Association Class that refers to the returned Object MUST match the value
 (defun association-instances (instance assoc-class &key result-class role result-role property-list)
   "Find all concrete instances associated with the given instance.
 
-If RESULT-CLASS is non-nil, it should be a symbol designating a CIM Class name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be either an Instance of this class (or one of its subclasses).
+If RESULT-CLASS is non-nil, it should be a symbol designating a CIM Class name. It acts as a filter on the returned set of Objects by mandating that each returned Object MUST be either an Instance of this class or one of its subclasses.
 "
   (declare (ignore property-list) )
   ;; if result-class is provided then filter the resulting instances for those of this class

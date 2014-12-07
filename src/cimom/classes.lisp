@@ -374,8 +374,8 @@ through the local namespace repository."
       (error "Class ~S not found." (cim-instance-classname cim-instance)))
     (let ((inst (make-instance cl)))
       (dolist (slot (cim-instance-slots cim-instance))
-	(destructuring-bind (slot-name slot-value slot-type) slot
-	  (declare (ignore slot-type))
+	(destructuring-bind (slot-name slot-value slot-type &rest options) slot
+	  (declare (ignore slot-type options))
 	  (let ((slot-definition (find-cim-slot slot-name cl)))
 	    (if slot-definition
 		(setf (slot-value inst (closer-mop:slot-definition-name slot-definition))
