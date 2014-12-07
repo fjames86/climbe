@@ -90,10 +90,32 @@
 (defmethod cim-qualifiers ((cim cim-class))
   (cim-class-qualifiers cim))
 
-(defmethod print-object ((cim cim-class) stream)
-  (format stream "#S(CIM-CLASS ~A)" 
-	  (cim-name cim)))
+(defun cim-class-method-names (class)
+  (declare (type cim-class class))
+  (mapcar #'cim-name (cim-class-methods class)))
 
+(defun cim-class-slot-names (class)
+  (declare (type cim-class class))
+  (mapcar #'cim-name (cim-class-slots class)))
+
+
+(defmethod print-object ((cim cim-class) stream)
+  (format stream "#S(CIM-CLASS ~A" (cim-name cim))
+
+  (format stream " :SLOTS (")
+  (let ((first t))
+    (dolist (slot-name (cim-class-slot-names cim))
+      (unless first (format stream " "))
+      (format stream "~A" slot-name)
+      (setf first nil)))
+
+  (format stream ") :METHODS (")
+  (let ((first t))
+    (dolist (method-name (cim-class-method-names cim))
+      (unless first (format stream " "))
+      (format stream "~A" method-name)
+      (setf first nil)))
+  (format stream "))"))
 
 ;; slots
 (defstruct cim-slot 

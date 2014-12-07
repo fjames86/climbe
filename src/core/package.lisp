@@ -175,6 +175,8 @@
            #:cim-class-methods
            #:cim-class-superclass
            #:cim-class-p
+	   #:cim-class-method-names
+	   #:cim-class-slot-names
 
            #:cim-slot
            #:make-cim-slot

@@ -49,9 +49,11 @@
 
 
 (defun cim-class-direct-slots (class)
-  "Get the slots of a class."
+  "Get the slots of a class. This incldues all the slots of the parent classes."
   (declare (type cim-standard-class class))
-  (closer-mop:class-direct-slots class))
+  (let ((classes (cim-class-superclasses class)))
+    (mapcan #'closer-mop:class-direct-slots 
+	    (append classes (list class)))))
 
 (defun cim-class-superclasses (class)
   "Get all CIM superclasses."
@@ -71,6 +73,11 @@
     (mapcan (lambda (sub)
               (cons sub (cim-class-subclasses sub)))
             subs)))
+
+(defun cim-class-direct-methods (class)
+  (let ((classes (cim-class-superclasses class)))
+    (mapcan #'cim-methods 
+	    (append classes (list class)))))
 
 (defmethod closer-mop:validate-superclass ((class cim-standard-class) (super standard-class))
   t)
@@ -338,8 +345,8 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 (defun find-cim-method (cim-name class)
   "Find a CIM method on a class."
   (declare (type string cim-name)
-		   (type cim-standard-class class))
-  (find cim-name (cim-methods class)
+	   (type cim-standard-class class))
+  (find cim-name (cim-class-direct-methods class)
         :key #'cim-name 
         :test #'string-equal))
 
@@ -398,7 +405,7 @@ through the local namespace repository."
 				   :qualifiers (cim-qualifiers slot)))
 		  (cim-class-direct-slots class))
    :qualifiers (cim-qualifiers class)
-   :methods (cim-methods class)
+   :methods (cim-class-direct-methods class)
    :superclass (let ((scs (cim-class-superclasses class)))
 				 (when scs
 				   (cim-name (car scs))))))

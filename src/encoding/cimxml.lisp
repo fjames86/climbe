@@ -324,7 +324,7 @@
 	 (let* ((clos-class (class-of instance))
 		(cim-class (class-to-declaration clos-class)))
 	   (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-name cim-class))
-	   (dolist (clos-slot (closer-mop:class-slots clos-class))
+	   (dolist (clos-slot (cim-class-direct-slots clos-class))
 	     (let ((cim-slot (find (cim-name clos-slot) (cim-class-slots cim-class)
 				   :key #'cim-name :test #'string-equal)))
 	       (when cim-slot 
