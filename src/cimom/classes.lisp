@@ -357,10 +357,8 @@ If SUPER-CLASSES is T all the superclasses are also removed."
   (let ((method (find-cim-method cim-name class)))
     (if method
         (apply (cim-method-function method) args)
-        (error "Method ~S not found" cim-name))))
-
-
-
+        (cim-error :not-found
+		   (format nil "Method ~S not found" cim-name)))))
 
 (defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
@@ -371,7 +369,8 @@ through the local namespace repository."
 				namespace
 				(find-namespace (cim-instance-namespace cim-instance))))))
     (unless cl 
-      (error "Class ~S not found." (cim-name cim-instance)))
+      (cim-error :not-found 
+		 (format nil "Class ~S not found." (cim-name cim-instance))))
     (let ((inst (make-instance cl)))
       (dolist (slot (cim-instance-slots cim-instance))
 	(destructuring-bind (slot-name slot-value slot-type &rest options) slot

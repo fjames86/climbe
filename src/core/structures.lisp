@@ -66,6 +66,15 @@
 (defmethod cim-name ((cim cim-instance))
     (cim-instance-name cim))
 
+(defmacro cim-instance (class-name &rest slots)
+  "Macro to facilitate making an instance."
+  `(make-cim-instance :name ,(string class-name)
+		      :slots (list ,@(mapcar (lambda (slot)
+					       (destructuring-bind (slot-name slot-value slot-type) slot
+						 `(list ,(string slot-name) ,slot-value ',slot-type)))
+					     slots))))
+
+
 
 ;; CIM-CLASS is a client-side representation of a CIM class definition. 
 ;; It should be used everywhere outside the cimom module (where we use real CLOS meta-class instances).
