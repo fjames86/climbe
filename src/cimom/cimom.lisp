@@ -34,7 +34,7 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
     (setf class (find-class class)))
   ;; call the generic on each of the classes, least-specific first
   (do ((insts (ignore-cim-errors (provider-enumerate-instances (make-instance class)))
-              (nconc insts 
+              (append insts 
                      (ignore-cim-errors (provider-enumerate-instances (make-instance (car classes))))))
        (classes (when deep-inheritance (cim-class-subclasses class))
                 (cdr classes)))
