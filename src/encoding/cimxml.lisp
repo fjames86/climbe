@@ -655,9 +655,7 @@ PARAM-VALUES is a list of form (name value type)."
 	 (encode-cimxml-classname value))
 	(:instancename
 	 (let ((class-name (cim-name value))
-	       (slots (if (cim-instance-p value) 
-			  (cim-instance-slots value) 
-			  (cim-instance-slots value))))
+	       (slots (cim-instance-slots value)))
 	   (encode-cimxml-instancename class-name slots)))
 	(:qualifier.declaration
 	 (error "FIXME!!!"))

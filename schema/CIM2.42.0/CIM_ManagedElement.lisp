@@ -3,6 +3,7 @@
 
 (in-package #:climbe)
 
+(in-namespace "root/interop")
 
 (DEFCIM-CLASS CIM_MANAGEDELEMENT NIL
               ((INSTANCEID STRING :CIM-NAME "InstanceID" :QUALIFIERS

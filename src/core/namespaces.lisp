@@ -101,8 +101,9 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
   (declare (type cim-namespace namespace))
   (let ((parent (cim-namespace-parent namespace)))
     (if parent
-	(nconc (namespace-list parent) (list namespace))
+	(append (namespace-list parent) (list namespace))
 	(list namespace))))
+
 
 ;; current namespace
 (defparameter *namespace* (find-namespace "root")

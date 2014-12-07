@@ -4,6 +4,8 @@
 (in-package #:climbe)
 
 
+(in-namespace "root/interop")
+
 (DEFCIM-CLASS CIM_NAMESPACE (CIM_MANAGEDELEMENT)
               ((SYSTEMCREATIONCLASSNAME STRING :CIM-NAME
                 "SystemCreationClassName" :QUALIFIERS
@@ -128,3 +130,18 @@ Note that the Name property of ManagedSystemElement is also defined as a user-fr
                (:DESCRIPTION
                 "Namespace is deprecated. See CIM_WBEMServerNamespace as the replacement for this class.
 Namespace provides a domain (in other words, a container), in which the instances [of a class] are guaranteed to be unique per the KEY qualifier definitions. It is named relative to the CIM_ObjectManager implementation that provides such a domain.")))
+
+
+
+(defmethod provider-enumerate-instances ((dummy cim_namespace))
+  ;; enumerate all namespaces as instance of the cim_namespace class
+  (mapcar (lambda (namespace)
+	    (let ((ns (make-instance 'cim_namespace)))
+	      (setf (slot-value ns 'name)
+		    namespace)
+	      ns))
+	  (mapcan (lambda (namespace)
+		    (if (listp namespace)
+			namespace
+			(list namespace)))
+		  (namespace-tree))))

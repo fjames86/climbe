@@ -52,8 +52,12 @@
   "Get the slots of a class. This incldues all the slots of the parent classes."
   (declare (type cim-standard-class class))
   (let ((classes (cim-class-superclasses class)))
-    (mapcan #'closer-mop:class-direct-slots 
-	    (append classes (list class)))))
+    (do ((slots nil)
+	 (classes (append classes (list class)) (cdr classes)))
+	((null classes) slots)
+      (let ((s (closer-mop:class-direct-slots (car classes))))
+	(setf slots (append slots s))))))
+		
 
 (defun cim-class-superclasses (class)
   "Get all CIM superclasses."
@@ -229,7 +233,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
        (,@(mapcar (lambda (slot)
 		    (destructuring-bind (slot-name slot-type &rest args) slot
 			`(,slot-name :cim-type ,slot-type ,@args)))
-		  slots))      
+		  slots))     
        ;; set the metaclass
        (:metaclass 
         ,(let ((quals (cdr (assoc :qualifiers options))))

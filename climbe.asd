@@ -73,19 +73,21 @@
                       ((:file "package")
                        (:file "server" :depends-on ("package")))
                       :depends-on (:core :cimom :encoding :decoding))
-			 (:module :schema
-					  :pathname "schema"
-					  :components
-					  ((:file "package")
-					   (:file "schema" :depends-on ("package")))
-					  :depends-on (:core :cimom :encoding :decoding))
-             (:file "package" :depends-on (:core :cimom :client :server :schema)) )))
+	     (:module :schema
+		      :pathname "schema"
+		      :components
+		      ((:file "package")
+		       (:file "schema" :depends-on ("package")))
+		      :depends-on (:core :cimom :encoding :decoding))
+             (:file "package" :depends-on (:core :cimom :client :server :schema))))
+   (:module :cim-schema
+	    :pathname "schema/CIM2.42.0"
+	    :components
+	    ((:file "CIM_ManagedElement")
+	     (:file "CIM_Namespace" :depends-on ("CIM_ManagedElement")))
+	    :depends-on (:src)))
   :depends-on (:closer-mop :cl-ppcre :cxml :drakma :hunchentoot :babel :parse-number :ntlm :cl-who))
 
 
 
-
-;; ----------------------
-
-;; a special system that loads the cim classes?
 
