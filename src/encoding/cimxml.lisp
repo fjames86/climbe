@@ -249,13 +249,15 @@
 (defun encode-cimxml-instancename (class-name key-slots)
   (eformat "<INSTANCENAME CLASSNAME=\"~A\">~%" class-name)
   (cond
-	((cim-reference-p key-slots)
-	 (encode-cimxml-value.reference key-slots))
-	((atom key-slots)
-	 (encode-cimxml-keyvalue key-slots))
-	(t
-	 (dolist (key-slot key-slots)
-	   (encode-cimxml-keybinding (car key-slot) (cdr key-slot)))))
+    ((cim-reference-p key-slots)
+     (encode-cimxml-value.reference key-slots))
+    ((atom key-slots)
+     (encode-cimxml-keyvalue key-slots))
+    (t
+     (dolist (key-slot key-slots)
+       (destructuring-bind (slot-name slot-value slot-type &rest options) key-slot
+	 (declare (ignore slot-type options))
+	 (encode-cimxml-keybinding slot-name slot-value)))))
   (eformat "</INSTANCENAME>~%"))
 
 ;;<!ELEMENT OBJECTPATH (INSTANCEPATH|CLASSPATH)>
@@ -328,7 +330,7 @@
 	     (let ((cim-slot (find (cim-name clos-slot) (cim-class-slots cim-class)
 				   :key #'cim-name :test #'string-equal)))
 	       (when cim-slot 
-		 (encode-cimxml-slot cim-slot (slot-value instance (class-name clos-slot))))))
+		 (encode-cimxml-slot cim-slot (slot-value instance (closer-mop:slot-definition-name clos-slot))))))
 	   (eformat "</INSTANCE>~%")))))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>
@@ -593,7 +595,7 @@
 PARAM-VALUES is a list of form (name value type)."
   (eformat "<METHODCALL NAME=\"~A\">~%" method-name)
   (let ((namespace (cim-reference-namespace reference))
-		(class-name (cim-reference-classname reference)))
+	(class-name (cim-reference-classname reference)))
 	(if (cim-reference-keyslots reference)
 		(encode-cimxml-localinstancepath (parse-namespace namespace)
 								  class-name
@@ -651,8 +653,11 @@ PARAM-VALUES is a list of form (name value type)."
 	(:classname
 	 (encode-cimxml-classname value))
 	(:instancename
-	 (encode-cimxml-instancename (cim-instance-classname value)
-								 (cim-instance-slots value)))	
+	 (let ((class-name (cim-name value))
+	       (slots (if (cim-instance-p value) 
+			  (cim-instance-slots value) 
+			  (cim-reference-keyslots value))))
+	   (encode-cimxml-instancename class-name slots)))
 	(:qualifier.declaration
 	 (error "FIXME!!!"))
 	(:class

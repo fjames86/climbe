@@ -210,7 +210,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
   (let ((slots (cim-class-direct-slots (class-of instance))))
 	(mapcar (lambda (slot)
 			  (list (cim-name slot)
-					(slot-value instance (class-name slot))
+					(slot-value instance (closer-mop:slot-definition-name slot))
 					(cim-type slot)))
 			slots)))
 
@@ -218,7 +218,7 @@ If SUPER-CLASSES is T all the superclasses are also removed."
   (let ((slots (cim-key-slots instance)))
 	(mapcar (lambda (slot)
 			  (list (cim-name slot)
-					(slot-value instance (class-name slot))
+					(slot-value instance (closer-mop:slot-definition-name slot))
 					(cim-type slot)))
 			slots)))
 
@@ -365,15 +365,19 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 (defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
 through the local namespace repository."
-  (declare (type cim-instance cim-instance))
-  (let ((cl (find-cim-class (cim-instance-classname cim-instance)
+  (declare (type (or cim-instance cim-reference) cim-instance))
+  (let ((cl (find-cim-class (cim-name cim-instance)
 			    (if namespace
-					namespace
-					(find-namespace (cim-instance-namespace cim-instance))))))
+				namespace
+				(find-namespace (if (cim-instance-p cim-instance)
+						    (cim-instance-namespace cim-instance)
+						    (cim-reference-namespace cim-instance)))))))
     (unless cl 
-      (error "Class ~S not found." (cim-instance-classname cim-instance)))
+      (error "Class ~S not found." (cim-name cim-instance)))
     (let ((inst (make-instance cl)))
-      (dolist (slot (cim-instance-slots cim-instance))
+      (dolist (slot (if (cim-instance-p cim-instance)
+			(cim-instance-slots cim-instance)
+			(cim-reference-keyslots cim-instance)))
 	(destructuring-bind (slot-name slot-value slot-type &rest options) slot
 	  (declare (ignore slot-type options))
 	  (let ((slot-definition (find-cim-slot slot-name cl)))
