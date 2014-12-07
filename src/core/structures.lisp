@@ -58,25 +58,13 @@
   method-name intrinsic-p return-value return-type out-parameters error)
 
 
-
-
-
-;; a reference is an object that is used to specify an instance of a class by 
-;; naming its KEY slots only. This is enough to uniquely specify the instance.
-(defstruct cim-reference
-  namespace classname keyslots)
-
 ;; a CIM-INSTANCE is used as a client-side object to represent an instance of a class. 
 ;; On the server-side we can directly use CLOS instances.
 (defstruct cim-instance
-  namespace classname slots)
+  namespace name slots)
 
 (defmethod cim-name ((cim cim-instance))
-    (cim-instance-classname cim))
-
-(defmethod cim-name ((cim cim-reference)) 
-    (cim-reference-classname cim))
-
+    (cim-instance-name cim))
 
 
 ;; CIM-CLASS is a client-side representation of a CIM class definition. 

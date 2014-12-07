@@ -153,17 +153,10 @@
            #:cim-response-error
            #:cim-response-p
 
-           #:cim-reference
-           #:make-cim-reference
-           #:cim-reference-namespace
-           #:cim-reference-classname
-           #:cim-reference-keyslots
-           #:cim-reference-p
-
            #:cim-instance
            #:make-cim-instance
            #:cim-instance-namespace
-           #:cim-instance-classname
+           #:cim-instance-name
            #:cim-instance-slots
            #:cim-instance-p
 

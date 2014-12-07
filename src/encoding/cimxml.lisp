@@ -97,9 +97,10 @@
 
 ;;<!ELEMENT VALUE.REFERENCE (CLASSPATH|LOCALCLASSPATH|CLASSNAME|INSTANCEPATH|LOCALINSTANCEPATH|INSTANCENAME)>
 (defun encode-cimxml-value.reference (reference)
-  (let ((namespace (cim-reference-namespace reference))
-		(classname (cim-reference-classname reference))
-		(keyslots (cim-reference-keyslots reference)))
+  (declare (type cim-instance reference))
+  (let ((namespace (cim-instance-namespace reference))
+	(classname (cim-instance-name reference))
+	(keyslots (cim-instance-slots reference)))
 	(cond
 	  ((and namespace classname (null keyslots))
 	   ;; classpath/localclasspath
@@ -135,7 +136,7 @@
 (defun encode-cimxml-value.namedinstance (instance)
   (declare (type cim-instance instance))
   (eformat "<VALUE.NAMEDINSTANCE>~%")
-  (encode-cimxml-instancename (cim-instance-classname instance)
+  (encode-cimxml-instancename (cim-instance-name instance)
 							  (cim-instance-slots instance))
   (encode-cimxml-instance instance)
   (eformat "</VALUE.NAMEDINSTANCE>~%"))
@@ -249,7 +250,7 @@
 (defun encode-cimxml-instancename (class-name key-slots)
   (eformat "<INSTANCENAME CLASSNAME=\"~A\">~%" class-name)
   (cond
-    ((cim-reference-p key-slots)
+    ((cim-instance-p key-slots)
      (encode-cimxml-value.reference key-slots))
     ((atom key-slots)
      (encode-cimxml-keyvalue key-slots))
@@ -273,7 +274,7 @@
 ;;    %CIMName;>
 (defun encode-cimxml-keybinding (name value)
   (eformat "<KEYBINDING NAME=\"~A\">~%" name)
-  (if (cim-reference-p value)
+  (if (cim-instance-p value)
       (encode-cimxml-value.reference value)
       (encode-cimxml-keyvalue value))
   (eformat "</KEYBINDING>~%"))
@@ -317,7 +318,7 @@
 (defun encode-cimxml-instance (instance)
   (cond
 	((cim-instance-p instance)
-	 (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-instance-classname instance))
+	 (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-instance-name instance))
 	 (dolist (slot (cim-instance-slots instance))
 	   (destructuring-bind (slot-name slot-value slot-type) slot
 		 (encode-cimxml-slot* slot-name slot-value slot-type)))
@@ -594,12 +595,12 @@
 
 PARAM-VALUES is a list of form (name value type)."
   (eformat "<METHODCALL NAME=\"~A\">~%" method-name)
-  (let ((namespace (cim-reference-namespace reference))
-	(class-name (cim-reference-classname reference)))
-	(if (cim-reference-keyslots reference)
+  (let ((namespace (cim-instance-namespace reference))
+	(class-name (cim-instance-name reference)))
+	(if (cim-instance-slots reference)
 		(encode-cimxml-localinstancepath (parse-namespace namespace)
 								  class-name
-								  (cim-reference-keyslots reference))
+								  (cim-instance-slots reference))
 		(encode-cimxml-localclasspath (parse-namespace namespace)
 							   class-name)))
   (dolist (param-value param-values)
@@ -619,7 +620,7 @@ PARAM-VALUES is a list of form (name value type)."
 	 (if (subtypep (cadr type) 'cim-primitive)
 		 (encode-cimxml-value.array value)
 		 (encode-cimxml-value.refarray value)))
-	((cim-reference-p value)
+	((cim-instance-p value)
 	 (encode-cimxml-value.reference value))
 	(t (encode-cimxml-value value)))
   (eformat "</PARAMVALUE>~%"))
@@ -656,7 +657,7 @@ PARAM-VALUES is a list of form (name value type)."
 	 (let ((class-name (cim-name value))
 	       (slots (if (cim-instance-p value) 
 			  (cim-instance-slots value) 
-			  (cim-reference-keyslots value))))
+			  (cim-instance-slots value))))
 	   (encode-cimxml-instancename class-name slots)))
 	(:qualifier.declaration
 	 (error "FIXME!!!"))
@@ -745,7 +746,7 @@ PARAM-VALUES is a list of form (name value type)."
 ;;     %ParamType;     #IMPLIED>
 (defun encode-cimxml-returnvalue (value)
   (eformat "<RETURNVALUE>~%")
-  (if (cim-reference-p value)
+  (if (cim-instance-p value)
 	  (encode-cimxml-value.reference value)
 	  (encode-cimxml-value value))
   (eformat "</RETURNVALUE>~%"))
@@ -884,10 +885,10 @@ PARAM-VALUES is a list of form (name value type)."
         :namespace-list (parse-namespace namespace))
        :arguments arguments
        :reference
-       (make-cim-reference
+       (make-cim-instance
         :namespace namespace
-        :classname class-name
-        :keyslots key-slots))))))
+        :name class-name
+        :slots key-slots))))))
 
 ;; <class>GetClass ( 
 ;;         [IN] <className> ClassName, 

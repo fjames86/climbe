@@ -105,7 +105,7 @@ means we need to call the provider-get-instnace call."
     (let* ((method-name climbe.core::method-name)
 	   (reference climbe.core::reference)
 	   (arguments climbe.core::arguments)
-	   (namespace (find-namespace (cim-reference-namespace reference)))
+	   (namespace (find-namespace (cim-instance-namespace reference)))
 	   (class (if namespace 
 		      (find-cim-class (cim-name reference) namespace)
 		      (cim-error :invalid-namespace)))
@@ -125,7 +125,7 @@ means we need to call the provider-get-instnace call."
 			       (list arg-val))))))
 		     (cim-method-parameters method))))
 	;; apply the function to the args
-	(if (cim-reference-keyslots reference)
+	(if (cim-instance-slots reference)
 	    ;; it's an instance
 	    (let ((instance (provider-get-instance (convert-cim-instance reference namespace))))
 	      (apply (cim-method-function method) instance real-args))

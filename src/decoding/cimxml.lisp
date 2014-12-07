@@ -221,12 +221,12 @@
 
 ;;<!ELEMENT CLASSPATH (NAMESPACEPATH,CLASSNAME)>
 (deftag classpath () (namespacepath classname)
-  (make-cim-reference :classname classname
-                      :namespace (namespace-path-string namespacepath)))
+  (make-cim-instance :name classname
+		     :namespace (namespace-path-string namespacepath)))
 
 ;;<!ELEMENT LOCALCLASSPATH (LOCALNAMESPACEPATH, CLASSNAME)>
 (deftag localclasspath () (localnamespacepath classname)
-  (make-cim-reference :classname classname
+  (make-cim-instance :name classname
                       :namespace (namespace-path-string localnamespacepath)))
 
 ;;<!ELEMENT CLASSNAME EMPTY>
@@ -238,13 +238,13 @@
 
 ;;<!ELEMENT INSTANCEPATH (NAMESPACEPATH,INSTANCENAME)>
 (deftag instancepath () (namespacepath instancename)
-  (setf (cim-reference-namespace instancename)
+  (setf (cim-instance-namespace instancename)
         (namespace-path-string namespacepath))
   instancename)
 
 ;;<!ELEMENT LOCALINSTANCEPATH (LOCALNAMESPACEPATH,INSTANCENAME)>
 (deftag localinstancepath () (localnamespacepath instancename)
-  (setf (cim-reference-namespace instancename)
+  (setf (cim-instance-namespace instancename)
         (namespace-path-string localnamespacepath))
   instancename)
 
@@ -252,9 +252,9 @@
 ;;<!ATTLIST INSTANCENAME
 ;;    %ClassName;>
 (deftag instancename (classname) (keybinding* keyvalue value.reference)
-  (make-cim-reference
-   :classname classname
-   :keyslots 
+  (make-cim-instance
+   :name classname
+   :slots 
    (cond
      (keybinding keybinding)
      (keyvalue (list keyvalue))
@@ -273,7 +273,7 @@
             value.reference
             (first keyvalue))
         (if value.reference
-            (cim-reference-classname value.reference)
+            (cim-instance-name value.reference)
             (second keyvalue))))
             
         
@@ -325,7 +325,7 @@
 ;;         xml:lang   NMTOKEN  #IMPLIED>
 (deftag instance (classname) (property* property.array* property.reference*)
   (make-cim-instance 
-   :classname classname
+   :name classname
    :slots (append property property.array property.reference)))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>

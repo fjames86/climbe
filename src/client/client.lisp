@@ -109,8 +109,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                       :property-list property-list)
 		 "GetInstance"
 		 (cim-object-string namespace 
-				    (cim-reference-classname instance-name)
-				    (cim-reference-keyslots instance-name))
+				    (cim-instance-name instance-name)
+				    (cim-instance-slots instance-name))
                  drakma-args))))
     (destructuring-bind (instances type) (cim-response-return-value response)
       (declare (ignore type)) ;; e.g. :value.namedinstance 
@@ -129,8 +129,8 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
          (encode-delete-instance instance-name :namespace namespace)
 	 "DeleteInstance"
 	 (cim-object-string namespace 
-			    (cim-reference-classname instance-name)
-			    (cim-reference-keyslots instance-name))
+			    (cim-instance-name instance-name)
+			    (cim-instance-slots instance-name))
          drakma-args))
 
 ;;void CreateClass ( 

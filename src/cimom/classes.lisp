@@ -365,19 +365,15 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 (defun convert-cim-instance (cim-instance &optional namespace)
   "Takes a CIM-INSTANCE structure and instantiates a CLOS instance that represents it by searching 
 through the local namespace repository."
-  (declare (type (or cim-instance cim-reference) cim-instance))
+  (declare (type cim-instance cim-instance))
   (let ((cl (find-cim-class (cim-name cim-instance)
 			    (if namespace
 				namespace
-				(find-namespace (if (cim-instance-p cim-instance)
-						    (cim-instance-namespace cim-instance)
-						    (cim-reference-namespace cim-instance)))))))
+				(find-namespace (cim-instance-namespace cim-instance))))))
     (unless cl 
       (error "Class ~S not found." (cim-name cim-instance)))
     (let ((inst (make-instance cl)))
-      (dolist (slot (if (cim-instance-p cim-instance)
-			(cim-instance-slots cim-instance)
-			(cim-reference-keyslots cim-instance)))
+      (dolist (slot (cim-instance-slots cim-instance))
 	(destructuring-bind (slot-name slot-value slot-type &rest options) slot
 	  (declare (ignore slot-type options))
 	  (let ((slot-definition (find-cim-slot slot-name cl)))
@@ -390,7 +386,7 @@ through the local namespace repository."
 (defun instance-to-cim-instance (instance)
   "Convert a CLOS instance to a CIM-INSTANCE."
   (let ((cl (class-of instance)))
-    (make-cim-instance :classname (cim-name cl)
+    (make-cim-instance :name (cim-name cl)
                        :slots 
                        (mapcar (lambda (slot)
                                  (list (cim-name slot)
