@@ -69,7 +69,7 @@
 		 ;; WS-Man instances should look like this
 		 (destructuring-bind ((classname . ns) attributes &rest slots) instance
 		   (declare (ignore ns attributes))
-		   (make-cim-instance :classname classname
+		   (make-cim-instance :name classname
 				      :slots 
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attributes &rest value) slot

@@ -201,8 +201,8 @@
 
 ;;<!ELEMENT NAMESPACEPATH (HOST,LOCALNAMESPACEPATH)> 
 (deftag namespacepath () (host localnamespacepath)
-  (make-namespace-path :host host 
-                       :namespace-list localnamespacepath))
+  (setf (namespace-path-host localnamespacepath) host)
+  localnamespacepath)
 
 ;;<!ELEMENT LOCALNAMESPACEPATH (NAMESPACE+)> 
 (deftag localnamespacepath () (namespace+)

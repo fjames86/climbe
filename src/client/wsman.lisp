@@ -101,7 +101,7 @@ Returns (VALUES (instance*) context)."
        (mapcar (lambda (instance)
 		 (destructuring-bind ((class-name . ns) attribs &rest slots) instance
 		   (declare (ignore ns attribs))
-		   (make-cim-instance :classname class-name
+		   (make-cim-instance :name class-name
 				      :slots 
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attribs &optional value) slot

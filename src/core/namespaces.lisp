@@ -142,6 +142,7 @@ Namespace nodes are delimited with the #\/ character only (backslashes are not a
 
 
 (defun namespace-path-string (namespace-path)
+  (declare (type namespace-path namespace-path))
   (format nil "//~A~{/~A~}" 
           (let ((host (namespace-path-host namespace-path)))
             (if host host "."))
