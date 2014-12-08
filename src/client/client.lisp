@@ -148,7 +148,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                  (encode-create-instance instance :namespace namespace)
 		 "CreateInstance"
 		 (cim-object-string namespace 
-				    (cim-instance-classname instance)
+				    (cim-instance-name instance)
 				    ;; FIXME: these are ALL the slots but we want just the key slots
 				    (cim-instance-slots instance))
                  drakma-args))))
@@ -172,7 +172,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
                                  :property-list property-list)
 	 "ModifyInstance"
 	 (cim-object-string namespace 
-			    (cim-instance-classname named-instance)
+			    (cim-instance-name named-instance)
 			    (cim-instance-slots named-instance))
          drakma-args))
 
@@ -298,7 +298,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 		 (cim-object-string namespace 
 				    (if (cim-class-p object-name)
 					(cim-class-name object-name)
-					(cim-instance-classname object-name))
+					(cim-instance-name object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
                  drakma-args))))
@@ -329,7 +329,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 		 (cim-object-string namespace 
 				    (if (cim-class-p object-name)
 					(cim-class-name object-name)
-					(cim-instance-classname object-name))
+					(cim-instance-name object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
                  drakma-args))))
@@ -360,7 +360,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 		 (cim-object-string namespace 
 				    (if (cim-class-p object-name)
 					(cim-class-name object-name)
-					(cim-instance-classname object-name))
+					(cim-instance-name object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
                  drakma-args))))
@@ -386,7 +386,7 @@ DRAKMA-ARGS contains other arguments to Drakma's HTTP-REQUEST function."
 		 (cim-object-string namespace 
 				    (if (cim-class-p object-name)
 					(cim-class-name object-name)
-					(cim-instance-classname object-name))
+					(cim-instance-name object-name))
 				    (when (cim-instance-p object-name)
 				      (cim-instance-slots object-name)))
                  drakma-args))))

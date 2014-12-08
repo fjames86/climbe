@@ -321,7 +321,8 @@
 	 (eformat "<INSTANCE CLASSNAME=\"~A\">~%" (cim-instance-name instance))
 	 (dolist (slot (cim-instance-slots instance))
 	   (destructuring-bind (slot-name slot-value slot-type) slot
-		 (encode-cimxml-slot* slot-name slot-value slot-type)))
+	     (when (or slot-value (eq slot-type 'boolean))
+	       (encode-cimxml-slot* slot-name slot-value slot-type))))
 	 (eformat "</INSTANCE>~%"))
 	(t 
 	 (let* ((clos-class (class-of instance))
@@ -330,10 +331,11 @@
 	   (dolist (clos-slot (cim-class-direct-slots clos-class))
 	     (let ((cim-slot (find (cim-name clos-slot) (cim-class-slots cim-class)
 				   :key #'cim-name :test #'string-equal)))
-	       (when cim-slot 
-		 (encode-cimxml-slot cim-slot (slot-value instance (closer-mop:slot-definition-name clos-slot))))))
+	       (let ((type (cim-type cim-slot))
+		     (value (slot-value instance (closer-mop:slot-definition-name clos-slot))))
+	       (when (and cim-slot (or value (eq type 'boolean)))
+		 (encode-cimxml-slot cim-slot value)))))
 	   (eformat "</INSTANCE>~%")))))
-
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>
 ;;<!ATTLIST QUALIFIER 
 ;;     %CIMName;

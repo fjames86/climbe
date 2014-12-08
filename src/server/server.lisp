@@ -308,7 +308,7 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
 ;; )
 (defun handle-create-instance (request)
   (destructuring-request (request namespace) (newinstance)
-    (values (create-instance (convert-cim-instance newinstance namespace))
+    (values (instance-to-cim-instance (create-instance (convert-cim-instance newinstance namespace)))
 	    :instancename)))
 
 ;;void ModifyClass ( 

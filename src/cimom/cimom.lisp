@@ -79,7 +79,6 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun create-instance (instance)
   "Create an instance of this class."
-  (declare (type cim-standard-class instance))
   (provider-create-instance instance))
 
 (defmethod provider-create-instance ((instance cim-standard-class))
@@ -96,7 +95,6 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun modify-instance (instance)
   "Modify the instance named by the KEY slots."
-  (declare (type cim-standard-class instance))
   (provider-modify-instance instance))
 
 (defmethod provider-modify-instance ((instance cim-standard-class))
@@ -111,7 +109,6 @@ If PROPERTY-LIST is non-null, it should be a list of slot-symbols which the retu
 
 (defun delete-instance (instance)
   "Delete the instance named by the KEY slots of the input instance."
-  (declare (type cim-standard-class instance))
   (provider-delete-instance instance))
 
 (defmethod provider-delete-instance ((instance cim-standard-class))

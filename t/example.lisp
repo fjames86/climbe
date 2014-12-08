@@ -80,6 +80,13 @@
         :key #'person-name
         :test #'string-equal))
 
+(defmethod provider-create-instance ((instance child))
+  (push instance *children*))
+
+
+
+
+
 (defcim-class Parent-Child ()
   ((parent parent 
            :initform nil 
