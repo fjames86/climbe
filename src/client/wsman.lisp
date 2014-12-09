@@ -78,6 +78,9 @@ SLOTS shojuld be a list of (slot-name slot-value) forms."
 	      :uri uri
 	      :domain domain))
 	      
+
+;; FIXME: this function is an absolute mess. Needs tidying up
+;; probably lots of the destructuring code should be moved to the decoding package
 (defun call-wsman-enumerate-instances (class-name 
 				       &key enumeration-context (namespace *cim-namespace*) 
 					 (username *wsman-username*) domain (password *wsman-password*) (uri *wsman-uri*))
@@ -104,10 +107,33 @@ Returns (VALUES (instance*) context)."
 		   (make-cim-instance :name class-name
 				      :slots 
 				      (mapcar (lambda (slot)
-						(destructuring-bind ((slot-name . ns) attribs &optional value) slot
+						(destructuring-bind ((slot-name . ns) attribs &rest values) slot
 						  (declare (ignore ns attribs))
-						  (list (intern slot-name :keyword) 
-							(climbe.decoding::decode-heuristically value))))
+						  (case (length values)
+						    ((0 1)
+						     (list (intern slot-name :keyword) 
+							   (climbe.decoding::decode-heuristically (first values))))
+						    (2 
+						     ;; a reference-type value
+						     (list (intern slot-name :keyword)
+							   (make-cim-instance :name slot-name
+									      :slots (mapcar (lambda (selector)
+											       (destructuring-bind ((s . ns) attribs val) selector
+												 (declare (ignore s ns))
+												 (list (intern (cadr (assoc "Name" attribs :test #'string-equal))
+													       :keyword)
+												       val
+												       nil)))											     
+											     (cddr 
+											      (assoc "SelectorSet"
+												     (assoc "ReferenceParameters" 
+													    values
+													    :key #'car :test #'string-equal)
+												     :key (lambda (x)
+													    (if (consp x)
+														(car x)
+														x))
+												     :test #'string-equal)))))))))
 					      slots))))
 	       (first 
 		(climbe.decoding::envelope-body 
