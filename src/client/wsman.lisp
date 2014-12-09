@@ -106,7 +106,7 @@ Returns (VALUES (instance*) context)."
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attribs &optional value) slot
 						  (declare (ignore ns attribs))
-						  (list slot-name value)))
+						  (list (intern slot-name :keyword) value)))
 					      slots))))
 	       (first 
 		(climbe.decoding::envelope-body 
@@ -116,4 +116,35 @@ Returns (VALUES (instance*) context)."
 			     :uri uri
 			     :domain domain))))
        context))))
+
+
+(defun call-wsman-enumerate-associations (class-name 
+				       &key enumeration-context (namespace *cim-namespace*) 
+					 (username *wsman-username*) domain (password *wsman-password*) (uri *wsman-uri*)
+					 (assoc-class "") (result-class ""))
+  "Enumerate ALL instances of a specific class.
+
+The enumeration context can be provided, otherwise a new one is created.
+
+Returns (VALUES (instance*) context)."
+  (flet ((get-context ()
+	   (let ((env (call-wsman password
+				  (encode-wsman-enumerate-associations class-name namespace 
+								       :uri uri
+								       :assoc-class assoc-class
+								       :result-class result-class)
+				  :username username
+				  :uri uri
+				  :domain domain)))
+	     (let ((context (second
+			     (assoc :|EnumerationContext| 
+				    (cim-instance-slots (first (climbe.decoding::envelope-body env)))))))
+	       context))))
+    (let ((context (or enumeration-context (get-context))))
+      (call-wsman password
+		  (climbe.encoding::encode-wsman-pull context :uri uri)
+		  :username username
+		  :uri uri
+		  :domain domain))))
+
 

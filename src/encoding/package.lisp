@@ -32,6 +32,7 @@
 	   #:encode-wsman-pull
 
 	   #:encode-wsman-get-instance
+	   #:encode-wsman-enumerate-associations
 
            ))
 

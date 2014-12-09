@@ -258,6 +258,49 @@ in one or more pull requests to get data. The context probably has a lifetime so
 		(:|w:OperationTimeout| "PT60.000S"))
       (:|s:Body|))))
 
+(defun encode-wsman-enumerate-associations (class-name namespace &key uri assoc-class result-class)
+  "Basic exmaple of how we might go about encoding the messages. Uses CL-WHO."
+  (cl-who:with-html-output-to-string (s)
+    "<?xml version=\"1.0\" encoding=\"utf-8\" ?>"
+    (terpri s)
+	(:|s:Envelope| :|xmlns:s| +soap-envelope+
+	               :|xmlns:a| +soap-addressing+
+		       :|xmlns:w| +soap-wsman+
+		       :|xmlns:b| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding.xsd"
+		       :|xmlns:n| +soap-enumerate+
+	  (:|s:Header|
+	    (:|a:To| (write-string uri s))
+	    (:|w:ResourceURI| :|s:mustUnderstand| "true"
+	      (format s 
+		      "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" 
+		      class-name))
+	    (:|a:ReplyTo|
+	      (:|a:Address| :|s:mustUnderstand| "true"
+		"http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous"))
+	    (:|a:Action| :|s:mustUnderstand| "true"
+	      "http://schemas.xmlsoap.org/ws/2004/09/enumeration/Enumerate")
+	    (:|w:MaxEnvelopeSize| :|s:mustUnderstand| "true" "153600")
+	    (:|a:MessageID| (write-string (gen-id) s))
+	    (:|w:Locale| :|xml:lang| "en-US" :|s:mustUnderstand| "false")
+	    (:|w:SelectorSet|
+	      (:|w:Selector| :|Name| "__cimnamespace" 
+		(write-string namespace s)))
+	    (:|w:OperationTimeout| "PT60.000S"))
+      (:|s:Body|
+	(:|n:Enumerate|
+	  (:|w:MaxElements| "32000")
+	  (:|w:EnumerationMode| "EnumerateObjectAndEPR")
+	  (:|w:Filter| :|Dialect| "http://schemas.dmtf.org/wbem/wsman/1/cimbinding/associationFilter"
+	    (:|b:AssociatedInstances| 
+	      (:|b:Object| 
+		(:|a:Address| "http://schemas.xmlsoap.org/ws/2004/08/addressing/role/anonymous")
+		(:|a:ReferenceParameters|
+		  (:|w:ResourceURI| (format s "http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2/~A" namespace))
+		  (:|w:SelectorSet| 
+		    (:|w:Selector| :|Name| "__cimnamespace" (write-string class-name s)))))
+	      (:|b:AssociationClassName| (write-string assoc-class s))
+	      (:|b:ResultClassName| (write-string result-class s)))))))))
+
 
 
 

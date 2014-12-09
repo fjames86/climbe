@@ -74,7 +74,7 @@
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attributes &rest value) slot
 						  (declare (ignore ns attributes))						      
-						  (list (intern slot-name :keyword) (car value))))
+						  (list (intern slot-name :keyword) (car value) nil)))
 					      slots)))))))
 	      instances))
                                         
@@ -114,7 +114,7 @@
   (car timeout))
 
 (deftag fault () (text)
-  (make-cim-error :cim-failt text))
+  (make-cim-error :failed text))
 
 (deftag text () contents
   (car contents))

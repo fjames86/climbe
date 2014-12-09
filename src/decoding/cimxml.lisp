@@ -326,7 +326,12 @@
 (deftag instance (classname) (property* property.array* property.reference*)
   (make-cim-instance 
    :name classname
-   :slots (append property property.array property.reference)))
+   :slots 
+   (mapcar (lambda (slot)
+	     (destructuring-bind (slot-name slot-value slot-type &rest options) slot
+	       (declare (ignore options))
+	       (list (intern slot-name :keyword) slot-value slot-type)))
+	   (append property property.array property.reference))))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>
 ;;<!ATTLIST QUALIFIER 
