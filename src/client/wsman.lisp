@@ -106,7 +106,8 @@ Returns (VALUES (instance*) context)."
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attribs &optional value) slot
 						  (declare (ignore ns attribs))
-						  (list (intern slot-name :keyword) value)))
+						  (list (intern slot-name :keyword) 
+							(climbe.decoding::decode-heuristically value))))
 					      slots))))
 	       (first 
 		(climbe.decoding::envelope-body 

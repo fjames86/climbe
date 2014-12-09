@@ -64,6 +64,21 @@
 	(error "Type ~S not found" string))))
 
 
+(defun decode-heuristically (string)
+  "Attempt to decode the string into a value"
+  (let ((i (ignore-errors 
+	     (parse-integer string :junk-allowed t)))
+	(f (ignore-errors 
+	     (parse-number:parse-number string))))
+  (cond
+    (i i)
+    (f f)
+    ((equal string "true")
+     t)
+    ((equal string "false")
+     nil)
+    (t string))))
+
 ;; ensure the prefix is set
 (eval-when (:compile-toplevel :load-toplevel :execute)
   (setf *tag-prefix* "CIMXML"))
@@ -330,7 +345,9 @@
    (mapcar (lambda (slot)
 	     (destructuring-bind (slot-name slot-value slot-type &rest options) slot
 	       (declare (ignore options))
-	       (list (intern slot-name :keyword) slot-value slot-type)))
+	       (list (intern slot-name :keyword) 
+		     (decode-heuristically slot-value) 
+		     slot-type)))
 	   (append property property.array property.reference))))
 
 ;;<!ELEMENT QUALIFIER ((VALUE|VALUE.ARRAY)?)>

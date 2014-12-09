@@ -74,7 +74,9 @@
 				      (mapcar (lambda (slot)
 						(destructuring-bind ((slot-name . ns) attributes &rest value) slot
 						  (declare (ignore ns attributes))						      
-						  (list (intern slot-name :keyword) (car value) nil)))
+						  (list (intern slot-name :keyword) 
+							(decode-heuristically (car value))
+							nil)))
 					      slots)))))))
 	      instances))
                                         

@@ -159,6 +159,7 @@
            #:cim-instance-name
            #:cim-instance-slots
            #:cim-instance-p
+	   #:cim-slot-value
 
            #:cim-class
            #:make-cim-class

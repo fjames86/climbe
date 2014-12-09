@@ -74,7 +74,25 @@
 						 `(list ,(string slot-name) ,slot-value ',slot-type)))
 					     slots))))
 
+(defun cim-slot-value (instance slot-name)
+  "Get the value of a CIM-INSTANCE slot."
+  (declare (type cim-instance instance))
+  (let ((slot (find slot-name (cim-instance-slots instance) 
+		    :key #'first 
+		    :test #'string-equal)))
+    (if slot 
+	(second slot)
+	(error "No slot ~S" slot-name))))
 
+(defun (setf cim-slot-value) (value instance slot-name)
+  (declare (type cim-instance instance))
+  (let ((slot (find slot-name (cim-instance-slots instance)
+		    :key #'first 
+		    :test #'string-equal)))
+    (if slot 
+	(setf (second slot) value)
+	(push (list slot-name value nil) (cim-instance-slots instance))))
+  value)
 
 ;; CIM-CLASS is a client-side representation of a CIM class definition. 
 ;; It should be used everywhere outside the cimom module (where we use real CLOS meta-class instances).
