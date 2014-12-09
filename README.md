@@ -234,6 +234,27 @@ Closer-MOP, CL-PPCRE, CXML, Drakma, Hunchentoot, Babel, Parse-Number, CL-WHO.
 It also requires the NTLM package, which is not in quicklisp at present. You should 
 get the most recent version from github.com/fjames86.
 
+##6. TODO
+-----------
+
+Things that need to be working before Climbe can be branched for release:
+* The CIMOM MUST understand Association classes
+* The server MUST be able to return associated classes as well as instances 
+of associated classes.
+* The WS-Man client MUST support invoking methods on classes/instances.
+* The WS-Man client MUST support requesting association/reference instances.
+
+Things that ideally should be working by the time we branch for release:
+* The server SHOULD support posting indication messages.
+* The client SHOULD be able to notify the caller on receipt of indication messages. 
+When the client subscribes to an indication, it can register a callback function 
+which gets invoked by the server on receipt of the message???
+* The WS-Man client SHOULD support indication subsciption
+* The WS-Man client SHOULD (somehow) support receipt of indication messages.
+Note that this is not simple: the received indictation message will be in 
+WS-Man encoding, so it's not a simple as extending the CIMXML server. Either 
+we extend the CIMXML server to also handle WS-Man indications, or we write a new 
+server specifically to receieve these messages. 
 
 
 Frank James 2014.

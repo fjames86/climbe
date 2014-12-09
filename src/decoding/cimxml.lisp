@@ -71,13 +71,13 @@
 	(f (ignore-errors 
 	     (parse-number:parse-number string))))
   (cond
-    (i i)
-    (f f)
+    (i (values i 'sint64))
+    (f  (values f 'real64))
     ((equal string "true")
-     t)
+     (values t 'boolean))
     ((equal string "false")
-     nil)
-    (t string))))
+     (values nil 'boolean))
+    (t (values string 'string)))))
 
 ;; ensure the prefix is set
 (eval-when (:compile-toplevel :load-toplevel :execute)
