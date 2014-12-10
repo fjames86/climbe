@@ -387,8 +387,6 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
 ;;         [IN,OPTIONAL] boolean IncludeClassOrigin = false, 
 ;;         [IN,OPTIONAL,NULL] string PropertyList [] = NULL 
 ;; )
-
-;; FIXME!!!!
 (defun handle-associators (request)
   (destructuring-request (request namespace) (objectname assocclass resultclass role resultrole propertylist)
     (if (cim-class-p objectname)

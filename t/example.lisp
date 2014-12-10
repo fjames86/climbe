@@ -104,8 +104,19 @@
 
 
 
+(defun start ()
+  "Start the CIM server"
+  (start-cim-server))
+
+(defun stop ()
+  "Stop the server"
+  (stop-cim-server))
 
 
+;; call:
+(defun call ()
+  (call-enumerate-classes nil :namespace "root/climbe/test")
+  (call-associators nil "Parent_Child" :namespace "root/climbe/test"))
 
 
-
+  
