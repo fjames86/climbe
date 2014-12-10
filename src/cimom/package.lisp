@@ -13,6 +13,7 @@
            #:cim-class-direct-slots
            #:cim-class-superclasses
            #:cim-class-subclasses
+	   #:cim-class-associations
            #:find-cim-class
            #:find-cim-slot
            #:add-class-to-namespace

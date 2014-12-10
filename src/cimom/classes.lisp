@@ -8,7 +8,8 @@
 (defclass cim-standard-class (closer-mop:standard-class)
   ((cim-name :initarg :cim-name :initform nil :accessor cim-name)
    (qualifiers :initarg :qualifiers :initform nil :accessor cim-qualifiers)
-   (methods :initarg :methods :initform nil :accessor cim-methods))
+   (methods :initarg :methods :initform nil :accessor cim-methods)
+   (associations :initarg :associations :initform nil :accessor cim-class-associations))
   (:documentation "Metaclass used to represent CIM classes."))
 
 (defclass cim-association (cim-standard-class)
@@ -227,28 +228,46 @@ If SUPER-CLASSES is T all the superclasses are also removed."
 			slots)))
 
 (defmacro defcim-class (name direct-superclasses slots &rest options)
-  `(progn
-     ;; define the class
-     (defclass ,name ,direct-superclasses 
-       (,@(mapcar (lambda (slot)
-		    (destructuring-bind (slot-name slot-type &rest args) slot
+  (let* ((quals (cdr (assoc :qualifiers options)))
+	 (ass-p (find :association quals))
+	 (ind-p (find :indication quals)))
+    `(progn
+       ;; define the class
+       (defclass ,name ,direct-superclasses 
+	 (,@(mapcar (lambda (slot)
+		      (destructuring-bind (slot-name slot-type &rest args) slot
 			`(,slot-name :cim-type ,slot-type ,@args)))
-		  slots))     
-       ;; set the metaclass
-       (:metaclass 
-        ,(let ((quals (cdr (assoc :qualifiers options))))
-	      (cond          
-		((find :association quals) 'cim-association)
-		((find :indication quals) 'cim-indication)
-		(t 'cim-standard-class))))
-       ;; other class options
-       ,@options)
+		    slots))
+	 ;; set the metaclass
+	 (:metaclass 
+	  ,(cond 
+	    (ass-p 'cim-association)
+	    (ind-p 'cim-indication)
+	    (t 'cim-standard-class)))
+	
+	 ;; other class options
+	 ,@options)
 
-     ;; add class to current namespace
-     (add-class-to-namespace (find-class ',name) *namespace*)
+       ;; add class to current namespace
+       (add-class-to-namespace (find-class ',name) *namespace*)
+       
+       ;; when the class is an association class we need to analyze its slots
+       ;; to determine the standard classes it is associated with. 
+       ;; we then add these standard classes to the new assocaition classs
+       ;; and the association class to each of the standard classes
+       ,@(when ass-p 
+	  (mapcar (lambda (slot)
+		    (destructuring-bind (slot-name slot-type &rest options) slot
+		      (declare (ignore options slot-name))
+		      (when (and (symbolp slot-type) (not (keywordp slot-type)))
+			 ;; names a class type
+			 `(progn
+			    (push ',slot-type (cim-class-associations (find-class ',name)))
+			    (push ',name (cim-class-associations (find-class ',slot-type)))))))
+		  slots))
 
-     ;; finalize the class
-     (closer-mop:ensure-finalized (find-class ',name))))
+       ;; finalize the class
+       (closer-mop:ensure-finalized (find-class ',name)))))
 
 
   

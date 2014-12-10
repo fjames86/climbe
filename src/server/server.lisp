@@ -393,7 +393,15 @@ an ssl server. See the hunchentoot documentation for the meaning of these parame
   (destructuring-request (request namespace) (objectname assocclass resultclass role resultrole propertylist)
     (if (cim-class-p objectname)
 	;; is a class. find its associated classes
-	(cim-error :not-supported "Class associations not yet implemented!!!")
+	(let ((real-class (find-cim-class (cim-name objectname) namespace)))
+	  (values 
+	   (let ((path (namespace-path namespace)))
+	     (mapcar (lambda (aname)
+		       (list (class-to-declaration (find-class aname))
+			     path))
+		   (cim-class-associations real-class)))
+	   :value.objectwithpath))
+
 	;; is an instance. call the provider method 
 	(values 
 	 (let ((path (namespace-path namespace)))

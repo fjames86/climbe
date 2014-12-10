@@ -196,7 +196,9 @@
 (defun encode-cimxml-localnamespacepath (namespace-list)
   (eformat "<LOCALNAMESPACEPATH>~%")
   (dolist (namespace namespace-list)
-    (encode-cimxml-namespace namespace))
+    (etypecase namespace
+      (string (encode-cimxml-namespace namespace))
+      (cim-namespace (encode-cimxml-namespace (cim-namespace-name namespace)))))
   (eformat "</LOCALNAMESPACEPATH>~%"))
 
 ;;<!ELEMENT HOST (#PCDATA)> 
@@ -775,10 +777,15 @@ PARAM-VALUES is a list of form (name value type)."
 		   (encode-cimxml-value v))
 		 (encode-cimxml-value value)))
     (:value.objectwithpath
-     (destructuring-bind (object path) value
-       (if (namespace-path-host path)
-		   (encode-cimxml-value.objectwithpath object path)
-		   (encode-cimxml-value.objectwithlocalpath object (namespace-path-namespace-list path)))))
+     (flet ((enc-obj (value)
+	      (destructuring-bind (object path) value
+		(if (namespace-path-host path)
+		    (encode-cimxml-value.objectwithpath object path)
+		    (encode-cimxml-value.objectwithlocalpath object (namespace-path-namespace-list path))))))
+     (if (consp (car value))
+	 (dolist (v value)
+	   (enc-obj v))
+	 (enc-obj value))))
     (:value.objectwithlocalpath
      (destructuring-bind (object path) value
        (encode-cimxml-value.objectwithlocalpath object 

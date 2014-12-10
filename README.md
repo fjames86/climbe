@@ -239,10 +239,9 @@ get the most recent version from github.com/fjames86.
 
 Things that need to be working before Climbe can be branched for release:
 * The CIMOM MUST understand Association classes
-* The server MUST be able to return associated classes as well as instances 
-of associated classes.
+* The server MUST be able to return associated classes as well as instances of associated classes.
 * The WS-Man client MUST support invoking methods on classes/instances.
-* The WS-Man client MUST support requesting association/reference instances.
+* The WS-Man client MUST support requesting association classesa and instances.
 
 Things that ideally should be working by the time we branch for release:
 * The server SHOULD support posting indication messages.
