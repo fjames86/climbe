@@ -35,7 +35,7 @@ Setup a socket listener using
 
 From powershell do
 
-$sess = New-CimSession Basic -Credential (Cet-Credential) -ComputerName "localhost" -OperationTimeoutSec 1 -SkipTestConnection -Port 9999 -SessionOption (New-CimSessionOption -NoEncryption)
+$sess = New-CimSession -authentication Basic -Credential (Cet-Credential) -ComputerName "localhost" -OperationTimeoutSec 1 -SkipTestConnection -Port 9999 -SessionOption (New-CimSessionOption -NoEncryption)
 
 Now call Lisp to get an idea of what the winrm client does:
 
